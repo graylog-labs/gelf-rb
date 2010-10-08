@@ -61,10 +61,10 @@ module Graylog2
     end
 
     def prepend_chunk_data data, msg_id, sequence_number, sequence_count
-      throw "Data must be a string and not be empty." if data == nil or data.length == 0
-      throw "Message ID must be a string and not be empty." if msg_id == nil or msg_id.length == 0
-      throw "Sequence count must be bigger than 0." if sequence_count <= 0
-      throw "Sequence number must not be higher than sequence count." if sequence_number > sequence_count
+      raise "Data must be a string and not be empty." if data == nil or data.length == 0
+      raise "Message ID must be a string and not be empty." if msg_id == nil or msg_id.length == 0
+      raise "Sequence count must be bigger than 0." if sequence_count <= 0
+      raise "Sequence number must not be higher than sequence count." if sequence_number > sequence_count
 
       # Get raw binary (packed) GELF ID
       gelf_id_bin = [ 30, 15 ].pack('CC')

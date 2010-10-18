@@ -8,11 +8,17 @@ class Gelf
 
   MAX_CHUNK_SIZE = 8154
 
-  attr_accessor :short_message, :full_message, :level, :host, :type, :line, :file
+  attr_accessor :short_message, :full_message, :level, :host, :line, :file
+
+  @@additional = []
 
   def initialize hostname, port
     @hostname = hostname
     @port = port
+  end
+
+  def add_additional key, value
+    @@additional << { :key => key, :value => value } 
   end
 
   def send
@@ -26,10 +32,16 @@ class Gelf
       "full_message" => self.full_message,
       "level" => self.level,
       "host" => self.host,
-      "type" => self.type,
       "line" => self.line,
       "file" => self.file
     }
+
+    # Add additional fields if there are some.
+    if @@additional.count > 0
+      @@additional.each do |additional|
+        data[additional[:key].delete(' ')] = additional[:value]
+      end
+    end
 
     # Convert to JSON and deflate (ZLIB)
     data = Zlib::Deflate.deflate(data.to_json)

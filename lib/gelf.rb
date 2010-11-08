@@ -6,7 +6,7 @@ require 'digest/sha2'
 
 class Gelf
 
-  MAX_CHUNK_SIZE = 8154
+  MAX_CHUNK_SIZE = 1420
 
   attr_accessor :short_message, :full_message, :level, :host, :line, :file
 

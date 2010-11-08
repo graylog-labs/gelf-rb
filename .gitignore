@@ -1,3 +1,5 @@
 pkg/
+coverage/
+rdoc/
 
 .DS_Store

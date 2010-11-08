@@ -6,15 +6,16 @@ module GELF
 
     attr_reader :host, :port
 
+    # +host+ and +port+ are host/ip and port of graylog2-server.
     def initialize(host, port)
       @host, @port = host, port
     end
 
     # Sends +message+ to Graylog2 server.
-    # +message+ may be:
-    # - plain-text
+    # +message+ can be:
+    # - any object which responds to +to_hash+
     # - exception
-    # - any object which responds to #to_hash
+    # - plain-text or anything which responds to +to_s+
     def notify(message)
       do_notify(extract_hash(message))
     end

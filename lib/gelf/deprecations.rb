@@ -1,6 +1,4 @@
-# For compatability with 0.9.3.
-# This file is to be removed in 1.0.0 release.
-
+# Deprecated, do not use in new code, to be removed.
 class Gelf
   def deprecate(instead)
     Kernel.caller.first =~ /:in `(.+)'$/

@@ -1,6 +1,12 @@
 require 'helper'
 
 class TestMessage < Test::Unit::TestCase
+  should "be initialized with attributes" do
+    message = GELF::Message.new(:short_message => 'message', :param => true)
+    assert_equal 'message', message['short_message']
+    assert_equal true, message['param']
+  end
+
   context "with empty message" do
     setup do
       @message = GELF::Message.new

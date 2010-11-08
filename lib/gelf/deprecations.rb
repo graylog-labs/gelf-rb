@@ -30,4 +30,8 @@ class Gelf
       @message.__send__("#{a}=", value)
     end
   end
+
+  def add_additional(key, value)
+    @message[key] = value
+  end
 end

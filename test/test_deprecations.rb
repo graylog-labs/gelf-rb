@@ -29,5 +29,10 @@ class TestDeprecations < Test::Unit::TestCase
         assert_equal 'value', @g.__send__(a)
       end
     end
+
+    should "set add additional params" do
+      @g.add_additional(:key, 'value')
+      assert_equal 'value', @g.message[:key]
+    end
   end
 end

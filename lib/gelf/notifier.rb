@@ -11,36 +11,45 @@ module GELF
       @host, @port = host, port
     end
 
-    # Sends +message+ to Graylog2 server.
-    # +message+ can be:
+    # Sends message to Graylog2 server.
+    # +args+ can be:
     # - any object which responds to +to_hash+
     # - exception
-    # - plain-text or anything which responds to +to_s+
-    def notify(message)
-      do_notify(extract_hash(message))
+    # - exception with hash or object which responds to +to_hash+
+    # - string or anything which responds to +to_s+
+    def notify(*args)
+      do_notify(extract_hash(args))
     end
 
   private
-    def extract_hash(object_or_exception)
-      hash = if object_or_exception.respond_to?(:to_hash)
-               object_or_exception.to_hash
-             elsif object_or_exception.is_a?(Exception)
-               bt = object_or_exception.backtrace || ["Backtrace is not available."]
-               { 'short_message' => "#{object_or_exception.class}: #{object_or_exception.message}",
-                 'full_message' => "Backtrace:\n" + bt.join("\n") }
+    def extract_hash(*args)
+      raise ArgumentError.new("Please pass one or two arguments.") if args.count < 1 || args.count > 2
+
+      arg = args.first
+      hash = if args.count == 2
+               args.last.merge(extract_hash_from_exception(args.first))
+             elsif arg.respond_to?(:to_hash)
+               arg.to_hash
+             elsif arg.is_a?(Exception)
+               extract_hash_from_exception(arg)
              else
-               { 'short_message' => object_or_exception.to_s}
+               { 'short_message' => arg.to_s }
              end
 
       hash['host'] ||= @this_host || detect_this_host
 
       %w(short_message host).each do |a|
         if hash[a].to_s.empty?
-          raise "Attributes short_message and host must be set. #{a} is not present or empty."
+          raise ArgumentError.new("Attributes short_message and host must be set. #{a} is not present or empty.")
         end
       end
 
       hash
+    end
+
+    def extract_hash_from_exception(e)
+      bt = e.backtrace || ["Backtrace is not available."]
+      { 'short_message' => "#{e.class}: #{e.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
     end
 
     def do_notify(hash)

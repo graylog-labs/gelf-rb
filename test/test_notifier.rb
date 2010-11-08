@@ -9,6 +9,11 @@ class TestNotifier < Test::Unit::TestCase
     end
 
     context "extract_hash" do
+      should "check number of arguments" do
+        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash) }
+        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1, 2, 3) }
+      end
+
       should "work with plain-text" do
         Socket.stubs(:gethostname).returns("localhost")
         assert_equal HASH, @notifier.__send__(:extract_hash, 'message')
@@ -36,6 +41,13 @@ class TestNotifier < Test::Unit::TestCase
         e = RuntimeError.new('message')
         hash = @notifier.__send__(:extract_hash, e)
         assert_match /Backtrace is not available/, hash['full_message']
+      end
+
+      should "work with exception and hash" do
+        e, h = RuntimeError.new('message'), {'param' => 1, 'short_message' => 'will be hidden by exception'}
+        hash = @notifier.__send__(:extract_hash, e, h)
+        assert_equal 'RuntimeError: message', hash['short_message']
+        assert_equal 1, hash['param']
       end
     end
 

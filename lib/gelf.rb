@@ -39,7 +39,7 @@ class Gelf
     # Add additional fields if there are some.
     if @@additional.count > 0
       @@additional.each do |additional|
-        data[additional[:key].delete(' ')] = additional[:value]
+        data[additional[:key].to_s.delete(' ')] = additional[:value]
       end
     end
 

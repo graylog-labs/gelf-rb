@@ -8,9 +8,9 @@ Gem::Specification.new do |s|
   s.version = "0.9.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Lennart Koopmann"]
-  s.date = %q{2010-11-02}
-  s.description = %q{Library to send Graylog2 Extended Log Format (GELF) messages}
+  s.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
+  s.date = %q{2010-11-09}
+  s.description = %q{Suports plain-text, GELF messages and exceptions.}
   s.email = %q{lennart@socketfeed.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -24,17 +24,21 @@ Gem::Specification.new do |s|
      "VERSION",
      "gelf.gemspec",
      "lib/gelf.rb",
+     "lib/gelf/deprecations.rb",
+     "lib/gelf/notifier.rb",
      "test/helper.rb",
-     "test/test_gelf.rb"
+     "test/test_deprecations.rb",
+     "test/test_notifier.rb"
   ]
   s.homepage = %q{http://github.com/lennartkoopmann/gelf-rb}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
-  s.summary = %q{Library to send Graylog2 Extended Log Format (GELF) messages}
+  s.summary = %q{Library to send GELF messages to Graylog2 logging server}
   s.test_files = [
-    "test/helper.rb",
-     "test/test_gelf.rb"
+    "test/test_deprecations.rb",
+     "test/helper.rb",
+     "test/test_notifier.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -44,13 +48,16 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<json>, [">= 0"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
+      s.add_development_dependency(%q<mocha>, [">= 0"])
     else
       s.add_dependency(%q<json>, [">= 0"])
       s.add_dependency(%q<shoulda>, [">= 0"])
+      s.add_dependency(%q<mocha>, [">= 0"])
     end
   else
     s.add_dependency(%q<json>, [">= 0"])
     s.add_dependency(%q<shoulda>, [">= 0"])
+    s.add_dependency(%q<mocha>, [">= 0"])
   end
 end
 

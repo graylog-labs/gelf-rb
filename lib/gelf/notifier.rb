@@ -10,7 +10,7 @@ module GELF
       @host, @port, self.max_chunk_size = host, port, max_size
     end
 
-    # +size may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
+    # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
     # Default (safe) value is 'WAN'.
     def max_chunk_size=(size)
       s = size.to_s.downcase
@@ -23,15 +23,24 @@ module GELF
       end
     end
 
+    # Same as notify!, but rescues all exceptions (including +ArgumentError+)
+    # and sends them instead.
+    def notify(*args)
+      notify!(*args)
+    rescue Exception => e
+      notify!(e)
+    end
+
     # Sends message to Graylog2 server.
     # +args+ can be:
     # - hash-like object (any object which responds to +to_hash+, including +Hash+ instance)
-    #    notify(:short_message => 'All your rebase are belong to us', :user => 'AlekSi')
+    #    notify!(:short_message => 'All your rebase are belong to us', :user => 'AlekSi')
     # - exception with optional hash-like object
-    #    notify(SecurityError.new('ALARM!'), :trespasser => 'AlekSi')
+    #    notify!(SecurityError.new('ALARM!'), :trespasser => 'AlekSi')
     # - string-like object (anything which responds to +to_s+) with optional hash-like object
-    #    notify('Plain olde text message', :scribe => 'AlekSi')
-    def notify(*args)
+    #    notify!('Plain olde text message', :scribe => 'AlekSi')
+    # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
+    def notify!(*args)
       do_notify(extract_hash(*args))
     end
 

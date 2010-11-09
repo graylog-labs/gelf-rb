@@ -80,19 +80,19 @@ class TestNotifier < Test::Unit::TestCase
     should "detect and cache host" do
       Socket.expects(:gethostname).once.returns("localhost")
       @notifier.expects(:do_notify).twice
-      2.times { @notifier.notify('short_message' => 'message') }
+      2.times { @notifier.notify!('short_message' => 'message') }
     end
 
     context "datagrams" do
       should "not split short datagram" do
         UDPSocket.any_instance.expects(:send).once
-        @notifier.notify(HASH)
+        @notifier.notify!(HASH)
       end
 
       should "split long datagram" do
         srand(1) # for stable tests
         UDPSocket.any_instance.expects(:send).twice
-        @notifier.notify(HASH.merge('something' => (0..1500).map { rand(256).chr }.join)) # or it will be compressed too good
+        @notifier.notify!(HASH.merge('something' => (0..1500).map { rand(256).chr }.join)) # or it will be compressed too good
       end
 
       should "send correct short datagram" do
@@ -101,7 +101,7 @@ class TestNotifier < Test::Unit::TestCase
           port == @notifier.port &&
           data[0..1] == "\170\234"
         end
-        @notifier.notify(HASH)
+        @notifier.notify!(HASH)
       end
 
       should "send correct long datagrams" do
@@ -111,8 +111,18 @@ class TestNotifier < Test::Unit::TestCase
           data[0..1] == "\036\017"
         end
         srand(1) # for stable tests
-        @notifier.notify(HASH.merge('something' => (0..1500).map { rand(256).chr }.join)) # or it will be compressed too good
+        @notifier.notify!(HASH.merge('something' => (0..1500).map { rand(256).chr }.join)) # or it will be compressed too good
       end
+    end
+
+    should "not rescue from invalid invocation of #notify!" do
+      assert_raise(ArgumentError) { @notifier.notify!(:no_short_message => 'too bad') }
+    end
+
+    should "rescue from invalid invocation of #notify" do
+      @notifier.expects(:notify!).with(instance_of(Hash)).raises(ArgumentError)
+      @notifier.expects(:notify!).with(instance_of(ArgumentError))
+      assert_nothing_raised { @notifier.notify(:no_short_message => 'too bad') }
     end
   end
 end

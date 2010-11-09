@@ -1,6 +1,8 @@
-= gelf2
+= GELF
 
-FIXME Lennart: Description goes here.
+This is the new GELF gem written by Aleksey Palazhchenko. It is based on the old gem by Lennart Koopmann and allows you to send GELF
+messages to Graylog2 server instances. See http://www.graylog2.org/about/gelf for more information about GELF and
+http://www.graylog2.org/documentation/libraries for usage examples.
 
 == Note on Patches/Pull Requests
 

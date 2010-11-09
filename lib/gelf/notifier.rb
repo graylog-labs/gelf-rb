@@ -4,7 +4,7 @@ module GELF
 
     @@id = 0
 
-    attr_reader :host, :port
+    attr_accessor :host, :port
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     def initialize(host = 'localhost', port = 12201)
@@ -62,13 +62,14 @@ module GELF
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
       if data.count > MAX_CHUNK_SIZE
         @@id += 1
-        msg_id, i, count = Digest::SHA256.digest("#{Time.now.to_f}-#{@@id}"), 0, (data.count / 1.0 / MAX_CHUNK_SIZE).ceil
+        msg_id = Digest::SHA256.digest("#{Time.now.to_f}-#{@@id}")
+        i, count = 0, (data.count / 1.0 / MAX_CHUNK_SIZE).ceil
         data.each_slice(MAX_CHUNK_SIZE) do |slice|
-          datagrams << chunk_data(slice.to_a.join, msg_id, i, count)
+          datagrams << chunk_data(slice, msg_id, i, count)
           i += 1
         end
       else
-        datagrams = [data.to_a.join]
+        datagrams = [data.map(&:chr).join]
       end
 
       datagrams.each { |d| sock.send(d, 0, @host, @port) }
@@ -77,7 +78,7 @@ module GELF
 
     def chunk_data(data, msg_id, sequence_number, sequence_count)
       # [30, 15].pack('CC') => "\036\017"
-      return "\036\017" + msg_id + [sequence_number, sequence_count].pack('nn') + data
+      return "\036\017" + msg_id + [sequence_number, sequence_count].pack('nn') + data.map(&:chr).join
     end
 
     def detect_this_host

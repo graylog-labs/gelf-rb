@@ -78,9 +78,28 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "split long datagram" do
-        srand(1)
+        srand(1) # for stable tests
         UDPSocket.any_instance.expects(:send).twice
-        @notifier.notify(HASH.merge('something' => (0..12000).map { rand(256).chr }.join))
+        @notifier.notify(HASH.merge('something' => (0..12000).map { rand(256).chr }.join)) # or it will be compressed too good
+      end
+
+      should "send correct short datagram" do
+        UDPSocket.any_instance.expects(:send).with do |data, flags, host, port|
+          host == @notifier.host &&
+          port == @notifier.port &&
+          data[0..1] == "\170\234"
+        end
+        @notifier.notify(HASH)
+      end
+
+      should "send correct long datagrams" do
+        UDPSocket.any_instance.expects(:send).twice.with do |data, flags, host, port|
+          host == @notifier.host &&
+          port == @notifier.port &&
+          data[0..1] == "\036\017"
+        end
+        srand(1) # for stable tests
+        @notifier.notify(HASH.merge('something' => (0..12000).map { rand(256).chr }.join)) # or it will be compressed too good
       end
     end
   end

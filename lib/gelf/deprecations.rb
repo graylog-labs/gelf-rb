@@ -10,24 +10,24 @@ class Gelf
   def initialize(hostname, port)
     deprecate('GELF::Notifier.new(hostname, port) and GELF::Message.new')
     @notifier = GELF::Notifier.new(hostname, port)
-    @message = GELF::Message.new
+    @message = {}
   end
 
   # bizarre, but Gelf did this...
   def send
     deprecate('GELF::Notifier#notify(message)')
-    GELF::Notifier.notify
+    GELF::Notifier.notify(@message)
   end
 
   [:short_message, :full_message, :level, :host, :line, :file].each do |a|
     define_method a do
       deprecate("GELF::Message##{a}")
-      @message.__send__(a)
+      @message[a]
     end
 
     define_method "#{a}=" do |value|
       deprecate("GELF::Message##{a} = value")
-      @message.__send__("#{a}=", value)
+      @message[a] = value
     end
   end
 

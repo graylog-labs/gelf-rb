@@ -15,11 +15,11 @@ class TestDeprecations < Test::Unit::TestCase
       assert_equal Gelf, @g.class
       assert_equal 'host', @g.notifier.host
       assert_equal 12345, @g.notifier.port
-      assert_equal GELF::Message, @g.message.class
+      assert_equal Hash, @g.message.class
     end
 
     should "deprecate Gelf#send" do
-      GELF::Notifier.expects(:notify)
+      GELF::Notifier.expects(:notify).with(@g.message)
       @g.send
     end
 

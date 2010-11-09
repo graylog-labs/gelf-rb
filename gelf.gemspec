@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gelf}
-  s.version = "0.9.2"
+  s.version = "1.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.files = [
     ".gitignore",
      "LICENSE",
+     "Manifest",
      "README.rdoc",
      "Rakefile",
      "VERSION",

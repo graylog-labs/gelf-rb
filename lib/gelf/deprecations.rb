@@ -16,7 +16,7 @@ class Gelf
   # bizarre, but Gelf did this...
   def send
     deprecate('GELF::Notifier#notify(message)')
-    GELF::Notifier.notify(@message)
+    @notifier.notify(@message)
   end
 
   [:short_message, :full_message, :level, :host, :line, :file].each do |a|

@@ -19,7 +19,7 @@ class TestDeprecations < Test::Unit::TestCase
     end
 
     should "deprecate Gelf#send" do
-      GELF::Notifier.expects(:notify).with(@g.message)
+      @g.notifier.expects(:notify).with(@g.message)
       @g.send
     end
 

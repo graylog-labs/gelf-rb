@@ -57,6 +57,15 @@ module GELF
 
       hash['host'] ||= @this_host || detect_this_host
 
+      # for compatibility with HoptoadNotifier
+      if hash['short_message'].to_s.empty?
+        if hash.has_key?('error_class') && hash.has_key?('error_message')
+          hash['short_message'] = "#{hash['error_class']}: #{hash['error_message']}"
+          hash.delete('error_class')
+          hash.delete('error_message')
+        end
+      end
+
       %w(short_message host).each do |a|
         if hash[a].to_s.empty?
           raise ArgumentError.new("Attributes short_message and host must be set.")

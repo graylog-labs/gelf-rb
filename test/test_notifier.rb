@@ -53,8 +53,7 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "work with plain text" do
-        Socket.stubs(:gethostname).returns("localhost")
-        assert_equal HASH, @notifier.__send__(:extract_hash, 'message')
+        assert_equal 'message', @notifier.__send__(:extract_hash, 'message')['short_message']
       end
 
       should "work with plain text and hash" do
@@ -69,6 +68,12 @@ class TestNotifier < Test::Unit::TestCase
 
       should "not overwrite keys on convert" do
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, :short_message => :message1, 'short_message' => 'message2') }
+      end
+
+      should "be compatible with HoptoadNotifier" do
+        # https://github.com/thoughtbot/hoptoad_notifier/blob/master/README.rdoc, section Going beyond exceptions
+        hash = @notifier.__send__(:extract_hash, :error_class => 'Class', :error_message => 'Message')
+        assert_equal 'Class: Message', hash['short_message']
       end
     end
 

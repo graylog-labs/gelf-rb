@@ -14,11 +14,6 @@ class TestNotifier < Test::Unit::TestCase
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1, 2, 3) }
       end
 
-      should "work with plain-text" do
-        Socket.stubs(:gethostname).returns("localhost")
-        assert_equal HASH, @notifier.__send__(:extract_hash, 'message')
-      end
-
       should "work with hash" do
         assert_equal HASH, @notifier.__send__(:extract_hash, HASH)
       end
@@ -48,6 +43,15 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, e, h)
         assert_equal 'RuntimeError: message', hash['short_message']
         assert_equal 1, hash['param']
+      end
+
+      should "work with plain text" do
+        Socket.stubs(:gethostname).returns("localhost")
+        assert_equal HASH, @notifier.__send__(:extract_hash, 'message')
+      end
+
+      should "work with plain text and hash" do
+        assert_equal HASH, @notifier.__send__(:extract_hash, 'message', 'host' => 'localhost')
       end
 
       should "covert hash keys to strings" do

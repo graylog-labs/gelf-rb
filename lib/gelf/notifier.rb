@@ -13,10 +13,12 @@ module GELF
 
     # Sends message to Graylog2 server.
     # +args+ can be:
-    # - any object which responds to +to_hash+ (including +Hash+ object)
-    # - exception
-    # - exception with hash or object which responds to +to_hash+
-    # - string or anything which responds to +to_s+
+    # - hash-like object (any object which responds to +to_hash+, including +Hash+ instance)
+    #    notify(:short_message => 'All your rebase are belong to us', :user => 'AlekSi')
+    # - exception with optional hash-like object
+    #    notify(SecurityError.new('ALARM!'), :trespasser => 'AlekSi')
+    # - string-like object (anything which responds to +to_s+) with optional hash-like object
+    #    notify('Plain olde text message', :scribe => 'AlekSi')
     def notify(*args)
       do_notify(extract_hash(*args))
     end
@@ -34,13 +36,14 @@ module GELF
                      end
 
       hash = args.merge(primary_data)
-      hash['host'] ||= @this_host || detect_this_host
 
       hash.keys.each do |key|
         value, key_s = hash.delete(key), key.to_s
-        raise ArgumentError.new("Both #{key.inspect} and #{key} are present.") if hash.has_key?(key_s)
+        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.has_key?(key_s)
         hash[key_s] = value
       end
+
+      hash['host'] ||= @this_host || detect_this_host
 
       %w(short_message host).each do |a|
         if hash[a].to_s.empty?

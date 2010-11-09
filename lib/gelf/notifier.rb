@@ -7,7 +7,7 @@ module GELF
     attr_reader :host, :port
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
-    def initialize(host, port)
+    def initialize(host = 'localhost', port = 12201)
       @host, @port = host, port
     end
 
@@ -72,6 +72,7 @@ module GELF
       end
 
       datagrams.each { |d| sock.send(d, 0, @host, @port) }
+      datagrams
     end
 
     def chunk_data(data, msg_id, sequence_number, sequence_count)

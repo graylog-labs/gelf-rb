@@ -13,7 +13,7 @@ module GELF
 
     # Sends message to Graylog2 server.
     # +args+ can be:
-    # - any object which responds to +to_hash+
+    # - any object which responds to +to_hash+ (including +Hash+ object)
     # - exception
     # - exception with hash or object which responds to +to_hash+
     # - string or anything which responds to +to_s+
@@ -36,9 +36,15 @@ module GELF
       hash = args.merge(primary_data)
       hash['host'] ||= @this_host || detect_this_host
 
+      hash.keys.each do |key|
+        value, key_s = hash.delete(key), key.to_s
+        raise ArgumentError.new("Both #{key.inspect} and #{key} are present.") if hash.has_key?(key_s)
+        hash[key_s] = value
+      end
+
       %w(short_message host).each do |a|
         if hash[a].to_s.empty?
-          raise ArgumentError.new("Attributes short_message and host must be set. #{a} is not present or empty.")
+          raise ArgumentError.new("Attributes short_message and host must be set.")
         end
       end
 

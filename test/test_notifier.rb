@@ -49,6 +49,16 @@ class TestNotifier < Test::Unit::TestCase
         assert_equal 'RuntimeError: message', hash['short_message']
         assert_equal 1, hash['param']
       end
+
+      should "covert hash keys to strings" do
+        hash = @notifier.__send__(:extract_hash, :short_message => :message)
+        assert hash.has_key?('short_message')
+        assert !hash.has_key?(:short_message)
+      end
+
+      should "not overwrite keys on convert" do
+        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, :short_message => :message1, 'short_message' => 'message2') }
+      end
     end
 
     should "detect and cache host" do

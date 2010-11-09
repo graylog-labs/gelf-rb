@@ -1,14 +1,26 @@
 module GELF
   class Notifier
-    MAX_CHUNK_SIZE = 8154
-
     @@id = 0
 
     attr_accessor :host, :port
+    attr_reader :max_chunk_size
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
-    def initialize(host = 'localhost', port = 12201)
-      @host, @port = host, port
+    def initialize(host = 'localhost', port = 12201, max_size = 'WAN')
+      @host, @port, self.max_chunk_size = host, port, max_size
+    end
+
+    # +size may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
+    # Default (safe) value is 'WAN'.
+    def max_chunk_size=(size)
+      s = size.to_s.downcase
+      if s == 'wan'
+        @max_chunk_size = 1420
+      elsif s == 'lan'
+        @max_chunk_size = 8154
+      else
+        @max_chunk_size = size.to_int
+      end
     end
 
     # Sends message to Graylog2 server.
@@ -60,11 +72,11 @@ module GELF
       datagrams = []
 
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
-      if data.count > MAX_CHUNK_SIZE
+      if data.count > @max_chunk_size
         @@id += 1
         msg_id = Digest::SHA256.digest("#{Time.now.to_f}-#{@@id}")
-        i, count = 0, (data.count / 1.0 / MAX_CHUNK_SIZE).ceil
-        data.each_slice(MAX_CHUNK_SIZE) do |slice|
+        i, count = 0, (data.count / 1.0 / @max_chunk_size).ceil
+        data.each_slice(@max_chunk_size) do |slice|
           datagrams << chunk_data(slice, msg_id, i, count)
           i += 1
         end

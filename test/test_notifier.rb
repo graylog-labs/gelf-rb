@@ -3,6 +3,13 @@ require 'helper'
 HASH = {'short_message' => 'message', 'host' => 'localhost'}
 
 class TestNotifier < Test::Unit::TestCase
+  should "allow access to host, port and max_chunk_size" do
+    notifier = GELF::Notifier.new
+    assert_equal ['localhost', 12201, 1420], [notifier.host, notifier.port, notifier.max_chunk_size]
+    notifier.host, notifier.port, notifier.max_chunk_size = 'graylog2.org', 7777, :lan
+    assert_equal ['graylog2.org', 7777, 8154], [notifier.host, notifier.port, notifier.max_chunk_size]
+  end
+
   context "with notifier" do
     setup do
       @notifier = GELF::Notifier.new('host', 12345)
@@ -80,7 +87,7 @@ class TestNotifier < Test::Unit::TestCase
       should "split long datagram" do
         srand(1) # for stable tests
         UDPSocket.any_instance.expects(:send).twice
-        @notifier.notify(HASH.merge('something' => (0..12000).map { rand(256).chr }.join)) # or it will be compressed too good
+        @notifier.notify(HASH.merge('something' => (0..1500).map { rand(256).chr }.join)) # or it will be compressed too good
       end
 
       should "send correct short datagram" do
@@ -99,7 +106,7 @@ class TestNotifier < Test::Unit::TestCase
           data[0..1] == "\036\017"
         end
         srand(1) # for stable tests
-        @notifier.notify(HASH.merge('something' => (0..12000).map { rand(256).chr }.join)) # or it will be compressed too good
+        @notifier.notify(HASH.merge('something' => (0..1500).map { rand(256).chr }.join)) # or it will be compressed too good
       end
     end
   end

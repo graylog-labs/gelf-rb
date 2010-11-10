@@ -4,6 +4,8 @@ This is the new GELF gem written by Aleksey Palazhchenko. It is based on the old
 messages to Graylog2 server instances. See http://www.graylog2.org/about/gelf for more information about GELF and
 http://www.graylog2.org/documentation/libraries for usage examples.
 
+Works with Ruby 1.8.7 and 1.9.2. 1.8.6 is not supported.
+
 == Note on Patches/Pull Requests
 
 * Fork the project.

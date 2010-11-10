@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
      "test/test_deprecations.rb",
      "test/test_notifier.rb"
   ]
-  s.homepage = %q{http://github.com/lennartkoopmann/gelf-rb}
+  s.homepage = %q{http://github.com/Graylog2/gelf-rb}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}

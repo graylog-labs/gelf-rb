@@ -2,10 +2,6 @@ require 'helper'
 
 class TestDeprecations < Test::Unit::TestCase
   context "with Gelf object" do
-    should "fail" do
-      flunk "Hello Hudson!"
-    end
-
     setup do
       @verbose, $VERBOSE = $VERBOSE, nil
       @g = Gelf.new('host', 12345)

@@ -156,6 +156,13 @@ class TestNotifier < Test::Unit::TestCase
       end
     end
 
+    should "pass valid data to sender" do
+      @sender.expects(:send_datagrams).with do |datagrams|
+        datagrams.is_a?(Array) && datagrams[0].is_a?(String)
+      end
+      @notifier.notify!(HASH)
+    end
+
     should "not rescue from invalid invocation of #notify!" do
       assert_raise(ArgumentError) { @notifier.notify!(:no_short_message => 'too bad') }
     end

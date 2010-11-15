@@ -57,7 +57,7 @@ module GELF
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args)
-      @cache << datagrams_from_hash(extract_hash(*args))
+      @cache += datagrams_from_hash(extract_hash(*args))
       send_pending_notifications if @cache.count == cache_size
     end
 

@@ -86,12 +86,12 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, :error_class => 'Class', :error_message => 'Message')
         assert_equal 'Class: Message', hash['short_message']
       end
-    end
 
-    should "detect and cache host" do
-      Socket.expects(:gethostname).once.returns("localhost")
-      @sender.expects(:send_datagrams).twice
-      2.times { @notifier.notify!('short_message' => 'message') }
+      should "detect and cache host" do
+        Socket.expects(:gethostname).once.returns("localhost")
+        2.times { @notifier.__send__(:extract_hash, 'short_message' => 'message') }
+        assert_equal 'localhost', @notifier.default_options['host']
+      end
     end
 
     context "datagrams_from_hash" do

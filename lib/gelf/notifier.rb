@@ -66,7 +66,10 @@ module GELF
 
       hash = self.class.stringify_hash_keys(args.merge(primary_data))
       hash = default_options.merge(hash)
-      hash['host'] ||= @this_host || detect_this_host
+
+      if hash['host'].to_s.empty?
+        hash['host'] = default_options['host'] = Socket.gethostname
+      end
 
       # for compatibility with HoptoadNotifier
       if hash['short_message'].to_s.empty?
@@ -109,10 +112,6 @@ module GELF
     def chunk_data(data, msg_id, sequence_number, sequence_count)
       # [30, 15].pack('CC') => "\036\017"
       return "\036\017" + msg_id + [sequence_number, sequence_count].pack('nn') + data.map(&:chr).join
-    end
-
-    def detect_this_host
-      @this_host = Socket.gethostname
     end
 
     def self.stringify_hash_keys(hash)

@@ -2,12 +2,14 @@ module GELF
   class Notifier
     @@id = 0
 
-    attr_accessor :host, :port
+    attr_accessor :host, :port, :default_options
     attr_reader :max_chunk_size
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
-    def initialize(host = 'localhost', port = 12201, max_size = 'WAN')
-      @host, @port, self.max_chunk_size = host, port, max_size
+    # +max_size+ is passed to max_chunk_size=.
+    # +default_options+ is used in notify!
+    def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
+      @host, @port, self.max_chunk_size, @default_options = host, port, max_size, default_options
       @sender = RubySender.new(host, port)
     end
 
@@ -40,6 +42,7 @@ module GELF
     #    notify!(SecurityError.new('ALARM!'), :trespasser => 'AlekSi')
     # - string-like object (anything which responds to +to_s+) with optional hash-like object
     #    notify!('Plain olde text message', :scribe => 'AlekSi')
+    # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args)
       @sender.send_datagrams(datagrams_from_hash(extract_hash(*args)))
@@ -57,7 +60,7 @@ module GELF
                        { 'short_message' => object_or_exception.to_s }
                      end
 
-      hash = args.merge(primary_data)
+      hash = default_options.merge(args.merge(primary_data))
 
       hash.keys.each do |key|
         value, key_s = hash.delete(key), key.to_s

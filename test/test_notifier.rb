@@ -5,11 +5,11 @@ HASH = {'short_message' => 'message', 'host' => 'localhost'}
 RANDOM_DATA = ('A'..'Z').to_a
 
 class TestNotifier < Test::Unit::TestCase
-  should "allow access to host, port and max_chunk_size" do
-    notifier = GELF::Notifier.new
-    assert_equal ['localhost', 12201, 1420], [notifier.host, notifier.port, notifier.max_chunk_size]
-    notifier.host, notifier.port, notifier.max_chunk_size = 'graylog2.org', 7777, :lan
-    assert_equal ['graylog2.org', 7777, 8154], [notifier.host, notifier.port, notifier.max_chunk_size]
+  should "allow access to host, port, max_chunk_size and default_options" do
+    n = GELF::Notifier.new
+    assert_equal ['localhost', 12201, 1420, {}], [n.host, n.port, n.max_chunk_size, n.default_options]
+    n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {:host => 'grayhost'}
+    assert_equal ['graylog2.org', 7777, 8154, {:host => 'grayhost'}], [n.host, n.port, n.max_chunk_size, n.default_options]
   end
 
   context "with notifier with mocked sender" do
@@ -72,6 +72,13 @@ class TestNotifier < Test::Unit::TestCase
 
       should "not overwrite keys on convert" do
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, :short_message => :message1, 'short_message' => 'message2') }
+      end
+
+      should "use default_options" do
+        @notifier.default_options = {:file => 'somefile.rb', 'short_message' => 'will be hidden by explicit argument'}
+        hash = @notifier.__send__(:extract_hash, HASH)
+        assert_equal 'somefile.rb', hash['file']
+        assert_not_equal 'will be hidden by explicit argument', hash['short_message']
       end
 
       should "be compatible with HoptoadNotifier" do

@@ -8,6 +8,7 @@ module GELF
     # +host+ and +port+ are host/ip and port of graylog2-server.
     def initialize(host = 'localhost', port = 12201, max_size = 'WAN')
       @host, @port, self.max_chunk_size = host, port, max_size
+      @sender = RubySender.new(host, port)
     end
 
     # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
@@ -41,7 +42,7 @@ module GELF
     #    notify!('Plain olde text message', :scribe => 'AlekSi')
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args)
-      do_notify(extract_hash(*args))
+      @sender.send_datagrams(datagrams_from_hash(extract_hash(*args)))
     end
 
   private
@@ -84,9 +85,8 @@ module GELF
       hash
     end
 
-    def do_notify(hash)
+    def datagrams_from_hash(hash)
       data = Zlib::Deflate.deflate(hash.to_json).bytes
-      sock = UDPSocket.open
       datagrams = []
 
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
@@ -102,7 +102,6 @@ module GELF
         datagrams = [data.map(&:chr).join]
       end
 
-      datagrams.each { |d| sock.send(d, 0, @host, @port) }
       datagrams
     end
 

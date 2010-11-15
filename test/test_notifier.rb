@@ -12,9 +12,11 @@ class TestNotifier < Test::Unit::TestCase
     assert_equal ['graylog2.org', 7777, 8154], [notifier.host, notifier.port, notifier.max_chunk_size]
   end
 
-  context "with notifier" do
+  context "with notifier with mocked sender" do
     setup do
       @notifier = GELF::Notifier.new('host', 12345)
+      @sender = mock
+      @notifier.instance_variable_set('@sender', @sender)
     end
 
     context "extract_hash" do
@@ -81,39 +83,24 @@ class TestNotifier < Test::Unit::TestCase
 
     should "detect and cache host" do
       Socket.expects(:gethostname).once.returns("localhost")
-      @notifier.expects(:do_notify).twice
+      @sender.expects(:send_datagrams).twice
       2.times { @notifier.notify!('short_message' => 'message') }
     end
 
-    context "datagrams" do
-      should "not split short datagram" do
-        UDPSocket.any_instance.expects(:send).once
-        @notifier.notify!(HASH)
+    context "datagrams_from_hash" do
+      should "not split short data" do
+        datagrams = @notifier.__send__(:datagrams_from_hash, HASH)
+        assert_equal 1, datagrams.count
+        assert_equal "\170\234", datagrams[0][0..1]
       end
 
-      should "split long datagram" do
+      should "split long data" do
         srand(1) # for stable tests
-        UDPSocket.any_instance.expects(:send).twice
-        @notifier.notify!(HASH.merge('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join)) # or it will be compressed too good
-      end
-
-      should "send correct short datagram" do
-        UDPSocket.any_instance.expects(:send).with do |data, flags, host, port|
-          host == @notifier.host &&
-          port == @notifier.port &&
-          data[0..1] == "\170\234"
-        end
-        @notifier.notify!(HASH)
-      end
-
-      should "send correct long datagrams" do
-        UDPSocket.any_instance.expects(:send).twice.with do |data, flags, host, port|
-          host == @notifier.host &&
-          port == @notifier.port &&
-          data[0..1] == "\036\017"
-        end
-        srand(1) # for stable tests
-        @notifier.notify!(HASH.merge('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join)) # or it will be compressed too good
+        hash = HASH.merge('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
+        datagrams = @notifier.__send__(:datagrams_from_hash, hash)
+        assert_equal 2, datagrams.count
+        assert_equal "\036\017", datagrams[0][0..1]
+        assert_equal "\036\017", datagrams[1][0..1]
       end
     end
 

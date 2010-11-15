@@ -61,9 +61,12 @@ module GELF
       send_pending_notifications if @cache.count == cache_size
     end
 
+    # Sends all pending notifications.
     def send_pending_notifications
-      @sender.send_datagrams(@cache)
-      @cache = []
+      if @cache.count > 0
+        @sender.send_datagrams(@cache)
+        @cache = []
+      end
     end
 
   private

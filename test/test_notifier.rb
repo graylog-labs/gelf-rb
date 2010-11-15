@@ -137,6 +137,22 @@ class TestNotifier < Test::Unit::TestCase
           2.times { @notifier.notify!(HASH) }
           @notifier.cache_size = 1
         end
+
+        context "and caching limit is disabled" do
+          setup do
+            @notifier.cache_size = 0
+            5.times { @notifier.notify!(HASH) }
+          end
+
+          before_should "not send datagrams when caching limit is disabled" do
+            @sender.expects(:send_datagrams).never
+          end
+
+          should "send datagrams on send_pending_notifications" do
+            @sender.expects(:send_datagrams).once
+            @notifier.send_pending_notifications
+          end
+        end
       end
     end
 

@@ -2,8 +2,8 @@ module GELF
   class Notifier
     @@id = 0
 
-    attr_accessor :host, :port, :default_options
-    attr_reader :max_chunk_size
+    attr_accessor :host, :port
+    attr_reader :max_chunk_size, :default_options
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
@@ -24,6 +24,10 @@ module GELF
       else
         @max_chunk_size = size.to_int
       end
+    end
+
+    def default_options=(options)
+      @default_options = self.class.stringify_hash_keys(options)
     end
 
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
@@ -60,14 +64,8 @@ module GELF
                        { 'short_message' => object_or_exception.to_s }
                      end
 
-      hash = default_options.merge(args.merge(primary_data))
-
-      hash.keys.each do |key|
-        value, key_s = hash.delete(key), key.to_s
-        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.has_key?(key_s)
-        hash[key_s] = value
-      end
-
+      hash = self.class.stringify_hash_keys(args.merge(primary_data))
+      hash = default_options.merge(hash)
       hash['host'] ||= @this_host || detect_this_host
 
       # for compatibility with HoptoadNotifier
@@ -81,7 +79,7 @@ module GELF
 
       %w(short_message host).each do |a|
         if hash[a].to_s.empty?
-          raise ArgumentError.new("Attributes short_message and host must be set.")
+          raise ArgumentError.new("Options short_message and host must be set.")
         end
       end
 
@@ -115,6 +113,15 @@ module GELF
 
     def detect_this_host
       @this_host = Socket.gethostname
+    end
+
+    def self.stringify_hash_keys(hash)
+      hash.keys.each do |key|
+        value, key_s = hash.delete(key), key.to_s
+        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.has_key?(key_s)
+        hash[key_s] = value
+      end
+      hash
     end
   end
 end

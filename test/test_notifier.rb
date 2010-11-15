@@ -9,7 +9,7 @@ class TestNotifier < Test::Unit::TestCase
     n = GELF::Notifier.new
     assert_equal ['localhost', 12201, 1420, {}], [n.host, n.port, n.max_chunk_size, n.default_options]
     n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {:host => 'grayhost'}
-    assert_equal ['graylog2.org', 7777, 8154, {:host => 'grayhost'}], [n.host, n.port, n.max_chunk_size, n.default_options]
+    assert_equal ['graylog2.org', 7777, 8154, {'host' => 'grayhost'}], [n.host, n.port, n.max_chunk_size, n.default_options]
   end
 
   context "with notifier with mocked sender" do

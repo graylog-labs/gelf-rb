@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rake'
 
 begin
-  gem 'jeweler', '~> 1.4.0' # looks like jeweler 1.5.1 doesn't regenerates gemspec?!
+  gem 'jeweler', '~> 1.4.0' # https://github.com/technicalpickles/jeweler/issues/issue/150
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "gelf"

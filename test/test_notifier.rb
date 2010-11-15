@@ -111,6 +111,35 @@ class TestNotifier < Test::Unit::TestCase
       end
     end
 
+    context "local cache" do
+      should "call send datagrams after each notify" do
+        @sender.expects(:send_datagrams).twice
+        2.times { @notifier.notify!(HASH) }
+      end
+
+      context "with enabled caching" do
+        setup do
+          @notifier.cache_size = 3
+        end
+
+        should "not send datagram immediately after notify" do
+          @sender.expects(:send_datagrams).never
+          2.times { @notifier.notify!(HASH) }
+        end
+
+        should "send datagrams when cache is full" do
+          @sender.expects(:send_datagrams).once
+          3.times { @notifier.notify!(HASH) }
+        end
+
+        should "send datagrams when cache size is reduced" do
+          @sender.expects(:send_datagrams).once
+          2.times { @notifier.notify!(HASH) }
+          @notifier.cache_size = 1
+        end
+      end
+    end
+
     should "not rescue from invalid invocation of #notify!" do
       assert_raise(ArgumentError) { @notifier.notify!(:no_short_message => 'too bad') }
     end

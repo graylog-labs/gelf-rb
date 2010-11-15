@@ -3,13 +3,15 @@ module GELF
     @@id = 0
 
     attr_accessor :host, :port
-    attr_reader :max_chunk_size, :default_options
+    attr_reader :max_chunk_size, :default_options, :cache_size
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
     # +default_options+ is used in notify!
     def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
-      @host, @port, self.max_chunk_size, @default_options = host, port, max_size, default_options
+      @host, @port, self.max_chunk_size, self.default_options = host, port, max_size, default_options
+      @cache = []
+      self.cache_size = 1
       @sender = RubySender.new(host, port)
     end
 
@@ -30,6 +32,12 @@ module GELF
       @default_options = self.class.stringify_hash_keys(options)
     end
 
+    def cache_size=(size)
+      @cache_size = size
+      send_pending_notifications if @cache.count > size
+    end
+
+
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
     # and sends them instead.
     def notify(*args)
@@ -49,7 +57,13 @@ module GELF
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args)
-      @sender.send_datagrams(datagrams_from_hash(extract_hash(*args)))
+      @cache << datagrams_from_hash(extract_hash(*args))
+      send_pending_notifications if @cache.count == cache_size
+    end
+
+    def send_pending_notifications
+      @sender.send_datagrams(@cache)
+      @cache = []
     end
 
   private

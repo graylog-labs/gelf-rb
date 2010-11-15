@@ -1,3 +1,6 @@
+1.x.x, 2010-11-xx:
+ + Notifier#default_options
+
 1.0.0, 2010-11-10:
- - initial stable version;
- - deprecated Gelf class is still there.
+ + initial stable version;
+ * deprecated Gelf class is still there.

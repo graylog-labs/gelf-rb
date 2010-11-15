@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gelf}
-  s.version = "1.0.0"
+  s.version = "1.0.9999"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
-  s.date = %q{2010-11-10}
+  s.date = %q{2010-11-16}
   s.description = %q{Suports plain-text, GELF messages and exceptions.}
   s.email = %q{lennart@socketfeed.com}
   s.extra_rdoc_files = [
@@ -26,10 +26,13 @@ Gem::Specification.new do |s|
      "gelf.gemspec",
      "lib/gelf.rb",
      "lib/gelf/deprecations.rb",
+     "lib/gelf/em_sender.rb",
      "lib/gelf/notifier.rb",
+     "lib/gelf/ruby_sender.rb",
      "test/helper.rb",
      "test/test_deprecations.rb",
-     "test/test_notifier.rb"
+     "test/test_notifier.rb",
+     "test/test_ruby_sender.rb"
   ]
   s.homepage = %q{http://github.com/Graylog2/gelf-rb}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -39,7 +42,8 @@ Gem::Specification.new do |s|
   s.test_files = [
     "test/helper.rb",
      "test/test_deprecations.rb",
-     "test/test_notifier.rb"
+     "test/test_notifier.rb",
+     "test/test_ruby_sender.rb"
   ]
 
   if s.respond_to? :specification_version then

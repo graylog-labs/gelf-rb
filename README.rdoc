@@ -17,4 +17,4 @@ Works with Ruby 1.8.7 and 1.9.2. 1.8.6 is not supported.
 
 == Copyright
 
-Copyright (c) 2010 Lennart Koopmann. See LICENSE for details.
+Copyright (c) 2010 Lennart Koopmann and Aleksey Palazhchenko. See LICENSE for details.

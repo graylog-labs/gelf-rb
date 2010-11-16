@@ -158,6 +158,26 @@ class TestNotifier < Test::Unit::TestCase
       end
     end
 
+    context "logger compatibility" do
+      context "call notify with overwritten severity" do
+        should "for standard levels" do
+          GELF::LEVELS.each do |k, v|
+            hash = HASH.merge('severity' => -1)
+            @notifier.expects(:notify).with { |hash| hash['severity'] == v }
+            @notifier.__send__(k, hash)
+          end
+        end
+
+        should "for extended levels" do
+          GELF::LEVELS_EXT.each do |k, v|
+            hash = HASH.merge('severity' => -1)
+            @notifier.expects(:notify).with { |hash| hash['severity'] == GELF::LEVELS[v] }
+            @notifier.__send__(k, hash)
+          end
+        end
+      end
+    end
+
     should "pass valid data to sender" do
       @sender.expects(:send_datagrams).with do |datagrams|
         datagrams.is_a?(Array) && datagrams[0].is_a?(String)

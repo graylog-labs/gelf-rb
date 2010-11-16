@@ -69,6 +69,21 @@ module GELF
       end
     end
 
+    # TODO: docs
+    GELF::LEVELS.each do |k, v|
+      define_method(k) do |*args|
+        hash = extract_hash(*args).merge('severity' => v)
+        notify(hash)
+      end
+    end
+
+    GELF::LEVELS_EXT.each do |k, v|
+      define_method(k) do |*args|
+        hash = extract_hash(*args).merge('severity' => GELF::LEVELS[v])
+        notify(hash)
+      end
+    end
+
   private
     def extract_hash(object_or_exception, args = {})
       primary_data = if object_or_exception.respond_to?(:to_hash)

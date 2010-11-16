@@ -10,6 +10,8 @@ class TestNotifier < Test::Unit::TestCase
     assert_equal ['localhost', 12201, 1420, {}], [n.host, n.port, n.max_chunk_size, n.default_options]
     n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {:host => 'grayhost'}
     assert_equal ['graylog2.org', 7777, 8154, {'host' => 'grayhost'}], [n.host, n.port, n.max_chunk_size, n.default_options]
+    n.max_chunk_size = 1337.1
+    assert_equal 1337, n.max_chunk_size
   end
 
   context "with notifier with mocked sender" do

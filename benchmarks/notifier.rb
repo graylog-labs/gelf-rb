@@ -15,7 +15,7 @@ DEFAULT_OPTIONS = { :host => 'localhost' }
 TIMES = 5000
 
 SHORT_HASH = { 'short_message' => 'message' }
-LONG_HASH = { 'short_message' => k1_message }
+LONG_HASH = { 'short_message' => 'short message', 'long_message' => k1_message, 'user_id' => rand(10000)}
 
 
 notifier_nc_lan = GELF::Notifier.new(TARGET_HOST, TARGET_PORT, 'LAN', DEFAULT_OPTIONS)

@@ -22,9 +22,12 @@ class TestNotifier < Test::Unit::TestCase
     end
 
     context "extract_hash" do
-      should "check number of arguments" do
+      should "check arguments" do
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash) }
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1, 2, 3) }
+        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1, lambda{ 'lambda' }) }
+        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, lambda{ 'lambda' }, 2) }
+        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1) { 'block' }         }
       end
 
       should "work with hash" do
@@ -64,6 +67,14 @@ class TestNotifier < Test::Unit::TestCase
 
       should "work with plain text and hash" do
         assert_equal HASH, @notifier.__send__(:extract_hash, 'message', 'host' => 'localhost')
+      end
+
+      should "work with lambda" do
+        assert_equal HASH, @notifier.__send__(:extract_hash, lambda { HASH } )
+      end
+
+      should "work with block" do
+        assert_equal HASH, @notifier.__send__(:extract_hash) { HASH }
       end
 
       should "covert hash keys to strings" do
@@ -114,7 +125,7 @@ class TestNotifier < Test::Unit::TestCase
     end
 
     context "local cache" do
-      should "call send datagrams after each notify" do
+      should "call send datagrams after each notify!" do
         @sender.expects(:send_datagrams).twice
         2.times { @notifier.notify!(HASH) }
       end
@@ -124,7 +135,7 @@ class TestNotifier < Test::Unit::TestCase
           @notifier.cache_size = 3
         end
 
-        should "not send datagram immediately after notify" do
+        should "not send datagram immediately after notify!" do
           @sender.expects(:send_datagrams).never
           2.times { @notifier.notify!(HASH) }
         end

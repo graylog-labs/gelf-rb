@@ -1,6 +1,9 @@
 1.x.x, 2010-11-xx:
  + Notifier#default_options
  + Local cache
+ + Compatibility with Ruby Logger. Exceptions:
+   - Logger#info('initialize') { "Initializing..." } – ArgumentError
+   - Logger#add(Logger::FATAL) { 'Fatal error!' }    – ArgumentError
 
 1.0.0, 2010-11-10:
  + initial stable version;

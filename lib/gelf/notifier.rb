@@ -3,7 +3,7 @@ module GELF
     @@id = 0
 
     attr_accessor :host, :port
-    attr_reader :max_chunk_size, :default_options, :cache_size
+    attr_reader :max_chunk_size, :default_options, :cache_size #TODO docs for cache
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
@@ -40,24 +40,27 @@ module GELF
 
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
     # and sends them instead.
-    def notify(*args)
-      notify!(*args)
+    def notify(*args, &block)
+      notify!(*args, &block)
     rescue Exception => e
       notify!(e)
     end
 
     # Sends message to Graylog2 server.
     # +args+ can be:
-    # - hash-like object (any object which responds to +to_hash+, including +Hash+ instance)
+    # - hash-like object (any object which responds to +to_hash+, including +Hash+ instance):
     #    notify!(:short_message => 'All your rebase are belong to us', :user => 'AlekSi')
-    # - exception with optional hash-like object
+    # - exception with optional hash-like object:
     #    notify!(SecurityError.new('ALARM!'), :trespasser => 'AlekSi')
-    # - string-like object (anything which responds to +to_s+) with optional hash-like object
+    # - string-like object (anything which responds to +to_s+) with optional hash-like object:
     #    notify!('Plain olde text message', :scribe => 'AlekSi')
+    # - lambda/proc or block, which generates anything from the above:
+    #    notify! lambda{ 'This weird syntax is only' }
+    #    notify!       { 'for compatibility with Ruby Logger' }
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
-    def notify!(*args)
-      @cache += datagrams_from_hash(extract_hash(*args))
+    def notify!(*args, &block)
+      @cache += datagrams_from_hash(extract_hash(*args, &block))
       send_pending_notifications if @cache.count == cache_size
     end
 
@@ -71,29 +74,36 @@ module GELF
 
     # TODO: docs
     GELF::LEVELS.each do |k, v|
-      define_method(k) do |*args|
-        hash = extract_hash(*args).merge('severity' => v)
+      define_method(k) do |*args, &block|
+        hash = extract_hash(*args, &block).merge('severity' => v)
         notify(hash)
       end
     end
 
     GELF::LEVELS_EXT.each do |k, v|
-      define_method(k) do |*args|
-        hash = extract_hash(*args).merge('severity' => GELF::LEVELS[v])
+      define_method(k) do |*args, &block|
+        hash = extract_hash(*args, &block).merge('severity' => GELF::LEVELS[v])
         notify(hash)
       end
     end
 
   private
-    def extract_hash(object_or_exception, args = {})
-      primary_data = if object_or_exception.respond_to?(:to_hash)
-                       object_or_exception.to_hash
-                     elsif object_or_exception.is_a?(Exception)
-                       bt = object_or_exception.backtrace || ["Backtrace is not available."]
-                       { 'short_message' => "#{object_or_exception.class}: #{object_or_exception.message}",
-                         'full_message' => "Backtrace:\n" + bt.join("\n") }
+    def extract_hash(o = nil, args = {}, &block)
+      primary_data = if block_given?
+                       raise ArgumentError.new("Pass block without other parameters.") unless o.nil? && args == {}
+                       yield
+                     elsif o.is_a?(Proc)
+                       raise ArgumentError.new("Pass lambda/proc without other parameters.") unless args == {}
+                       o.call
+                     elsif args.is_a?(Proc)
+                       raise ArgumentError.new("Pass lambda/proc without other parameters.")
+                     elsif o.respond_to?(:to_hash)
+                       o.to_hash
+                     elsif o.is_a?(Exception)
+                       bt = o.backtrace || ["Backtrace is not available."]
+                       { 'short_message' => "#{o.class}: #{o.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
                      else
-                       { 'short_message' => object_or_exception.to_s }
+                       { 'short_message' => o.to_s }
                      end
 
       hash = self.class.stringify_hash_keys(args.merge(primary_data))
@@ -122,6 +132,8 @@ module GELF
     end
 
     def datagrams_from_hash(hash)
+      raise ArgumentError.new("Parameter is empty.") if hash.nil? || hash.empty?
+
       data = Zlib::Deflate.deflate(hash.to_json).bytes
       datagrams = []
 

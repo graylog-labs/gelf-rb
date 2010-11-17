@@ -172,20 +172,17 @@ class TestNotifier < Test::Unit::TestCase
     context "logger compatibility" do
       context "call notify with overwritten severity" do
         should "for standard levels" do
-          GELF::LEVELS.each do |k, v|
+          GELF::LEVELS.each do |ruby_level_sym, syslog_level_num|
             hash = HASH.merge('severity' => -1)
-            @notifier.expects(:notify).with { |hash| hash['severity'] == v }
-            @notifier.__send__(k, hash)
+            @notifier.expects(:notify).with { |hash| hash['severity'] == syslog_level_num }
+            @notifier.__send__(ruby_level_sym, hash)
           end
         end
+      end
 
-        should "for extended levels" do
-          GELF::LEVELS_EXT.each do |k, v|
-            hash = HASH.merge('severity' => -1)
-            @notifier.expects(:notify).with { |hash| hash['severity'] == GELF::LEVELS[v] }
-            @notifier.__send__(k, hash)
-          end
-        end
+      should "send pending notifications on #close" do
+        @notifier.expects(:send_pending_notifications)
+        @notifier.close
       end
     end
 

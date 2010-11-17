@@ -1,19 +1,24 @@
 module GELF
-  # Emergency (0) and Alert (1) are reserved for OS kernel.
-  LEVELS = {  :critical  => 2,
-              :error     => 3,
-              :warning   => 4,
-              :notice    => 5,
-              :info      => 6,
-              :debug     => 7  }
+  # There are two things you should know about log leves/severity:
+  #  - syslog defines levels from 0 (Emergency) to 7 (Debug).
+  #    0 (Emergency) and 1 (Alert) levels are reserved for OS kernel.
+  #  - Ruby default Logger defines levels from 0 (DEBUG) to 4 (FATAL) and 5 (UNKNOWN).
+  #    Note that order is inverted. Also syslog level 5 (Notice) is skipped.
+  # For compatibility we define our constants as Ruby Logger, and convert values before
+  # generating GELF message.
 
-  LEVELS.each do |k, v|
-    const_set(k.to_s.upcase, v)
-  end
+  DEBUG   = 0
+  INFO    = 1
+  WARN    = 2
+  ERROR   = 3
+  FATAL   = 4
+  UNKNOWN = 5
 
-  LEVELS_EXT = { :warn => :warning, :fatal => :critical }
-
-  LEVELS_EXT.each do |k, v|
-    const_set(k.to_s.upcase, LEVELS[v])
-  end
+  # Maps Ruby Logger levels (and methods) to syslog levels.
+  LEVELS = {  :debug   => 7,
+              :info    => 6,
+              :warn    => 4,
+              :error   => 3,
+              :fatal   => 2,
+              :unknown => 2  }
 end

@@ -73,18 +73,16 @@ module GELF
     end
 
     # TODO: docs
-    GELF::LEVELS.each do |k, v|
-      define_method(k) do |*args, &block|
-        hash = extract_hash(*args, &block).merge('severity' => v)
+    GELF::LEVELS.each do |ruby_level_sym, syslog_level_num|
+      define_method(ruby_level_sym) do |*args, &block|
+        hash = extract_hash(*args, &block).merge('severity' => syslog_level_num)
         notify(hash)
       end
     end
 
-    GELF::LEVELS_EXT.each do |k, v|
-      define_method(k) do |*args, &block|
-        hash = extract_hash(*args, &block).merge('severity' => GELF::LEVELS[v])
-        notify(hash)
-      end
+    # Calls +send_pending_notifications+ for compatibilty with Ruby Logger.
+    def close
+      send_pending_notifications
     end
 
   private

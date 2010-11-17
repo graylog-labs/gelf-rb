@@ -87,19 +87,20 @@ module GELF
       end
     end
 
-    # TODO: docs
-    GELF::LEVELS_MAPPING.each do |ruby_level_sym, syslog_level_num|
-      define_method(ruby_level_sym) do |*args, &block|
-        hash = extract_hash(*args, &block).merge('level' => syslog_level_num)
-        notify(hash)
-      end
+    def add(level, message)
+      notify({ 'short_message' => message, 'level' => level })
     end
 
     GELF::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}?                        # def debug?
-          GELF::#{const} >= level                     #   GELF::DEBUG >= level
-        end                                           # end
+        def #{const.downcase}(*args, &block)                                    # def debug(*args, &block)
+          hash = extract_hash(*args, &block).merge('level' => GELF::#{const})   #   hash = extract_hash(*args, &block).merge('level' => GELF::DEBUG)
+          notify(hash)                                                          #   notify(hash)
+        end                                                                     # end
+
+        def #{const.downcase}?                                                  # def debug?
+          GELF::#{const} >= level                                               #   GELF::DEBUG >= level
+        end                                                                     # end
       EOT
     end
 
@@ -152,6 +153,8 @@ module GELF
 
     def datagrams_from_hash(hash)
       raise ArgumentError.new("Parameter is empty.") if hash.nil? || hash.empty?
+
+      hash['level'] = GELF::LEVELS_MAPPING[hash['level']]
 
       data = Zlib::Deflate.deflate(hash.to_json).bytes
       datagrams = []

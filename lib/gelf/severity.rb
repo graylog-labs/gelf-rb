@@ -18,11 +18,11 @@ module GELF
 
   include Levels
 
-  # Maps Ruby Logger levels (and methods) to syslog levels.
-  LEVELS_MAPPING = {  :debug   => 7,
-                      :info    => 6,
-                      :warn    => 4,
-                      :error   => 3,
-                      :fatal   => 2,
-                      :unknown => 2  }
+  # Maps Ruby Logger levels to syslog levels.
+  LEVELS_MAPPING = {  DEBUG   => 7,
+                      INFO    => 6,
+                      WARN    => 4,
+                      ERROR   => 3,
+                      FATAL   => 2,
+                      UNKNOWN => 2  }
 end

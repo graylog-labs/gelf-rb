@@ -75,9 +75,9 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "work with plain text and hash" do
-        hash = @notifier.__send__(:extract_hash, 'message', 'level' => GELF::ERROR)
+        hash = @notifier.__send__(:extract_hash, 'message', 'level' => GELF::WARN)
         assert_equal 'message', hash['short_message']
-        assert_equal GELF::ERROR, hash['level']
+        assert_equal GELF::WARN, hash['level']
       end
 
       should "work with lambda" do
@@ -186,17 +186,25 @@ class TestNotifier < Test::Unit::TestCase
 
       should "not notifications with level equal or above threshold" do
         @sender.expects(:send_datagrams).once
-        @notifier.notify!(HASH.merge('level' => GELF::ERROR))
+        @notifier.notify!(HASH.merge('level' => GELF::WARN))
       end
     end
 
     context "logger compatibility" do
       should "call notify with overwritten level" do
-        GELF::LEVELS_MAPPING.each do |ruby_level_sym, syslog_level_num|
+        GELF::Levels.constants.each do |const|
           hash = HASH.merge('level' => -1)
-          @notifier.expects(:notify!).with { |hash| hash['level'] == syslog_level_num }
-          @notifier.__send__(ruby_level_sym, hash)
+          @notifier.expects(:notify!).with { |hash| hash['level'] == GELF.const_get(const) }
+          @notifier.__send__(const.downcase, hash)
         end
+      end
+
+      should "implement add method" do
+        @notifier.expects(:notify!).with do |hash|
+          hash['short_message'] == 'Message' &&
+          hash['level'] == GELF::INFO
+        end
+        @notifier.add(GELF::INFO, 'Message')
       end
 
       should "send pending notifications on #close" do
@@ -205,9 +213,13 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "respond to query methods" do
-        @notifier.level = GELF::DEBUG
+        @notifier.level = GELF::ERROR
         GELF::Levels.constants.each do |const|
-          assert @notifier.__send__(const.to_s.downcase + '?')
+          if GELF.const_get(const) >= GELF::ERROR
+            assert @notifier.__send__(const.to_s.downcase + '?')
+          else
+            assert !@notifier.__send__(const.to_s.downcase + '?')
+          end
         end
       end
     end

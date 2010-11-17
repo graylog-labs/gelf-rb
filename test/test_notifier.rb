@@ -1,21 +1,26 @@
 require 'helper'
 
-HASH = {'short_message' => 'message', 'host' => 'localhost'}
+HASH = {'short_message' => 'message', 'host' => 'somehost', 'level' => 0}
 
 RANDOM_DATA = ('A'..'Z').to_a
 
 class TestNotifier < Test::Unit::TestCase
   should "allow access to host, port, max_chunk_size and default_options" do
+    Socket.expects(:gethostname).returns('default_hostname')
     n = GELF::Notifier.new
-    assert_equal ['localhost', 12201, 1420, {}], [n.host, n.port, n.max_chunk_size, n.default_options]
-    n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {:host => 'grayhost'}
-    assert_equal ['graylog2.org', 7777, 8154, {'host' => 'grayhost'}], [n.host, n.port, n.max_chunk_size, n.default_options]
+    assert_equal ['localhost', 12201, 1420], [n.host, n.port, n.max_chunk_size]
+    assert_equal({'level' => 0, 'host' => 'default_hostname'}, n.default_options)
+    n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {'host' => 'grayhost'}
+    assert_equal ['graylog2.org', 7777, 8154], [n.host, n.port, n.max_chunk_size]
+    assert_equal({'host' => 'grayhost'}, n.default_options)
+
     n.max_chunk_size = 1337.1
     assert_equal 1337, n.max_chunk_size
   end
 
   context "with notifier with mocked sender" do
     setup do
+      Socket.stubs(:gethostname).returns('stubbed_hostname')
       @notifier = GELF::Notifier.new('host', 12345)
       @sender = mock
       @notifier.instance_variable_set('@sender', @sender)
@@ -66,7 +71,7 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "work with plain text and hash" do
-        assert_equal HASH, @notifier.__send__(:extract_hash, 'message', 'host' => 'localhost')
+        assert_equal HASH, @notifier.__send__(:extract_hash, 'message', 'host' => 'somehost')
       end
 
       should "work with lambda" do
@@ -98,12 +103,6 @@ class TestNotifier < Test::Unit::TestCase
         # https://github.com/thoughtbot/hoptoad_notifier/blob/master/README.rdoc, section Going beyond exceptions
         hash = @notifier.__send__(:extract_hash, :error_class => 'Class', :error_message => 'Message')
         assert_equal 'Class: Message', hash['short_message']
-      end
-
-      should "detect and cache host" do
-        Socket.expects(:gethostname).once.returns("localhost")
-        2.times { @notifier.__send__(:extract_hash, 'short_message' => 'message') }
-        assert_equal 'localhost', @notifier.default_options['host']
       end
     end
 
@@ -169,14 +168,28 @@ class TestNotifier < Test::Unit::TestCase
       end
     end
 
+    context "level threshold" do
+      setup do
+        @notifier.level = GELF::WARN
+      end
+
+      should "not send notifications with level below threshold" do
+        @sender.expects(:send_datagrams).never
+        @notifier.notify!(HASH.merge('level' => GELF::DEBUG))
+      end
+
+      should "not notifications with level equal or above threshold" do
+        @sender.expects(:send_datagrams).once
+        @notifier.notify!(HASH.merge('level' => GELF::ERROR))
+      end
+    end
+
     context "logger compatibility" do
-      context "call notify with overwritten severity" do
-        should "for standard levels" do
-          GELF::LEVELS.each do |ruby_level_sym, syslog_level_num|
-            hash = HASH.merge('severity' => -1)
-            @notifier.expects(:notify).with { |hash| hash['severity'] == syslog_level_num }
-            @notifier.__send__(ruby_level_sym, hash)
-          end
+      should "call notify with overwritten level" do
+        GELF::LEVELS.each do |ruby_level_sym, syslog_level_num|
+          hash = HASH.merge('level' => -1)
+          @notifier.expects(:notify!).with { |hash| hash['level'] == syslog_level_num }
+          @notifier.__send__(ruby_level_sym, hash)
         end
       end
 

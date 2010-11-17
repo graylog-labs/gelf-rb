@@ -3,15 +3,23 @@ module GELF
     @@id = 0
 
     attr_accessor :host, :port
-    attr_reader :max_chunk_size, :default_options, :cache_size #TODO docs for cache
+    attr_reader :max_chunk_size, :default_options, :cache_size, :level #TODO docs for cache
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
     # +default_options+ is used in notify!
     def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
-      @host, @port, self.max_chunk_size, self.default_options = host, port, max_size, default_options
+      self.level = GELF::DEBUG
       @cache = []
       self.cache_size = 1
+      @default_options = {}
+
+      @host, @port, self.max_chunk_size = host, port, max_size
+
+      self.default_options = default_options
+      self.default_options['host'] ||= Socket.gethostname
+      self.default_options['level'] ||= GELF::DEBUG
+
       @sender = RubySender.new(host, port)
     end
 
@@ -37,6 +45,10 @@ module GELF
       send_pending_notifications if @cache.count > size
     end
 
+    def level=(l)
+      raise ArgumentError.new("Wrong level.") unless (0..5).include?(l)
+      @level = l
+    end
 
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
     # and sends them instead.
@@ -60,8 +72,11 @@ module GELF
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args, &block)
-      @cache += datagrams_from_hash(extract_hash(*args, &block))
-      send_pending_notifications if @cache.count == cache_size
+      hash = extract_hash(*args, &block)
+      if hash['level'] >= level
+        @cache += datagrams_from_hash(hash)
+        send_pending_notifications if @cache.count == cache_size
+      end
     end
 
     # Sends all pending notifications.
@@ -75,7 +90,7 @@ module GELF
     # TODO: docs
     GELF::LEVELS.each do |ruby_level_sym, syslog_level_num|
       define_method(ruby_level_sym) do |*args, &block|
-        hash = extract_hash(*args, &block).merge('severity' => syslog_level_num)
+        hash = extract_hash(*args, &block).merge('level' => syslog_level_num)
         notify(hash)
       end
     end
@@ -106,10 +121,6 @@ module GELF
 
       hash = self.class.stringify_hash_keys(args.merge(primary_data))
       hash = default_options.merge(hash)
-
-      if hash['host'].to_s.empty?
-        hash['host'] = default_options['host'] = Socket.gethostname
-      end
 
       # for compatibility with HoptoadNotifier
       if hash['short_message'].to_s.empty?

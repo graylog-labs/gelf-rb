@@ -42,6 +42,11 @@ rescue LoadError
   end
 end
 
+begin
+  require 'metric_fu'
+rescue LoadError
+end
+
 task :test => :check_dependencies
 
 task :default => :test

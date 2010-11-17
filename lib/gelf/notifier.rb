@@ -114,8 +114,10 @@ module GELF
                        o.to_hash
                      elsif o.is_a?(Exception)
                        bt = o.backtrace || ["Backtrace is not available."]
+                       args['level'] ||= GELF::ERROR
                        { 'short_message' => "#{o.class}: #{o.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
                      else
+                       args['level'] ||= GELF::INFO
                        { 'short_message' => o.to_s }
                      end
 

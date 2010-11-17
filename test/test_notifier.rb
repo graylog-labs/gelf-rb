@@ -1,6 +1,6 @@
 require 'helper'
 
-HASH = {'short_message' => 'message', 'host' => 'somehost', 'level' => 0}
+HASH = {'short_message' => 'message', 'host' => 'somehost', 'level' => GELF::WARN}
 
 RANDOM_DATA = ('A'..'Z').to_a
 
@@ -51,6 +51,7 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, e)
         assert_equal 'RuntimeError: message', hash['short_message']
         assert_match /Backtrace/, hash['full_message']
+        assert_equal GELF::ERROR, hash['level']
       end
 
       should "work with exception without backtrace" do
@@ -60,18 +61,23 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "work with exception and hash" do
-        e, h = RuntimeError.new('message'), {'param' => 1, 'short_message' => 'will be hidden by exception'}
+        e, h = RuntimeError.new('message'), {'param' => 1, 'level' => GELF::FATAL, 'short_message' => 'will be hidden by exception'}
         hash = @notifier.__send__(:extract_hash, e, h)
         assert_equal 'RuntimeError: message', hash['short_message']
+        assert_equal GELF::FATAL, hash['level']
         assert_equal 1, hash['param']
       end
 
       should "work with plain text" do
-        assert_equal 'message', @notifier.__send__(:extract_hash, 'message')['short_message']
+        hash = @notifier.__send__(:extract_hash, 'message')
+        assert_equal 'message', hash['short_message']
+        assert_equal GELF::INFO, hash['level']
       end
 
       should "work with plain text and hash" do
-        assert_equal HASH, @notifier.__send__(:extract_hash, 'message', 'host' => 'somehost')
+        hash = @notifier.__send__(:extract_hash, 'message', 'level' => GELF::ERROR)
+        assert_equal 'message', hash['short_message']
+        assert_equal GELF::ERROR, hash['level']
       end
 
       should "work with lambda" do

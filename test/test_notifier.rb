@@ -207,7 +207,7 @@ class TestNotifier < Test::Unit::TestCase
       should "respond to query methods" do
         @notifier.level = GELF::DEBUG
         GELF::Levels.constants.each do |const|
-          assert @notifier.__send__(const.downcase + '?')
+          assert @notifier.__send__(const.to_s.downcase + '?')
         end
       end
     end

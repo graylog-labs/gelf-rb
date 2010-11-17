@@ -7,18 +7,22 @@ module GELF
   # For compatibility we define our constants as Ruby Logger, and convert values before
   # generating GELF message.
 
-  DEBUG   = 0
-  INFO    = 1
-  WARN    = 2
-  ERROR   = 3
-  FATAL   = 4
-  UNKNOWN = 5
+  module Levels
+    DEBUG   = 0
+    INFO    = 1
+    WARN    = 2
+    ERROR   = 3
+    FATAL   = 4
+    UNKNOWN = 5
+  end
+
+  include Levels
 
   # Maps Ruby Logger levels (and methods) to syslog levels.
-  LEVELS = {  :debug   => 7,
-              :info    => 6,
-              :warn    => 4,
-              :error   => 3,
-              :fatal   => 2,
-              :unknown => 2  }
+  LEVELS_MAPPING = {  :debug   => 7,
+                      :info    => 6,
+                      :warn    => 4,
+                      :error   => 3,
+                      :fatal   => 2,
+                      :unknown => 2  }
 end

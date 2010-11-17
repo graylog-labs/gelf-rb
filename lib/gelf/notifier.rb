@@ -88,11 +88,19 @@ module GELF
     end
 
     # TODO: docs
-    GELF::LEVELS.each do |ruby_level_sym, syslog_level_num|
+    GELF::LEVELS_MAPPING.each do |ruby_level_sym, syslog_level_num|
       define_method(ruby_level_sym) do |*args, &block|
         hash = extract_hash(*args, &block).merge('level' => syslog_level_num)
         notify(hash)
       end
+    end
+
+    GELF::Levels.constants.each do |const|
+      class_eval <<-EOT, __FILE__, __LINE__ + 1
+        def #{const.downcase}?                        # def debug?
+          GELF::#{const} >= level                     #   GELF::DEBUG >= level
+        end                                           # end
+      EOT
     end
 
     # Calls +send_pending_notifications+ for compatibilty with Ruby Logger.

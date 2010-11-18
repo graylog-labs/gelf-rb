@@ -1,6 +1,6 @@
 require 'helper'
 
-HASH = {'short_message' => 'message', 'host' => 'somehost', 'level' => GELF::WARN}
+HASH = {'short_message' => 'message', 'host' => 'somehost', 'level' => GELF::WARN, 'facility' => 'test'}
 
 RANDOM_DATA = ('A'..'Z').to_a
 
@@ -9,7 +9,7 @@ class TestNotifier < Test::Unit::TestCase
     Socket.expects(:gethostname).returns('default_hostname')
     n = GELF::Notifier.new
     assert_equal ['localhost', 12201, 1420], [n.host, n.port, n.max_chunk_size]
-    assert_equal({'level' => 0, 'host' => 'default_hostname'}, n.default_options)
+    assert_equal({'level' => 0, 'host' => 'default_hostname', 'facility' => 'gelf-rb'}, n.default_options)
     n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {'host' => 'grayhost'}
     assert_equal ['graylog2.org', 7777, 8154], [n.host, n.port, n.max_chunk_size]
     assert_equal({'host' => 'grayhost'}, n.default_options)

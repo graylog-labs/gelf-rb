@@ -19,6 +19,7 @@ module GELF
       self.default_options = default_options
       self.default_options['host'] ||= Socket.gethostname
       self.default_options['level'] ||= GELF::DEBUG
+      self.default_options['facility'] ||= 'gelf-rb'
 
       @sender = RubySender.new(host, port)
     end

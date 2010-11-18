@@ -185,12 +185,22 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.close
       end
 
-      should "implement add method" do
+      # logger.add(Logger::INFO, 'Message')
+      should "implement add method with level and message" do
         @notifier.expects(:notify!).with do |hash|
           hash['short_message'] == 'Message' &&
           hash['level'] == GELF::INFO
         end
         @notifier.add(GELF::INFO, 'Message')
+      end
+
+      # logger.add(Logger::INFO) { 'Message' }
+      should "implement add method with level and message from block" do
+        @notifier.expects(:notify!).with do |hash|
+          hash['short_message'] == 'Message' &&
+          hash['level'] == GELF::INFO
+        end
+        @notifier.add(GELF::INFO) { 'Message' }
       end
 
       GELF::Levels.constants.each do |const|
@@ -221,6 +231,8 @@ class TestNotifier < Test::Unit::TestCase
           assert !@notifier.__send__(const.to_s.downcase + '?')
         end
       end
+
+      should_eventually "support Notifier#<<"
     end
 
     should "pass valid data to sender" do

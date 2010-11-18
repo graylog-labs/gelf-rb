@@ -84,13 +84,13 @@ module GELF
       end
     end
 
-    def add(level, message)
-      notify({ 'short_message' => message, 'level' => level })
+    def add(level, message = nil)
+      notify({ 'short_message' => message || yield, 'level' => level })
     end
 
     GELF::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}(message = nil, &block)                  # def debug(message = nil, &block)
+        def #{const.downcase}(message = nil)                          # def debug(message = nil)
           m = message || yield                                        #   m = message || yield
           add(GELF::#{const}, m)                                      #   add(GELF::DEBUG, message)
         end                                                           # end

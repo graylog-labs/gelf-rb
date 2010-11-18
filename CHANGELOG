@@ -2,10 +2,10 @@
  + Notifier#default_options;
  + local cache;
  + severity (level) threshold;
- + compatibility with Ruby Logger. Exceptions:
-   - Logger#info('initialize') { "Initializing..." } – ArgumentError
-   - Logger#add(Logger::FATAL) { 'Fatal error!' }    – ArgumentError
-   - and maybe something else
+ + partial compatibility with Ruby Logger and other loggers:
+   - Notifier#fatal { "Argument 'foo' not given." }
+   - Notifier#error "Argument #{ @foo } mismatch."
+   - Notifier#close
 
 1.0.0, 2010-11-10:
  + initial stable version;

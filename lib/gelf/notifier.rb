@@ -46,14 +46,13 @@ module GELF
     end
 
     def level=(l)
-      raise ArgumentError.new("Wrong level.") unless (0..5).include?(l)
       @level = l
     end
 
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
     # and sends them instead.
-    def notify(*args, &block)
-      notify!(*args, &block)
+    def notify(*args)
+      notify!(*args)
     rescue Exception => e
       notify!(e)
     end
@@ -66,12 +65,10 @@ module GELF
     #    notify!(SecurityError.new('ALARM!'), :trespasser => 'AlekSi')
     # - string-like object (anything which responds to +to_s+) with optional hash-like object:
     #    notify!('Plain olde text message', :scribe => 'AlekSi')
-    # - block yielding string-like object:
-    #    notify! { 'This weird syntax is for compatibility with Ruby Logger.' }
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
-    def notify!(*args, &block)
-      hash = extract_hash(*args, &block)
+    def notify!(*args)
+      hash = extract_hash(*args)
       if hash['level'] >= level
         @cache += datagrams_from_hash(hash)
         send_pending_notifications if @cache.count == cache_size
@@ -92,14 +89,14 @@ module GELF
 
     GELF::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}(*args, &block)                                    # def debug(*args, &block)
-          hash = extract_hash(*args, &block).merge('level' => GELF::#{const})   #   hash = extract_hash(*args, &block).merge('level' => GELF::DEBUG)
-          notify(hash)                                                          #   notify(hash)
-        end                                                                     # end
+        def #{const.downcase}(message = nil, &block)                  # def debug(message = nil, &block)
+          m = message || yield                                        #   m = message || yield
+          add(GELF::#{const}, m)                                      #   add(GELF::DEBUG, message)
+        end                                                           # end
 
-        def #{const.downcase}?                                                  # def debug?
-          GELF::#{const} >= level                                               #   GELF::DEBUG >= level
-        end                                                                     # end
+        def #{const.downcase}?                                        # def debug?
+          GELF::#{const} >= level                                     #   GELF::DEBUG >= level
+        end                                                           # end
       EOT
     end
 
@@ -109,11 +106,8 @@ module GELF
     end
 
   private
-    def extract_hash(o = nil, args = {}, &block)
-      primary_data = if block_given?
-                       raise ArgumentError.new("Pass block without other parameters.") unless o.nil? && args == {}
-                       { 'short_message' => yield.to_s }
-                     elsif o.respond_to?(:to_hash)
+    def extract_hash(o = nil, args = {})
+      primary_data = if o.respond_to?(:to_hash)
                        o.to_hash
                      elsif o.is_a?(Exception)
                        bt = o.backtrace || ["Backtrace is not available."]

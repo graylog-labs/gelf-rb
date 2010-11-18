@@ -30,7 +30,6 @@ class TestNotifier < Test::Unit::TestCase
       should "check arguments" do
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash) }
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1, 2, 3) }
-        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1) { 'block' }         }
       end
 
       should "work with hash" do
@@ -76,12 +75,6 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, 'message', 'level' => GELF::WARN)
         assert_equal 'message', hash['short_message']
         assert_equal GELF::WARN, hash['level']
-      end
-
-      should "work with block yielding plain text" do
-        hash = @notifier.__send__(:extract_hash) { HASH['short_message'] }
-        assert_equal HASH['short_message'], hash['short_message']
-        assert_equal GELF::DEBUG, hash['level']
       end
 
       should "covert hash keys to strings" do
@@ -187,12 +180,9 @@ class TestNotifier < Test::Unit::TestCase
     end
 
     context "logger compatibility" do
-      should "call notify with overwritten level" do
-        GELF::Levels.constants.each do |const|
-          hash = HASH.merge('level' => -1)
-          @notifier.expects(:notify!).with { |hash| hash['level'] == GELF.const_get(const) }
-          @notifier.__send__(const.downcase, hash)
-        end
+      should "send pending notifications on #close" do
+        @notifier.expects(:send_pending_notifications)
+        @notifier.close
       end
 
       should "implement add method" do
@@ -203,19 +193,32 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.add(GELF::INFO, 'Message')
       end
 
-      should "send pending notifications on #close" do
-        @notifier.expects(:send_pending_notifications)
-        @notifier.close
-      end
-
-      should "respond to query methods" do
-        @notifier.level = GELF::ERROR
-        GELF::Levels.constants.each do |const|
-          if GELF.const_get(const) >= GELF::ERROR
-            assert @notifier.__send__(const.to_s.downcase + '?')
-          else
-            assert !@notifier.__send__(const.to_s.downcase + '?')
+      GELF::Levels.constants.each do |const|
+        # logger.error "Argument #{ @foo } mismatch."
+        should "call notify with level #{const} from method name and message as parameter" do
+          @notifier.expects(:notify!).with do |hash|
+            hash['short_message'] == 'message' &&
+            hash['level'] == GELF.const_get(const)
           end
+          @notifier.__send__(const.downcase, 'message')
+        end
+
+        # logger.fatal { "Argument 'foo' not given." }
+        should "call notify with level #{const} from method name and message from block" do
+          @notifier.expects(:notify!).with do |hash|
+            hash['short_message'] == 'message' &&
+            hash['level'] == GELF.const_get(const)
+          end
+          @notifier.__send__(const.downcase) { 'message' }
+        end
+
+        should "respond to #{const.downcase}?" do
+          @notifier.level = GELF.const_get(const) - 1
+          assert @notifier.__send__(const.to_s.downcase + '?')
+          @notifier.level = GELF.const_get(const)
+          assert @notifier.__send__(const.to_s.downcase + '?')
+          @notifier.level = GELF.const_get(const) + 1
+          assert !@notifier.__send__(const.to_s.downcase + '?')
         end
       end
     end

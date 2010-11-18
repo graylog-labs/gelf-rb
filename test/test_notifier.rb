@@ -78,8 +78,10 @@ class TestNotifier < Test::Unit::TestCase
         assert_equal GELF::WARN, hash['level']
       end
 
-      should "work with block" do
-        assert_equal HASH, @notifier.__send__(:extract_hash) { HASH }
+      should "work with block yielding plain text" do
+        hash = @notifier.__send__(:extract_hash) { HASH['short_message'] }
+        assert_equal HASH['short_message'], hash['short_message']
+        assert_equal GELF::DEBUG, hash['level']
       end
 
       should "covert hash keys to strings" do

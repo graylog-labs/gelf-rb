@@ -66,9 +66,8 @@ module GELF
     #    notify!(SecurityError.new('ALARM!'), :trespasser => 'AlekSi')
     # - string-like object (anything which responds to +to_s+) with optional hash-like object:
     #    notify!('Plain olde text message', :scribe => 'AlekSi')
-    # - lambda/proc or block, which generates anything from the above:
-    #    notify! lambda{ 'This weird syntax is only' }
-    #    notify!       { 'for compatibility with Ruby Logger' }
+    # - block yielding string-like object:
+    #    notify! { 'This weird syntax is for compatibility with Ruby Logger.' }
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args, &block)
@@ -113,7 +112,7 @@ module GELF
     def extract_hash(o = nil, args = {}, &block)
       primary_data = if block_given?
                        raise ArgumentError.new("Pass block without other parameters.") unless o.nil? && args == {}
-                       yield
+                       { 'short_message' => yield.to_s }
                      elsif o.respond_to?(:to_hash)
                        o.to_hash
                      elsif o.is_a?(Exception)

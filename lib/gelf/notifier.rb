@@ -114,11 +114,6 @@ module GELF
       primary_data = if block_given?
                        raise ArgumentError.new("Pass block without other parameters.") unless o.nil? && args == {}
                        yield
-                     elsif o.is_a?(Proc)
-                       raise ArgumentError.new("Pass lambda/proc without other parameters.") unless args == {}
-                       o.call
-                     elsif args.is_a?(Proc)
-                       raise ArgumentError.new("Pass lambda/proc without other parameters.")
                      elsif o.respond_to?(:to_hash)
                        o.to_hash
                      elsif o.is_a?(Exception)

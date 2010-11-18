@@ -30,8 +30,6 @@ class TestNotifier < Test::Unit::TestCase
       should "check arguments" do
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash) }
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1, 2, 3) }
-        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1, lambda{ 'lambda' }) }
-        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, lambda{ 'lambda' }, 2) }
         assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, 1) { 'block' }         }
       end
 
@@ -78,10 +76,6 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, 'message', 'level' => GELF::WARN)
         assert_equal 'message', hash['short_message']
         assert_equal GELF::WARN, hash['level']
-      end
-
-      should "work with lambda" do
-        assert_equal HASH, @notifier.__send__(:extract_hash, lambda { HASH } )
       end
 
       should "work with block" do

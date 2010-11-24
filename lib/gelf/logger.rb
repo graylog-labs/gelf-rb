@@ -38,5 +38,9 @@ module GELF
         end                                           # end
       EOT
     end
+
+    def <<(message)
+      notify('short_message' => message, 'level' => GELF::UNKNOWN)
+    end
   end
 end

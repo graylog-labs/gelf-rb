@@ -125,6 +125,12 @@ class TestLogger < Test::Unit::TestCase
       end
     end
 
-    should_eventually "support Notifier#<<"
+    should "support Notifier#<<" do
+      @notifier.expects(:notify!).with do |hash|
+        hash['short_message'] == "Message" &&
+        hash['level'] == GELF::UNKNOWN
+      end
+      @notifier << "Message"
+    end
   end
 end

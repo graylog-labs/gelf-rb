@@ -20,9 +20,9 @@ module GELF
                             [args[0], nil]
                           end
 
-      hash = {'short_message' => message, 'level' => level, 'facility' => facility}
+      hash = {'short_message' => message, 'facility' => facility}
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
-      notify(hash)
+      notify_with_level(level, hash)
     end
 
     GELF::Levels.constants.each do |const|

@@ -46,9 +46,7 @@ module GELF
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
     # and sends them instead.
     def notify(*args)
-      notify!(*args)
-    rescue Exception => exception
-      notify!(exception)
+      notify_with_level(nil, *args)
     end
 
     # Sends message to Graylog2 server.
@@ -62,13 +60,32 @@ module GELF
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args)
+      notify_with_level!(nil, *args)
+    end
+
+    GELF::Levels.constants.each do |const|
+      class_eval <<-EOT, __FILE__, __LINE__ + 1
+        def #{const.downcase}(*args)                          # def debug(*args)
+          notify_with_level(GELF::#{const}, *args)            #   notify_with_level(GELF::DEBUG, *args)
+        end                                                   # end
+      EOT
+    end
+
+  private
+    def notify_with_level(message_level, *args)
+      notify_with_level!(message_level, *args)
+    rescue Exception => exception
+      notify_with_level!(GELF::UNKNOWN, exception)
+    end
+
+    def notify_with_level!(message_level, *args)
       extract_hash(*args)
+      @hash['level'] = message_level unless message_level.nil?
       if @hash['level'] >= level
         @sender.send_datagrams(datagrams_from_hash)
       end
     end
 
-  private
     def extract_hash(object = nil, args = {})
       primary_data = if object.respond_to?(:to_hash)
                        object.to_hash

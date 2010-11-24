@@ -143,13 +143,20 @@ class TestNotifier < Test::Unit::TestCase
       @notifier.notify!(HASH)
     end
 
+    GELF::Levels.constants.each do |const|
+      should "call notify with level #{const} from method name" do
+        @notifier.expects(:notify_with_level).with(GELF.const_get(const), HASH)
+        @notifier.__send__(const.downcase, HASH)
+      end
+    end
+
     should "not rescue from invalid invocation of #notify!" do
       assert_raise(ArgumentError) { @notifier.notify!(:no_short_message => 'too bad') }
     end
 
     should "rescue from invalid invocation of #notify" do
-      @notifier.expects(:notify!).with(instance_of(Hash)).raises(ArgumentError)
-      @notifier.expects(:notify!).with(instance_of(ArgumentError))
+      @notifier.expects(:notify_with_level!).with(nil, instance_of(Hash)).raises(ArgumentError)
+      @notifier.expects(:notify_with_level!).with(GELF::UNKNOWN, instance_of(ArgumentError))
       assert_nothing_raised { @notifier.notify(:no_short_message => 'too bad') }
     end
   end

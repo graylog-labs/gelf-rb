@@ -209,11 +209,27 @@ class TestNotifier < Test::Unit::TestCase
       should_eventually "implement add method with level from parameter and exception from block"
 
       # logger.add(Logger::INFO, 'Message', 'Facility')
+      should "implement add method with level, message and facility from parameters" do
+        @notifier.expects(:notify!).with do |hash|
+          hash['short_message'] == 'Message' &&
+          hash['level'] == GELF::INFO &&
+          hash['facility'] == 'Facility'
+        end
+        @notifier.add(GELF::INFO, 'Message', 'Facility')
+      end
 
       # logger.add(Logger::INFO, RuntimeError.new('Boom!'), 'Facility')
       should_eventually "implement add method with level, exception and facility from parameters"
 
       # logger.add(Logger::INFO, 'Facility') { 'Message' }
+      should "implement add method with level and facility from parameters and message from block" do
+        @notifier.expects(:notify!).with do |hash|
+          hash['short_message'] == 'Message' &&
+          hash['level'] == GELF::INFO &&
+          hash['facility'] == 'Facility'
+        end
+        @notifier.add(GELF::INFO, 'Facility') { 'Message' }
+      end
 
       # logger.add(Logger::INFO, 'Facility') { RuntimeError.new('Boom!') }
       should_eventually "implement add method with level and facility from parameters and exception from block"

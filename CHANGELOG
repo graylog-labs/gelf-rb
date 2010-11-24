@@ -2,19 +2,19 @@
  + Notifier#default_options;
  + severity (level) threshold;
  + wrappers for GELF::Notifier#notify with severity:
-   - GELF::Notifier.debug
-   - GELF::Notifier.info
-   - GELF::Notifier.warn
-   - GELF::Notifier.error
-   - GELF::Notifier.fatal
-   - GELF::Notifier.unknown
+   + GELF::Notifier.debug
+   + GELF::Notifier.info
+   + GELF::Notifier.warn
+   + GELF::Notifier.error
+   + GELF::Notifier.fatal
+   + GELF::Notifier.unknown
  + full compatibility with Ruby Logger and other loggers:
-   - GELF::Logger#fatal { "Argument 'foo' not given." }
-   - GELF::Logger#error "Argument #{ @foo } mismatch."
-   - GELF::Logger#info('initialize') { "Initializing..." }
-   - GELF::Logger#add(GELF::FATAL) { 'Fatal error!' }
-   - GELF::Logger#close
-   - GELF::Logger#level = GELF::INFO
+   + GELF::Logger#fatal { "Argument 'foo' not given." }
+   + GELF::Logger#error "Argument #{ @foo } mismatch."
+   + GELF::Logger#info('initialize') { "Initializing..." }
+   + GELF::Logger#add(GELF::FATAL) { 'Fatal error!' }
+   + GELF::Logger#close
+   + GELF::Logger#level = GELF::INFO
 
 1.0.0, 2010-11-10:
  + initial stable version;

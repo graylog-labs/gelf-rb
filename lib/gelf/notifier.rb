@@ -1,5 +1,7 @@
 module GELF
   class Notifier
+    include LoggerCompatibility
+
     @@id = 0
 
     attr_accessor :host, :port
@@ -83,40 +85,6 @@ module GELF
         @sender.send_datagrams(@cache)
         @cache = []
       end
-    end
-
-    # For Ruby Logger compatibility.
-    alias :close :send_pending_notifications
-
-    # For Ruby Logger compatibility. Do not use directly.
-    def add(level, *args)
-      raise ArgumentError.new('Wrong arguments.') unless (0..2).include?(args.count)
-
-      # Ruby Logger's author is a maniac.
-      message, facility = if args.count == 2
-                            [args[0], args[1]]
-                          elsif args.count == 0
-                            [yield, nil]
-                          elsif block_given?
-                            [yield, args[0]]
-                          else
-                            [args[0], nil]
-                          end
-
-      notify({ 'short_message' => message, 'level' => level, 'facility' => facility })
-    end
-
-    GELF::Levels.constants.each do |const|
-      class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}(*args)                  # def debug(*args)
-          args.unshift(yield) if block_given?         #   args.unshift(yield) if block_given?
-          add(GELF::#{const}, *args)                  #   add(GELF::DEBUG, *args)
-        end                                           # end
-
-        def #{const.downcase}?                        # def debug?
-          GELF::#{const} >= level                     #   GELF::DEBUG >= level
-        end                                           # end
-      EOT
     end
 
   private

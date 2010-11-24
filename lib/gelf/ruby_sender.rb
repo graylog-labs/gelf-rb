@@ -1,4 +1,5 @@
 module GELF
+  # Plain Ruby sender.
   class RubySender
     def initialize(host, port)
       @host, @port = host, port
@@ -6,7 +7,9 @@ module GELF
     end
 
     def send_datagrams(datagrams)
-      datagrams.each { |d| @socket.send(d, 0, @host, @port) }
+      datagrams.each do |datagram|
+        @socket.send(datagram, 0, @host, @port)
+      end
     end
   end
 end

@@ -1,4 +1,5 @@
 module GELF
+  # Sender for EventMachine.
   class EMSender
     def initialize(host, port)
     end

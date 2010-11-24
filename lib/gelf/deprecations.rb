@@ -19,15 +19,15 @@ class Gelf
     @notifier.notify(@message)
   end
 
-  [:short_message, :full_message, :level, :host, :line, :file].each do |a|
-    define_method a do
-      deprecate("GELF::Message##{a}")
-      @message[a]
+  [:short_message, :full_message, :level, :host, :line, :file].each do |attribute|
+    define_method attribute do
+      deprecate("GELF::Message##{attribute}")
+      @message[attribute]
     end
 
-    define_method "#{a}=" do |value|
-      deprecate("GELF::Message##{a} = value")
-      @message[a] = value
+    define_method "#{attribute}=" do |value|
+      deprecate("GELF::Message##{attribute} = value")
+      @message[attribute] = value
     end
   end
 

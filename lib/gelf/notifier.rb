@@ -1,8 +1,12 @@
 module GELF
+  # Graylog2 notifier – core.
   class Notifier
     include LoggerCompatibility
 
-    @@id = 0
+    @last_chunk_id = 0
+    class << self
+      attr_accessor :last_chunk_id
+    end
 
     attr_accessor :host, :port
     attr_reader :max_chunk_size, :default_options, :cache_size, :level #TODO docs for cache
@@ -30,10 +34,10 @@ module GELF
     # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
     # Default (safe) value is 'WAN'.
     def max_chunk_size=(size)
-      s = size.to_s.downcase
-      if s == 'wan'
+      size_s = size.to_s.downcase
+      if size_s == 'wan'
         @max_chunk_size = 1420
-      elsif s == 'lan'
+      elsif size_s == 'lan'
         @max_chunk_size = 8154
       else
         @max_chunk_size = size.to_int
@@ -49,8 +53,8 @@ module GELF
       send_pending_notifications if @cache.count > size
     end
 
-    def level=(l)
-      @level = l
+    def level=(new_level)
+      @level = new_level
     end
 
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
@@ -88,31 +92,23 @@ module GELF
     end
 
   private
-    def extract_hash(o = nil, args = {})
-      primary_data = if o.respond_to?(:to_hash)
-                       o.to_hash
-                     elsif o.is_a?(Exception)
+    def extract_hash(object = nil, args = {})
+      primary_data = if object.respond_to?(:to_hash)
+                       object.to_hash
+                     elsif object.is_a?(Exception)
                        args['level'] ||= GELF::ERROR
-                       extract_hash_from_exception(o)
+                       extract_hash_from_exception(object)
                      else
                        args['level'] ||= GELF::INFO
-                       { 'short_message' => o.to_s }
+                       { 'short_message' => object.to_s }
                      end
 
       hash = self.class.stringify_hash_keys(args.merge(primary_data))
       hash = default_options.merge(hash)
+      hash = self.class.hoptoad_to_graylog2(hash)
 
-      # for compatibility with HoptoadNotifier
-      if hash['short_message'].to_s.empty?
-        if hash.has_key?('error_class') && hash.has_key?('error_message')
-          hash['short_message'] = "#{hash['error_class']}: #{hash['error_message']}"
-          hash.delete('error_class')
-          hash.delete('error_message')
-        end
-      end
-
-      %w(short_message host).each do |a|
-        if hash[a].to_s.empty?
+      %w(short_message host).each do |attribute|
+        if hash[attribute].to_s.empty?
           raise ArgumentError.new("Options short_message and host must be set.")
         end
       end
@@ -120,9 +116,21 @@ module GELF
       hash
     end
 
-    def extract_hash_from_exception(e)
-      bt = e.backtrace || ["Backtrace is not available."]
-      { 'short_message' => "#{e.class}: #{e.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
+    def extract_hash_from_exception(exception)
+      bt = exception.backtrace || ["Backtrace is not available."]
+      { 'short_message' => "#{exception.class}: #{exception.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
+    end
+
+    # Converts Hoptoad-specific keys in +hash+ to Graylog2-specific.
+    def self.hoptoad_to_graylog2(hash)
+      if hash['short_message'].to_s.empty?
+        if hash.has_key?('error_class') && hash.has_key?('error_message')
+          hash['short_message'] = "#{hash['error_class']}: #{hash['error_message']}"
+          hash.delete('error_class')
+          hash.delete('error_message')
+        end
+      end
+      hash
     end
 
     def datagrams_from_hash(hash)
@@ -135,12 +143,12 @@ module GELF
 
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
       if data.count > @max_chunk_size
-        @@id += 1
-        msg_id = Digest::SHA256.digest("#{Time.now.to_f}-#{@@id}")
-        i, count = 0, (data.count / 1.0 / @max_chunk_size).ceil
+        id = self.class.last_chunk_id += 1
+        msg_id = Digest::SHA256.digest("#{Time.now.to_f}-#{id}")
+        num, count = 0, (data.count.to_f / @max_chunk_size).ceil
         data.each_slice(@max_chunk_size) do |slice|
-          datagrams << chunk_data(slice, msg_id, i, count)
-          i += 1
+          datagrams << chunk_data(slice, msg_id, num, count)
+          num += 1
         end
       else
         datagrams = [data.map(&:chr).join]

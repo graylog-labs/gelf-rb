@@ -103,7 +103,8 @@ class TestNotifier < Test::Unit::TestCase
 
     context "datagrams_from_hash" do
       should "not split short data" do
-        datagrams = @notifier.__send__(:datagrams_from_hash, HASH)
+        @notifier.instance_variable_set('@hash', HASH)
+        datagrams = @notifier.__send__(:datagrams_from_hash)
         assert_equal 1, datagrams.count
         assert_equal "\170\234", datagrams[0][0..1]
       end
@@ -111,7 +112,8 @@ class TestNotifier < Test::Unit::TestCase
       should "split long data" do
         srand(1) # for stable tests
         hash = HASH.merge('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
-        datagrams = @notifier.__send__(:datagrams_from_hash, hash)
+        @notifier.instance_variable_set('@hash', hash)
+        datagrams = @notifier.__send__(:datagrams_from_hash)
         assert_equal 2, datagrams.count
         assert_equal "\036\017", datagrams[0][0..1]
         assert_equal "\036\017", datagrams[1][0..1]

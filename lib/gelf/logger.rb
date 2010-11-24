@@ -22,7 +22,7 @@ module GELF
                           end
 
       hash = {'short_message' => message, 'level' => level, 'facility' => facility}
-      hash.merge!(extract_hash_from_exception(message)) if message.is_a?(Exception)
+      hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
       notify(hash)
     end
 

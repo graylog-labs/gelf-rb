@@ -8,8 +8,8 @@ module GELF
       attr_accessor :last_chunk_id
     end
 
-    attr_accessor :host, :port
-    attr_reader :max_chunk_size, :default_options, :cache_size, :level #TODO docs for cache
+    attr_accessor :host, :port, :default_options
+    attr_reader :max_chunk_size, :cache_size, :level #TODO docs for cache
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
@@ -44,10 +44,6 @@ module GELF
       end
     end
 
-    def default_options=(options)
-      @default_options = self.class.stringify_hash_keys(options)
-    end
-
     def cache_size=(size)
       @cache_size = size
       send_pending_notifications if @cache.count > size
@@ -61,8 +57,8 @@ module GELF
     # and sends them instead.
     def notify(*args)
       notify!(*args)
-    rescue Exception => e
-      notify!(e)
+    rescue Exception => exception
+      notify!(exception)
     end
 
     # Sends message to Graylog2 server.
@@ -76,9 +72,9 @@ module GELF
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
     # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args)
-      hash = extract_hash(*args)
-      if hash['level'] >= level
-        @cache += datagrams_from_hash(hash)
+      extract_hash(*args)
+      if @hash['level'] >= level
+        @cache += datagrams_from_hash
         send_pending_notifications if @cache.count == cache_size
       end
     end
@@ -97,48 +93,49 @@ module GELF
                        object.to_hash
                      elsif object.is_a?(Exception)
                        args['level'] ||= GELF::ERROR
-                       extract_hash_from_exception(object)
+                       self.class.extract_hash_from_exception(object)
                      else
                        args['level'] ||= GELF::INFO
                        { 'short_message' => object.to_s }
                      end
 
-      hash = self.class.stringify_hash_keys(args.merge(primary_data))
-      hash = default_options.merge(hash)
-      hash = self.class.hoptoad_to_graylog2(hash)
-
-      %w(short_message host).each do |attribute|
-        if hash[attribute].to_s.empty?
-          raise ArgumentError.new("Options short_message and host must be set.")
-        end
-      end
-
-      hash
+      @hash = default_options.merge(args.merge(primary_data))
+      stringify_hash_keys
+      convert_hoptoad_keys_to_graylog2
+      check_presence_of_mandatory_attributes
+      @hash
     end
 
-    def extract_hash_from_exception(exception)
+    def self.extract_hash_from_exception(exception)
       bt = exception.backtrace || ["Backtrace is not available."]
       { 'short_message' => "#{exception.class}: #{exception.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
     end
 
-    # Converts Hoptoad-specific keys in +hash+ to Graylog2-specific.
-    def self.hoptoad_to_graylog2(hash)
-      if hash['short_message'].to_s.empty?
-        if hash.has_key?('error_class') && hash.has_key?('error_message')
-          hash['short_message'] = "#{hash['error_class']}: #{hash['error_message']}"
-          hash.delete('error_class')
-          hash.delete('error_message')
+    # Converts Hoptoad-specific keys in +@hash+ to Graylog2-specific.
+    def convert_hoptoad_keys_to_graylog2
+      if @hash['short_message'].to_s.empty?
+        if @hash.has_key?('error_class') && @hash.has_key?('error_message')
+          @hash['short_message'] = "#{@hash['error_class']}: #{@hash['error_message']}"
+          @hash.delete('error_class')
+          @hash.delete('error_message')
         end
       end
-      hash
     end
 
-    def datagrams_from_hash(hash)
-      raise ArgumentError.new("Parameter is empty.") if hash.nil? || hash.empty?
+    def check_presence_of_mandatory_attributes
+      %w(short_message host).each do |attribute|
+        if @hash[attribute].to_s.empty?
+          raise ArgumentError.new("Options short_message and host must be set.")
+        end
+      end
+    end
 
-      hash['level'] = GELF::LEVELS_MAPPING[hash['level']]
+    def datagrams_from_hash
+      raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
 
-      data = Zlib::Deflate.deflate(hash.to_json).bytes
+      @hash['level'] = GELF::LEVELS_MAPPING[@hash['level']]
+
+      data = Zlib::Deflate.deflate(@hash.to_json).bytes
       datagrams = []
 
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
@@ -147,7 +144,7 @@ module GELF
         msg_id = Digest::SHA256.digest("#{Time.now.to_f}-#{id}")
         num, count = 0, (data.count.to_f / @max_chunk_size).ceil
         data.each_slice(@max_chunk_size) do |slice|
-          datagrams << chunk_data(slice, msg_id, num, count)
+          datagrams << self.class.chunk_data(slice, msg_id, num, count)
           num += 1
         end
       else
@@ -157,18 +154,17 @@ module GELF
       datagrams
     end
 
-    def chunk_data(data, msg_id, sequence_number, sequence_count)
+    def self.chunk_data(data, msg_id, num, count)
       # [30, 15].pack('CC') => "\036\017"
-      return "\036\017" + msg_id + [sequence_number, sequence_count].pack('nn') + data.map(&:chr).join
+      return "\036\017" + msg_id + [num, count].pack('nn') + data.map(&:chr).join
     end
 
-    def self.stringify_hash_keys(hash)
-      hash.keys.each do |key|
-        value, key_s = hash.delete(key), key.to_s
-        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.has_key?(key_s)
-        hash[key_s] = value
+    def stringify_hash_keys
+      @hash.keys.each do |key|
+        value, key_s = @hash.delete(key), key.to_s
+        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if @hash.has_key?(key_s)
+        @hash[key_s] = value
       end
-      hash
     end
   end
 end

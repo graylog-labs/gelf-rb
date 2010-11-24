@@ -181,12 +181,11 @@ class TestNotifier < Test::Unit::TestCase
 
     context "logger compatibility" do
       should "send pending notifications on #close" do
-        @notifier.expects(:send_pending_notifications)
-        @notifier.close
+        assert @notifier.respond_to?(:close)
       end
 
       # logger.add(Logger::INFO, 'Message')
-      should "implement add method with level and message" do
+      should "implement add method with level and message from parameters" do
         @notifier.expects(:notify!).with do |hash|
           hash['short_message'] == 'Message' &&
           hash['level'] == GELF::INFO
@@ -194,8 +193,11 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.add(GELF::INFO, 'Message')
       end
 
+      # logger.add(Logger::INFO, RuntimeError.new('Boom!'))
+      should_eventually "implement add method with level and exception from parameters"
+
       # logger.add(Logger::INFO) { 'Message' }
-      should "implement add method with level and message from block" do
+      should "implement add method with level from parameter and message from block" do
         @notifier.expects(:notify!).with do |hash|
           hash['short_message'] == 'Message' &&
           hash['level'] == GELF::INFO
@@ -203,23 +205,36 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.add(GELF::INFO) { 'Message' }
       end
 
+      # logger.add(Logger::INFO) { RuntimeError.new('Boom!') }
+      should_eventually "implement add method with level from parameter and exception from block"
+
+      # logger.add(Logger::INFO, 'Message', 'Facility')
+
+      # logger.add(Logger::INFO, RuntimeError.new('Boom!'), 'Facility')
+      should_eventually "implement add method with level, exception and facility from parameters"
+
+      # logger.add(Logger::INFO, 'Facility') { 'Message' }
+
+      # logger.add(Logger::INFO, 'Facility') { RuntimeError.new('Boom!') }
+      should_eventually "implement add method with level and facility from parameters and exception from block"
+
       GELF::Levels.constants.each do |const|
         # logger.error "Argument #{ @foo } mismatch."
-        should "call notify with level #{const} from method name and message as parameter" do
-          @notifier.expects(:notify!).with do |hash|
-            hash['short_message'] == 'message' &&
-            hash['level'] == GELF.const_get(const)
-          end
+        should "call notify with level #{const} from method name and message from parameter" do
+          @notifier.expects(:add).with(GELF.const_get(const), 'message')
           @notifier.__send__(const.downcase, 'message')
         end
 
         # logger.fatal { "Argument 'foo' not given." }
         should "call notify with level #{const} from method name and message from block" do
-          @notifier.expects(:notify!).with do |hash|
-            hash['short_message'] == 'message' &&
-            hash['level'] == GELF.const_get(const)
-          end
+          @notifier.expects(:add).with(GELF.const_get(const), 'message')
           @notifier.__send__(const.downcase) { 'message' }
+        end
+
+        # logger.info('initialize') { "Initializing..." }
+        should "call notify with level #{const} from method name, facility from parameter and message from block" do
+          @notifier.expects(:add).with(GELF.const_get(const), 'message', 'facility')
+          @notifier.__send__(const.downcase, 'facility') { 'message' }
         end
 
         should "respond to #{const.downcase}?" do

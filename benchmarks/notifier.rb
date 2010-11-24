@@ -1,3 +1,5 @@
+#! /usr/bin/env ruby
+
 require 'benchmark'
 
 require 'rubygems'
@@ -11,7 +13,7 @@ k1_message = (0..1024).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join
 
 TARGET_HOST = 'localhost'
 TARGET_PORT = 12201
-DEFAULT_OPTIONS = { :host => 'localhost' }
+DEFAULT_OPTIONS = { 'host' => 'localhost' }
 TIMES = 5000
 
 SHORT_HASH = { 'short_message' => 'message' }

@@ -1,9 +1,8 @@
 module GELF
   # Methods for compatibility with Ruby Logger.
   module LoggerCompatibility
-    # Calls send_pending_notifications
+    # Does nothing.
     def close
-      send_pending_notifications
     end
 
     # Use it like Logger#add… or better not to use at all.

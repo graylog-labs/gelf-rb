@@ -1,6 +1,5 @@
 1.x.x, 2010-11-xx:
  + Notifier#default_options;
- + local cache;
  + severity (level) threshold;
  + partial compatibility with Ruby Logger and other loggers:
    - Notifier#fatal { "Argument 'foo' not given." }

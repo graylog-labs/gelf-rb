@@ -9,9 +9,8 @@ class TestLogger < Test::Unit::TestCase
       @notifier.instance_variable_set('@sender', @sender)
     end
 
-    should "send pending notifications on #close" do
-      @notifier.expects(:send_pending_notifications)
-      @notifier.close
+    should "respond to #close" do
+      assert @notifier.respond_to?(:close)
     end
 
     context "#add" do

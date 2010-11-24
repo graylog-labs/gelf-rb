@@ -9,16 +9,13 @@ module GELF
     end
 
     attr_accessor :host, :port, :default_options
-    attr_reader :max_chunk_size, :cache_size, :level #TODO docs for cache
+    attr_reader :max_chunk_size, :level
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
     # +default_options+ is used in notify!
     def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
       self.level = GELF::DEBUG
-
-      @cache = []
-      self.cache_size = 1
 
       self.host, self.port, self.max_chunk_size = host, port, max_size
 
@@ -42,11 +39,6 @@ module GELF
       else
         @max_chunk_size = size.to_int
       end
-    end
-
-    def cache_size=(size)
-      @cache_size = size
-      send_pending_notifications if @cache.count > size
     end
 
     def level=(new_level)
@@ -74,16 +66,7 @@ module GELF
     def notify!(*args)
       extract_hash(*args)
       if @hash['level'] >= level
-        @cache += datagrams_from_hash
-        send_pending_notifications if @cache.count == cache_size
-      end
-    end
-
-    # Sends all pending notifications.
-    def send_pending_notifications
-      if @cache.count > 0
-        @sender.send_datagrams(@cache)
-        @cache = []
+        @sender.send_datagrams(datagrams_from_hash)
       end
     end
 

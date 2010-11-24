@@ -120,51 +120,6 @@ class TestNotifier < Test::Unit::TestCase
       end
     end
 
-    context "local cache" do
-      should "call send datagrams after each notify!" do
-        @sender.expects(:send_datagrams).twice
-        2.times { @notifier.notify!(HASH) }
-      end
-
-      context "with enabled caching" do
-        setup do
-          @notifier.cache_size = 3
-        end
-
-        should "not send datagram immediately after notify!" do
-          @sender.expects(:send_datagrams).never
-          2.times { @notifier.notify!(HASH) }
-        end
-
-        should "send datagrams when cache is full" do
-          @sender.expects(:send_datagrams).once
-          3.times { @notifier.notify!(HASH) }
-        end
-
-        should "send datagrams when cache size is reduced" do
-          @sender.expects(:send_datagrams).once
-          2.times { @notifier.notify!(HASH) }
-          @notifier.cache_size = 1
-        end
-
-        context "and caching limit is disabled" do
-          setup do
-            @notifier.cache_size = 0
-            5.times { @notifier.notify!(HASH) }
-          end
-
-          before_should "not send datagrams when caching limit is disabled" do
-            @sender.expects(:send_datagrams).never
-          end
-
-          should "send datagrams on send_pending_notifications" do
-            @sender.expects(:send_datagrams).once
-            @notifier.send_pending_notifications
-          end
-        end
-      end
-    end
-
     context "level threshold" do
       setup do
         @notifier.level = GELF::WARN

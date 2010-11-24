@@ -1,8 +1,6 @@
 module GELF
-  # Graylog2 notifier – core.
+  # Graylog2 notifier.
   class Notifier
-    include LoggerCompatibility
-
     @last_chunk_id = 0
     class << self
       attr_accessor :last_chunk_id

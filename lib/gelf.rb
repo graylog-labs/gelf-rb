@@ -5,6 +5,6 @@ require 'digest/sha2'
 
 require 'gelf/severity'
 require 'gelf/ruby_sender'
-require 'gelf/logger'
 require 'gelf/notifier'
+require 'gelf/logger'
 require 'gelf/deprecations'

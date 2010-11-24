@@ -4,7 +4,7 @@ class TestLogger < Test::Unit::TestCase
   context "with notifier with mocked sender" do
     setup do
       Socket.stubs(:gethostname).returns('stubbed_hostname')
-      @notifier = GELF::Notifier.new('host', 12345)
+      @notifier = GELF::Logger.new('host', 12345)
       @sender = mock
       @notifier.instance_variable_set('@sender', @sender)
     end

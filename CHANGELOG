@@ -1,10 +1,13 @@
 1.x.x, 2010-11-xx:
  + Notifier#default_options;
  + severity (level) threshold;
- + partial compatibility with Ruby Logger and other loggers:
-   - Notifier#fatal { "Argument 'foo' not given." }
-   - Notifier#error "Argument #{ @foo } mismatch."
-   - Notifier#close
+ + full compatibility with Ruby Logger and other loggers:
+   - Logger#fatal { "Argument 'foo' not given." }
+   - Logger#error "Argument #{ @foo } mismatch."
+   - Logger#info('initialize') { "Initializing..." }
+   - Logger#add(GELF::FATAL) { 'Fatal error!' }
+   - Logger#close
+   - Logger#level = GELF::INFO
 
 1.0.0, 2010-11-10:
  + initial stable version;

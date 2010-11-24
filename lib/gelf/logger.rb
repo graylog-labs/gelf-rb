@@ -42,4 +42,9 @@ module GELF
       notify('short_message' => message, 'level' => GELF::UNKNOWN)
     end
   end
+
+  # Graylog2 notifier, compatible with Ruby Logger.
+  class Logger < Notifier
+    include LoggerCompatibility
+  end
 end

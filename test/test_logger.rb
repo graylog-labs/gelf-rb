@@ -25,7 +25,14 @@ class TestLogger < Test::Unit::TestCase
       end
 
       # logger.add(Logger::INFO, RuntimeError.new('Boom!'))
-      should_eventually "implement add method with level and exception from parameters"
+      should "implement add method with level and exception from parameters" do
+        @notifier.expects(:notify!).with do |hash|
+          hash['short_message'] == 'RuntimeError: Boom!' &&
+          hash['full_message'] =~ /^Backtrace/ &&
+          hash['level'] == GELF::INFO
+        end
+        @notifier.add(GELF::INFO, RuntimeError.new('Boom!'))
+      end
 
       # logger.add(Logger::INFO) { 'Message' }
       should "implement add method with level from parameter and message from block" do
@@ -37,7 +44,14 @@ class TestLogger < Test::Unit::TestCase
       end
 
       # logger.add(Logger::INFO) { RuntimeError.new('Boom!') }
-      should_eventually "implement add method with level from parameter and exception from block"
+      should "implement add method with level from parameter and exception from block" do
+        @notifier.expects(:notify!).with do |hash|
+          hash['short_message'] == 'RuntimeError: Boom!' &&
+          hash['full_message'] =~ /^Backtrace/ &&
+          hash['level'] == GELF::INFO
+        end
+        @notifier.add(GELF::INFO) { RuntimeError.new('Boom!') }
+      end
 
       # logger.add(Logger::INFO, 'Message', 'Facility')
       should "implement add method with level, message and facility from parameters" do
@@ -50,7 +64,15 @@ class TestLogger < Test::Unit::TestCase
       end
 
       # logger.add(Logger::INFO, RuntimeError.new('Boom!'), 'Facility')
-      should_eventually "implement add method with level, exception and facility from parameters"
+      should "implement add method with level, exception and facility from parameters" do
+        @notifier.expects(:notify!).with do |hash|
+          hash['short_message'] == 'RuntimeError: Boom!' &&
+          hash['full_message'] =~ /^Backtrace/ &&
+          hash['level'] == GELF::INFO &&
+          hash['facility'] == 'Facility'
+        end
+        @notifier.add(GELF::INFO, RuntimeError.new('Boom!'), 'Facility')
+      end
 
       # logger.add(Logger::INFO, 'Facility') { 'Message' }
       should "implement add method with level and facility from parameters and message from block" do
@@ -63,7 +85,15 @@ class TestLogger < Test::Unit::TestCase
       end
 
       # logger.add(Logger::INFO, 'Facility') { RuntimeError.new('Boom!') }
-      should_eventually "implement add method with level and facility from parameters and exception from block"
+      should "implement add method with level and facility from parameters and exception from block" do
+        @notifier.expects(:notify!).with do |hash|
+          hash['short_message'] == 'RuntimeError: Boom!' &&
+          hash['full_message'] =~ /^Backtrace/ &&
+          hash['level'] == GELF::INFO &&
+          hash['facility'] == 'Facility'
+        end
+        @notifier.add(GELF::INFO, 'Facility') { RuntimeError.new('Boom!') }
+      end
     end
 
     GELF::Levels.constants.each do |const|

@@ -92,9 +92,8 @@ module GELF
       primary_data = if o.respond_to?(:to_hash)
                        o.to_hash
                      elsif o.is_a?(Exception)
-                       bt = o.backtrace || ["Backtrace is not available."]
                        args['level'] ||= GELF::ERROR
-                       { 'short_message' => "#{o.class}: #{o.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
+                       extract_hash_from_exception(o)
                      else
                        args['level'] ||= GELF::INFO
                        { 'short_message' => o.to_s }
@@ -119,6 +118,11 @@ module GELF
       end
 
       hash
+    end
+
+    def extract_hash_from_exception(e)
+      bt = e.backtrace || ["Backtrace is not available."]
+      { 'short_message' => "#{e.class}: #{e.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
     end
 
     def datagrams_from_hash(hash)

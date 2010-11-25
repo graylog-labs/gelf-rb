@@ -46,5 +46,6 @@ module GELF
   # Graylog2 notifier, compatible with Ruby Logger.
   class Logger < Notifier
     include LoggerCompatibility
+    @last_chunk_id = 0
   end
 end

@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gelf}
-  s.version = "1.1.0.beta2"
+  s.version = "1.1.0.beta3"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
-  s.date = %q{2010-11-25}
+  s.date = %q{2010-11-26}
   s.description = %q{Suports plain-text, GELF messages and exceptions.}
   s.email = %q{lennart@socketfeed.com}
   s.extra_rdoc_files = [

@@ -143,6 +143,29 @@ class TestNotifier < Test::Unit::TestCase
       end
     end
 
+    context "when disabled" do
+      setup do
+        @notifier.disable
+      end
+
+      should "not send datagrams" do
+        @sender.expects(:send_datagrams).never
+        @notifier.expects(:extract_hash).never
+        @notifier.notify!(HASH)
+      end
+
+      context "and enabled again" do
+        setup do
+          @notifier.enable
+        end
+
+        should "send datagrams" do
+          @sender.expects(:send_datagrams)
+          @notifier.notify!(HASH)
+        end
+      end
+    end
+
     should "pass valid data to sender" do
       @sender.expects(:send_datagrams).with do |datagrams|
         datagrams.is_a?(Array) && datagrams[0].is_a?(String)

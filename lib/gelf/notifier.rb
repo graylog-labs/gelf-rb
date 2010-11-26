@@ -6,13 +6,15 @@ module GELF
       attr_accessor :last_chunk_id
     end
 
-    attr_accessor :host, :port, :default_options
+    attr_accessor :host, :port, :default_options, :enabled
     attr_reader :max_chunk_size, :level
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
     # +default_options+ is used in notify!
     def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
+      @enabled = true
+
       self.level = GELF::DEBUG
 
       self.host, self.port, self.max_chunk_size = host, port, max_size
@@ -45,6 +47,14 @@ module GELF
                else
                  GELF.const_get(new_level.to_s.upcase)
                end
+    end
+
+    def disable
+      @enabled = false
+    end
+
+    def enable
+      @enabled = true
     end
 
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
@@ -83,6 +93,7 @@ module GELF
     end
 
     def notify_with_level!(message_level, *args)
+      return unless @enabled
       extract_hash(*args)
       @hash['level'] = message_level unless message_level.nil?
       if @hash['level'] >= level

@@ -125,6 +125,13 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.level = GELF::WARN
       end
 
+      ['debug', 'DEBUG', :debug].each do |l|
+        should "allow to set threshold as #{l.inspect}" do
+          @notifier.level = l
+          assert_equal GELF::DEBUG, @notifier.level
+        end
+      end
+
       should "not send notifications with level below threshold" do
         @sender.expects(:send_datagrams).never
         @notifier.notify!(HASH.merge('level' => GELF::DEBUG))

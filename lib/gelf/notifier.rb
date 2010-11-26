@@ -40,7 +40,11 @@ module GELF
     end
 
     def level=(new_level)
-      @level = new_level
+      @level = if new_level.is_a?(Fixnum)
+                 new_level
+               else
+                 GELF.const_get(new_level.to_s.upcase)
+               end
     end
 
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)

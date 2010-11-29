@@ -168,8 +168,7 @@ module GELF
     end
 
     def self.chunk_data(data, msg_id, num, count)
-      # [30, 15].pack('CC') => "\036\017"
-      return "\036\017" + msg_id + [num, count].pack('nn') + data.map(&:chr).join
+      return "\x1e\x0f" + msg_id + [num, count, *data].pack('nnC*')
     end
 
     def stringify_hash_keys

@@ -16,6 +16,10 @@
    + GELF::Logger#close
    + GELF::Logger#level = GELF::INFO
 
+1.0.2, 2010-11-29:
+1.0.1, 2010-11-29:
+ - added more tests for chunking in attempt to locate not existing bug.
+
 1.0.0, 2010-11-10:
  + initial stable version;
  * deprecated Gelf class is still there.

@@ -106,7 +106,7 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.instance_variable_set('@hash', HASH)
         datagrams = @notifier.__send__(:datagrams_from_hash)
         assert_equal 1, datagrams.count
-        assert_equal "\170\234", datagrams[0][0..1]
+        assert_equal "\x78\x9c", datagrams[0][0..1] # zlib header
       end
 
       should "split long data" do
@@ -115,8 +115,15 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.instance_variable_set('@hash', hash)
         datagrams = @notifier.__send__(:datagrams_from_hash)
         assert_equal 2, datagrams.count
-        assert_equal "\036\017", datagrams[0][0..1]
-        assert_equal "\036\017", datagrams[1][0..1]
+        datagrams.each_index do |i|
+          datagram = datagrams[i]
+          assert datagram[0..1] == "\x1e\x0f" # chunked GELF magic number
+          # datagram[2..33] is a message id
+          assert_equal 0, datagram[34].ord
+          assert_equal i, datagram[35].ord
+          assert_equal 0, datagram[36].ord
+          assert_equal datagrams.count, datagram[37].ord
+        end
       end
     end
 

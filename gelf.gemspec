@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
-  s.date = %q{2010-11-26}
+  s.date = %q{2010-11-29}
   s.description = %q{Suports plain-text, GELF messages and exceptions.}
   s.email = %q{lennart@socketfeed.com}
   s.extra_rdoc_files = [

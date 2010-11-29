@@ -126,5 +126,20 @@ class TestNotifier < Test::Unit::TestCase
       @notifier.expects(:notify!).with(instance_of(ArgumentError))
       assert_nothing_raised { @notifier.notify(:no_short_message => 'too bad') }
     end
+
+    should "chunk data" do
+      UDPSocket.any_instance.stubs(:send)
+      srand(1) # for stable tests
+      data = (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join
+      datagrams = @notifier.__send__(:do_notify, {'short_message' => data, 'host' => 'localhost'})
+      assert_equal 2, datagrams.count
+      datagrams.each_index do |i|
+        datagram = datagrams[i]
+        assert datagram[0..1] == "\x1e\x0f"
+        # datagram[2..33] is a message id
+        assert_equal i, datagram[34]
+        assert_equal datagrams.count, datagram[35]
+      end
+    end
   end
 end

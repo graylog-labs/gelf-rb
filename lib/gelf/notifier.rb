@@ -107,7 +107,7 @@ module GELF
     end
 
     def chunk_data(data, msg_id, sequence_number, sequence_count)
-      return "\036\017" + msg_id + [sequence_number, sequence_count, *data].map(&:chr).join
+      return "\036\017" + msg_id + [sequence_number, sequence_count, *data].pack('nnC*')
     end
 
     def detect_this_host

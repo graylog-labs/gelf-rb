@@ -137,8 +137,10 @@ class TestNotifier < Test::Unit::TestCase
         datagram = datagrams[i]
         assert datagram[0..1] == "\x1e\x0f"
         # datagram[2..33] is a message id
-        assert_equal i, datagram[34]
-        assert_equal datagrams.count, datagram[35]
+        assert_equal 0, datagram[34]
+        assert_equal i, datagram[35]
+        assert_equal 0, datagram[36]
+        assert_equal datagrams.count, datagram[37]
       end
     end
   end

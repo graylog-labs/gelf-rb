@@ -115,6 +115,7 @@ module GELF
       @hash = default_options.merge(args.merge(primary_data))
       stringify_hash_keys
       convert_hoptoad_keys_to_graylog2
+      set_file_and_line
       check_presence_of_mandatory_attributes
       @hash
     end
@@ -133,6 +134,18 @@ module GELF
           @hash.delete('error_message')
         end
       end
+    end
+
+    CALLER_REGEXP = /^(.*):(\d+):.*/
+
+    def set_file_and_line
+      stack = caller
+      begin
+        frame = stack.shift
+      end while frame.include?(__FILE__)
+      match = CALLER_REGEXP.match(frame)
+      @hash['file'] = match[1]
+      @hash['line'] = match[2].to_i
     end
 
     def check_presence_of_mandatory_attributes

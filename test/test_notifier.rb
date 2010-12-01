@@ -33,13 +33,19 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "work with hash" do
-        assert_equal HASH, @notifier.__send__(:extract_hash, HASH)
+        hash = @notifier.__send__(:extract_hash, HASH)
+        hash.delete('file')
+        hash.delete('line')
+        assert_equal HASH, hash
       end
 
       should "work with any object which responds to #to_hash" do
         o = Object.new
         o.expects(:to_hash).returns(HASH)
-        assert_equal HASH, @notifier.__send__(:extract_hash, o)
+        hash = @notifier.__send__(:extract_hash, o)
+        hash.delete('file')
+        hash.delete('line')
+        assert_equal HASH, hash
       end
 
       should "work with exception with backtrace" do
@@ -88,9 +94,9 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "use default_options" do
-        @notifier.default_options = {:file => 'somefile.rb', 'short_message' => 'will be hidden by explicit argument'}
+        @notifier.default_options = {:foo => 'bar', 'short_message' => 'will be hidden by explicit argument'}
         hash = @notifier.__send__(:extract_hash, HASH)
-        assert_equal 'somefile.rb', hash['file']
+        assert_equal 'bar', hash['foo']
         assert_not_equal 'will be hidden by explicit argument', hash['short_message']
       end
 
@@ -98,6 +104,13 @@ class TestNotifier < Test::Unit::TestCase
         # https://github.com/thoughtbot/hoptoad_notifier/blob/master/README.rdoc, section Going beyond exceptions
         hash = @notifier.__send__(:extract_hash, :error_class => 'Class', :error_message => 'Message')
         assert_equal 'Class: Message', hash['short_message']
+      end
+
+      should "set file and line" do
+        line = __LINE__
+        hash = @notifier.__send__(:extract_hash, HASH)
+        assert_match /test_notifier.rb/, hash['file']
+        assert_equal line + 1, hash['line']
       end
     end
 

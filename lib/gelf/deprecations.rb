@@ -8,7 +8,7 @@ class Gelf
   attr_reader :notifier, :message
 
   def initialize(hostname, port)
-    deprecate('GELF::Notifier.new(hostname, port) and GELF::Message.new')
+    deprecate('GELF::Notifier.new(hostname, port)')
     @notifier = GELF::Notifier.new(hostname, port)
     @message = {}
   end

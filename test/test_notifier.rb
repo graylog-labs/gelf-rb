@@ -137,11 +137,9 @@ class TestNotifier < Test::Unit::TestCase
         datagrams.each_index do |i|
           datagram = datagrams[i]
           assert datagram[0..1] == "\x1e\x0f" # chunked GELF magic number
-          # datagram[2..33] is a message id
-          assert_equal 0, datagram[34].ord
-          assert_equal i, datagram[35].ord
-          assert_equal 0, datagram[36].ord
-          assert_equal datagrams.count, datagram[37].ord
+          # datagram[2..9] is a message id
+          assert_equal i, datagram[10].ord
+          assert_equal datagrams.count, datagram[11].ord
         end
       end
     end

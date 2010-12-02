@@ -168,7 +168,7 @@ module GELF
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
       if data.count > @max_chunk_size
         id = self.class.last_chunk_id += 1
-        msg_id = Digest::SHA256.digest("#{Time.now.to_f}-#{id}")
+        msg_id = Digest::MD5.digest("#{Time.now.to_f}-#{id}")[0, 8]
         num, count = 0, (data.count.to_f / @max_chunk_size).ceil
         data.each_slice(@max_chunk_size) do |slice|
           datagrams << self.class.chunk_data(slice, msg_id, num, count)
@@ -182,7 +182,7 @@ module GELF
     end
 
     def self.chunk_data(data, msg_id, num, count)
-      return "\x1e\x0f" + msg_id + [num, count, *data].pack('nnC*')
+      return "\x1e\x0f" + msg_id + [num, count, *data].pack('C*')
     end
 
     def stringify_hash_keys

@@ -1,7 +1,7 @@
 require 'json'
 require 'socket'
 require 'zlib'
-require 'digest/sha2'
+require 'digest/md5'
 
 module GELF
   SPEC_VERSION = '1.0'

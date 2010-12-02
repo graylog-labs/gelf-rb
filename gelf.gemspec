@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gelf}
-  s.version = "1.1.0.beta4"
+  s.version = "1.1.0.beta5"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aleksey Palazhchenko", "Lennart Koopmann"]

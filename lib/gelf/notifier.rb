@@ -137,7 +137,7 @@ module GELF
       end
     end
 
-    CALLER_REGEXP = /^(.*):(\d+):.*/
+    CALLER_REGEXP = /^(.*):(\d+).*/
 
     def set_file_and_line
       stack = caller

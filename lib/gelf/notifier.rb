@@ -26,7 +26,7 @@ module GELF
       self.default_options['gelf_level'] ||= GELF::DEBUG
       self.default_options['gelf_facility'] ||= 'gelf-rb'
 
-      @sender = RubySender.new(host, port)
+      @sender = RubyUdpSender.new(host, port)
     end
 
     # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).

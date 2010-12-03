@@ -20,7 +20,7 @@ module GELF
                             [args[0], nil]
                           end
 
-      hash = {'gelf_short_message' => message, 'gelf_facility' => facility}
+      hash = {'_short_message' => message, '_facility' => facility}
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
       notify_with_level(level, hash)
     end
@@ -39,7 +39,7 @@ module GELF
     end
 
     def <<(message)
-      notify('gelf_short_message' => message, 'gelf_level' => GELF::UNKNOWN)
+      notify('_short_message' => message, '_level' => GELF::UNKNOWN)
     end
   end
 

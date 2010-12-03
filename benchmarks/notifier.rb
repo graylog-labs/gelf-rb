@@ -15,11 +15,11 @@ k3_message = (1..3*1024).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join
 
 TARGET_HOST = 'localhost'
 TARGET_PORT = 12201
-DEFAULT_OPTIONS = { 'gelf_host' => 'localhost' }
+DEFAULT_OPTIONS = { '_host' => 'localhost' }
 TIMES = 5000
 
-SHORT_HASH = { 'gelf_short_message' => 'message' }
-LONG_HASH  = { 'gelf_short_message' => 'message', 'gelf_long_message' => k3_message }
+SHORT_HASH = { '_short_message' => 'message' }
+LONG_HASH  = { '_short_message' => 'message', '_long_message' => k3_message }
 
 
 notifier_lan = GELF::Notifier.new(TARGET_HOST, TARGET_PORT, 'LAN', DEFAULT_OPTIONS)

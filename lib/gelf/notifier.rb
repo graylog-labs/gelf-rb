@@ -21,10 +21,10 @@ module GELF
 
       @default_options = {}
       self.default_options = default_options
-      self.default_options['gelf_version'] = SPEC_VERSION
-      self.default_options['gelf_host'] ||= Socket.gethostname
-      self.default_options['gelf_level'] ||= GELF::DEBUG
-      self.default_options['gelf_facility'] ||= 'gelf-rb'
+      self.default_options['_version'] = SPEC_VERSION
+      self.default_options['_host'] ||= Socket.gethostname
+      self.default_options['_level'] ||= GELF::DEBUG
+      self.default_options['_facility'] ||= 'gelf-rb'
 
       @sender = RubyUdpSender.new(host, port)
     end
@@ -96,8 +96,8 @@ module GELF
     def notify_with_level!(message_level, *args)
       return unless @enabled
       extract_hash(*args)
-      @hash['gelf_level'] = message_level unless message_level.nil?
-      if @hash['gelf_level'] >= level
+      @hash['_level'] = message_level unless message_level.nil?
+      if @hash['_level'] >= level
         @sender.send_datagrams(datagrams_from_hash)
       end
     end
@@ -106,11 +106,11 @@ module GELF
       primary_data = if object.respond_to?(:to_hash)
                        object.to_hash
                      elsif object.is_a?(Exception)
-                       args['gelf_level'] ||= GELF::ERROR
+                       args['_level'] ||= GELF::ERROR
                        self.class.extract_hash_from_exception(object)
                      else
-                       args['gelf_level'] ||= GELF::INFO
-                       { 'gelf_short_message' => object.to_s }
+                       args['_level'] ||= GELF::INFO
+                       { '_short_message' => object.to_s }
                      end
 
       @hash = default_options.merge(args.merge(primary_data))
@@ -123,14 +123,14 @@ module GELF
 
     def self.extract_hash_from_exception(exception)
       bt = exception.backtrace || ["Backtrace is not available."]
-      { 'gelf_short_message' => "#{exception.class}: #{exception.message}", 'gelf_full_message' => "Backtrace:\n" + bt.join("\n") }
+      { '_short_message' => "#{exception.class}: #{exception.message}", '_full_message' => "Backtrace:\n" + bt.join("\n") }
     end
 
     # Converts Hoptoad-specific keys in +@hash+ to Graylog2-specific.
     def convert_hoptoad_keys_to_graylog2
-      if @hash['gelf_short_message'].to_s.empty?
+      if @hash['_short_message'].to_s.empty?
         if @hash.has_key?('error_class') && @hash.has_key?('error_message')
-          @hash['gelf_short_message'] = "#{@hash['error_class']}: #{@hash['error_message']}"
+          @hash['_short_message'] = "#{@hash['error_class']}: #{@hash['error_message']}"
           @hash.delete('error_class')
           @hash.delete('error_message')
         end
@@ -145,14 +145,14 @@ module GELF
         frame = stack.shift
       end while frame.include?(__FILE__)
       match = CALLER_REGEXP.match(frame)
-      @hash['gelf_file'] = match[1]
-      @hash['gelf_line'] = match[2].to_i
+      @hash['_file'] = match[1]
+      @hash['_line'] = match[2].to_i
     end
 
     def check_presence_of_mandatory_attributes
-      %w(gelf_version gelf_short_message gelf_host).each do |attribute|
+      %w(_version _short_message _host).each do |attribute|
         if @hash[attribute].to_s.empty?
-          raise ArgumentError.new("#{attribute} is missing. Options gelf_version, gelf_short_message and gelf_host must be set.")
+          raise ArgumentError.new("#{attribute} is missing. Options _version, _short_message and _host must be set.")
         end
       end
     end
@@ -160,7 +160,7 @@ module GELF
     def datagrams_from_hash
       raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
 
-      @hash['gelf_level'] = GELF::LEVELS_MAPPING[@hash['gelf_level']]
+      @hash['_level'] = GELF::LEVELS_MAPPING[@hash['_level']]
 
       data = Zlib::Deflate.deflate(@hash.to_json).bytes
       datagrams = []

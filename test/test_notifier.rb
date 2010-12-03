@@ -1,10 +1,10 @@
 require 'helper'
 
-HASH = { 'gelf_version' => '1.0',
-         'gelf_short_message' => 'message',
-         'gelf_host' => 'somehost',
-         'gelf_level' => GELF::WARN,
-         'gelf_facility' => 'test' }
+HASH = { '_version' => '1.0',
+         '_short_message' => 'message',
+         '_host' => 'somehost',
+         '_level' => GELF::WARN,
+         '_facility' => 'test' }
 
 RANDOM_DATA = ('A'..'Z').to_a
 
@@ -13,12 +13,12 @@ class TestNotifier < Test::Unit::TestCase
     Socket.expects(:gethostname).returns('default_hostname')
     n = GELF::Notifier.new
     assert_equal ['localhost', 12201, 1420], [n.host, n.port, n.max_chunk_size]
-    assert_equal( { 'gelf_version' => '1.0', 'gelf_level' => GELF::DEBUG,
-                    'gelf_host' => 'default_hostname', 'gelf_facility' => 'gelf-rb' },
+    assert_equal( { '_version' => '1.0', '_level' => GELF::DEBUG,
+                    '_host' => 'default_hostname', '_facility' => 'gelf-rb' },
                   n.default_options )
-    n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {'gelf_host' => 'grayhost'}
+    n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {'_host' => 'grayhost'}
     assert_equal ['graylog2.org', 7777, 8154], [n.host, n.port, n.max_chunk_size]
-    assert_equal({'gelf_host' => 'grayhost'}, n.default_options)
+    assert_equal({'_host' => 'grayhost'}, n.default_options)
 
     n.max_chunk_size = 1337.1
     assert_equal 1337, n.max_chunk_size
@@ -40,8 +40,8 @@ class TestNotifier < Test::Unit::TestCase
 
       should "work with hash" do
         hash = @notifier.__send__(:extract_hash, HASH)
-        hash.delete('gelf_file')
-        hash.delete('gelf_line')
+        hash.delete('_file')
+        hash.delete('_line')
         assert_equal HASH, hash
       end
 
@@ -49,8 +49,8 @@ class TestNotifier < Test::Unit::TestCase
         o = Object.new
         o.expects(:to_hash).returns(HASH)
         hash = @notifier.__send__(:extract_hash, o)
-        hash.delete('gelf_file')
-        hash.delete('gelf_line')
+        hash.delete('_file')
+        hash.delete('_line')
         assert_equal HASH, hash
       end
 
@@ -58,65 +58,65 @@ class TestNotifier < Test::Unit::TestCase
         e = RuntimeError.new('message')
         e.set_backtrace(caller)
         hash = @notifier.__send__(:extract_hash, e)
-        assert_equal 'RuntimeError: message', hash['gelf_short_message']
-        assert_match /Backtrace/, hash['gelf_full_message']
-        assert_equal GELF::ERROR, hash['gelf_level']
+        assert_equal 'RuntimeError: message', hash['_short_message']
+        assert_match /Backtrace/, hash['_full_message']
+        assert_equal GELF::ERROR, hash['_level']
       end
 
       should "work with exception without backtrace" do
         e = RuntimeError.new('message')
         hash = @notifier.__send__(:extract_hash, e)
-        assert_match /Backtrace is not available/, hash['gelf_full_message']
+        assert_match /Backtrace is not available/, hash['_full_message']
       end
 
       should "work with exception and hash" do
-        e, h = RuntimeError.new('message'), {'param' => 1, 'gelf_level' => GELF::FATAL, 'gelf_short_message' => 'will be hidden by exception'}
+        e, h = RuntimeError.new('message'), {'param' => 1, '_level' => GELF::FATAL, '_short_message' => 'will be hidden by exception'}
         hash = @notifier.__send__(:extract_hash, e, h)
-        assert_equal 'RuntimeError: message', hash['gelf_short_message']
-        assert_equal GELF::FATAL, hash['gelf_level']
+        assert_equal 'RuntimeError: message', hash['_short_message']
+        assert_equal GELF::FATAL, hash['_level']
         assert_equal 1, hash['param']
       end
 
       should "work with plain text" do
         hash = @notifier.__send__(:extract_hash, 'message')
-        assert_equal 'message', hash['gelf_short_message']
-        assert_equal GELF::INFO, hash['gelf_level']
+        assert_equal 'message', hash['_short_message']
+        assert_equal GELF::INFO, hash['_level']
       end
 
       should "work with plain text and hash" do
-        hash = @notifier.__send__(:extract_hash, 'message', 'gelf_level' => GELF::WARN)
-        assert_equal 'message', hash['gelf_short_message']
-        assert_equal GELF::WARN, hash['gelf_level']
+        hash = @notifier.__send__(:extract_hash, 'message', '_level' => GELF::WARN)
+        assert_equal 'message', hash['_short_message']
+        assert_equal GELF::WARN, hash['_level']
       end
 
       should "covert hash keys to strings" do
-        hash = @notifier.__send__(:extract_hash, :gelf_short_message => :message)
-        assert hash.has_key?('gelf_short_message')
-        assert !hash.has_key?(:gelf_short_message)
+        hash = @notifier.__send__(:extract_hash, :_short_message => :message)
+        assert hash.has_key?('_short_message')
+        assert !hash.has_key?(:_short_message)
       end
 
       should "not overwrite keys on convert" do
-        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, :gelf_short_message => :message1, 'gelf_short_message' => 'message2') }
+        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, :_short_message => :message1, '_short_message' => 'message2') }
       end
 
       should "use default_options" do
-        @notifier.default_options = {:foo => 'bar', 'gelf_short_message' => 'will be hidden by explicit argument'}
+        @notifier.default_options = {:foo => 'bar', '_short_message' => 'will be hidden by explicit argument'}
         hash = @notifier.__send__(:extract_hash, HASH)
         assert_equal 'bar', hash['foo']
-        assert_not_equal 'will be hidden by explicit argument', hash['gelf_short_message']
+        assert_not_equal 'will be hidden by explicit argument', hash['_short_message']
       end
 
       should "be compatible with HoptoadNotifier" do
         # https://github.com/thoughtbot/hoptoad_notifier/blob/master/README.rdoc, section Going beyond exceptions
         hash = @notifier.__send__(:extract_hash, :error_class => 'Class', :error_message => 'Message')
-        assert_equal 'Class: Message', hash['gelf_short_message']
+        assert_equal 'Class: Message', hash['_short_message']
       end
 
       should "set file and line" do
         line = __LINE__
         hash = @notifier.__send__(:extract_hash, HASH)
-        assert_match /test_notifier.rb/, hash['gelf_file']
-        assert_equal line + 1, hash['gelf_line']
+        assert_match /test_notifier.rb/, hash['_file']
+        assert_equal line + 1, hash['_line']
       end
     end
 
@@ -158,12 +158,12 @@ class TestNotifier < Test::Unit::TestCase
 
       should "not send notifications with level below threshold" do
         @sender.expects(:send_datagrams).never
-        @notifier.notify!(HASH.merge('gelf_level' => GELF::DEBUG))
+        @notifier.notify!(HASH.merge('_level' => GELF::DEBUG))
       end
 
       should "not notifications with level equal or above threshold" do
         @sender.expects(:send_datagrams).once
-        @notifier.notify!(HASH.merge('gelf_level' => GELF::WARN))
+        @notifier.notify!(HASH.merge('_level' => GELF::WARN))
       end
     end
 

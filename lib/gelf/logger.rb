@@ -25,6 +25,7 @@ module GELF
       notify_with_level(level, hash)
     end
 
+    # Redefines methods in +Notifier+.
     GELF::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
         def #{const.downcase}(*args)                  # def debug(*args)

@@ -139,12 +139,13 @@ module GELF
     end
 
     CALLER_REGEXP = /^(.*):(\d+).*/
+    LIB_GELF_PATTERN = File.join('lib', 'gelf')
 
     def set_file_and_line
       stack = caller
       begin
         frame = stack.shift
-      end while frame.include?(__FILE__)
+      end while frame.include?(LIB_GELF_PATTERN)
       match = CALLER_REGEXP.match(frame)
       @hash['_file'] = match[1]
       @hash['_line'] = match[2].to_i

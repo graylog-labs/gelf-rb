@@ -1,9 +1,10 @@
 1.1.0 (not yet released), 2010-12-xx:
  + compatibility with GELF specification 1.0:
-   * requires graylog2-server version 0.9.XXXXXXXXXXXX or graylog2-server-twisted;
+   * requires graylog2-server version after 0.9.XXXXXXXXXXXX or graylog2-server-twisted;
+   * requires graylog2-web-interface version XXXXXXXXXXXX;
  + Notifier#default_options;
  + severity (level) threshold;
- + automatically set 'file' and 'line' fields;
+ + automatically set '_file', '_line' and '_timestamp', fields;
  + wrappers for GELF::Notifier#notify with severity:
    + GELF::Notifier.debug
    + GELF::Notifier.info

@@ -42,6 +42,7 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, HASH)
         hash.delete('_file')
         hash.delete('_line')
+        hash.delete('_timestamp')
         assert_equal HASH, hash
       end
 
@@ -51,6 +52,7 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, o)
         hash.delete('_file')
         hash.delete('_line')
+        hash.delete('_timestamp')
         assert_equal HASH, hash
       end
 
@@ -117,6 +119,12 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, HASH)
         assert_match /test_notifier.rb/, hash['_file']
         assert_equal line + 1, hash['_line']
+      end
+
+      should "set timestamp" do
+        hash = @notifier.__send__(:extract_hash, HASH)
+        now = Time.now.utc.to_i
+        assert ((now - 1)..(now + 1)).include?(hash['_timestamp'])
       end
     end
 

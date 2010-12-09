@@ -117,6 +117,7 @@ module GELF
       stringify_hash_keys
       convert_hoptoad_keys_to_graylog2
       set_file_and_line
+      set_timestamp
       check_presence_of_mandatory_attributes
       @hash
     end
@@ -147,6 +148,10 @@ module GELF
       match = CALLER_REGEXP.match(frame)
       @hash['_file'] = match[1]
       @hash['_line'] = match[2].to_i
+    end
+
+    def set_timestamp
+      @hash['_timestamp'] = Time.now.utc.to_f
     end
 
     def check_presence_of_mandatory_attributes

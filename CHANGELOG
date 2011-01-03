@@ -4,7 +4,7 @@
    * requires graylog2-web-interface version XXXXXXXXXXXX;
  + Notifier#default_options;
  + severity (level) threshold;
- + automatically set '_file', '_line' and '_timestamp', fields;
+ + automatically set '_file', '_line' and '_timestamp' fields;
  + wrappers for GELF::Notifier#notify with severity:
    + GELF::Notifier.debug
    + GELF::Notifier.info

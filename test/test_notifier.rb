@@ -113,6 +113,7 @@ class TestNotifier < Test::Unit::TestCase
 
       should "set timestamp" do
         hash = @notifier.__send__(:extract_hash, { '_version' => '1.0', '_short_message' => 'message' })
+        assert_instance_of Float, hash['_timestamp']
         now = Time.now.utc.to_i
         assert ((now - 1)..(now + 1)).include?(hash['_timestamp'])
       end

@@ -161,11 +161,7 @@ module GELF
     end
 
     def datagrams_from_hash
-      raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
-
-      @hash['_level'] = GELF::LEVELS_MAPPING[@hash['_level']]
-
-      data = Zlib::Deflate.deflate(@hash.to_json).bytes
+      data = serialize_hash
       datagrams = []
 
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
@@ -182,6 +178,14 @@ module GELF
       end
 
       datagrams
+    end
+
+    def serialize_hash
+      raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
+
+      @hash['_level'] = GELF::LEVELS_MAPPING[@hash['_level']]
+
+      Zlib::Deflate.deflate(@hash.to_json).bytes
     end
 
     def self.chunk_data(data, msg_id, num, count)

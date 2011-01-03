@@ -119,6 +119,21 @@ class TestNotifier < Test::Unit::TestCase
       end
     end
 
+    context "serialize_hash" do
+      setup do
+        @notifier.instance_variable_set('@hash', { '_level' => GELF::WARN, 'field' => 'value' })
+        @data = @notifier.__send__(:serialize_hash)
+        assert_instance_of Enumerable::Enumerator, @data
+        @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data.to_a.pack('C*')))
+        assert_instance_of Hash, @deserialized_hash
+      end
+
+      should "map level" do
+        assert_not_equal GELF::WARN, @deserialized_hash['_level']
+        assert_equal GELF::LEVELS_MAPPING[GELF::WARN], @deserialized_hash['_level']
+      end
+    end
+
     context "datagrams_from_hash" do
       should "not split short data" do
         @notifier.instance_variable_set('@hash', { '_version' => '1.0', '_short_message' => 'message' })

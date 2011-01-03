@@ -19,7 +19,6 @@ module GELF
 
       self.host, self.port, self.max_chunk_size = host, port, max_size
 
-      @default_options = {}
       self.default_options = default_options
       self.default_options['_version'] = SPEC_VERSION
       self.default_options['_host'] ||= Socket.gethostname

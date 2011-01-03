@@ -130,9 +130,7 @@ module GELF
     def convert_hoptoad_keys_to_graylog2
       if @hash['_short_message'].to_s.empty?
         if @hash.has_key?('error_class') && @hash.has_key?('error_message')
-          @hash['_short_message'] = "#{@hash['error_class']}: #{@hash['error_message']}"
-          @hash.delete('error_class')
-          @hash.delete('error_message')
+          @hash['_short_message'] = @hash.delete('error_class') + ': ' + @hash.delete('error_message')
         end
       end
     end

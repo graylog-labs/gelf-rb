@@ -170,11 +170,11 @@ module GELF
         msg_id = Digest::MD5.digest("#{Time.now.to_f}-#{id}")[0, 8]
         num, count = 0, (data.count.to_f / @max_chunk_size).ceil
         data.each_slice(@max_chunk_size) do |slice|
-          datagrams << self.class.chunk_data(slice, msg_id, num, count)
+          datagrams << "\x1e\x0f" + msg_id + [num, count, *slice].pack('C*')
           num += 1
         end
       else
-        datagrams = [data.map(&:chr).join]
+        datagrams << data.to_a.pack('C*')
       end
 
       datagrams
@@ -188,10 +188,6 @@ module GELF
       @hash.keys.each { |key| @hash['a_' + key] = @hash.delete(key) unless key.start_with?('_') }
 
       Zlib::Deflate.deflate(@hash.to_json).bytes
-    end
-
-    def self.chunk_data(data, msg_id, num, count)
-      return "\x1e\x0f" + msg_id + [num, count, *data].pack('C*')
     end
 
     def stringify_hash_keys

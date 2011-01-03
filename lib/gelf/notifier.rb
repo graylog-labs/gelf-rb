@@ -185,6 +185,8 @@ module GELF
 
       @hash['_level'] = GELF::LEVELS_MAPPING[@hash['_level']]
 
+      @hash.keys.each { |key| @hash['a_' + key] = @hash.delete(key) unless key.start_with?('_') }
+
       Zlib::Deflate.deflate(@hash.to_json).bytes
     end
 

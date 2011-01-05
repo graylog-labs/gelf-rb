@@ -132,15 +132,6 @@ class TestNotifier < Test::Unit::TestCase
         assert_not_equal GELF::WARN, @deserialized_hash['_level']
         assert_equal GELF::LEVELS_MAPPING[GELF::WARN], @deserialized_hash['_level']
       end
-
-      should "prefix additional fields" do
-        assert !@deserialized_hash.has_key?('field')
-        assert @deserialized_hash.has_key?('a_field')
-      end
-
-      should "not prefix standard fields" do
-        assert @deserialized_hash.has_key?('_level')
-      end
     end
 
     context "datagrams_from_hash" do

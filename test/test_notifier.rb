@@ -7,7 +7,7 @@ class TestNotifier < Test::Unit::TestCase
     Socket.expects(:gethostname).returns('default_hostname')
     n = GELF::Notifier.new
     assert_equal ['localhost', 12201, 1420], [n.host, n.port, n.max_chunk_size]
-    assert_equal( { '_version' => '1.0', '_level' => GELF::DEBUG,
+    assert_equal( { '_version' => '1.0', '_level' => GELF::UNKNOWN,
                     '_host' => 'default_hostname', '_facility' => 'gelf-rb' },
                   n.default_options )
     n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {'_host' => 'grayhost'}

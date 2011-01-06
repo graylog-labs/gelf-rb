@@ -22,7 +22,7 @@ module GELF
       self.default_options = default_options
       self.default_options['_version'] = SPEC_VERSION
       self.default_options['_host'] ||= Socket.gethostname
-      self.default_options['_level'] ||= GELF::DEBUG
+      self.default_options['_level'] ||= GELF::UNKNOWN
       self.default_options['_facility'] ||= 'gelf-rb'
 
       @sender = RubyUdpSender.new(host, port)

@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gelf}
-  s.version = "1.1.0.gamma1"
+  s.version = "1.1.0.rc1"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aleksey Palazhchenko", "Lennart Koopmann"]
-  s.date = %q{2010-12-09}
+  s.date = %q{2011-01-08}
   s.description = %q{Library to send GELF messages to Graylog2 logging server. Supports plain-text, GELF messages and exceptions.}
   s.email = %q{aleksey.palazhchenko@gmail.com}
   s.extra_rdoc_files = [
@@ -46,11 +46,11 @@ Gem::Specification.new do |s|
   s.summary = %q{Library to send GELF messages to Graylog2 logging server.}
   s.test_files = [
     "test/helper.rb",
-     "test/test_deprecations.rb",
      "test/test_logger.rb",
      "test/test_notifier.rb",
+     "test/test_severity.rb",
      "test/test_ruby_sender.rb",
-     "test/test_severity.rb"
+     "test/test_deprecations.rb"
   ]
 
   if s.respond_to? :specification_version then

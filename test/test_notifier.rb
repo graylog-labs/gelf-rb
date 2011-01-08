@@ -123,7 +123,7 @@ class TestNotifier < Test::Unit::TestCase
       setup do
         @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value' })
         @data = @notifier.__send__(:serialize_hash)
-        assert_instance_of Enumerator, @data
+        assert_instance_of Enumerable::Enumerator, @data
         @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data.to_a.pack('C*')))
         assert_instance_of Hash, @deserialized_hash
       end

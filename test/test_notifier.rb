@@ -87,10 +87,6 @@ class TestNotifier < Test::Unit::TestCase
         assert !hash.has_key?(:short_message)
       end
 
-      should "not overwrite keys on convert" do
-        assert_raise(ArgumentError) { @notifier.__send__(:extract_hash, :short_message => :message1, 'short_message' => 'message2') }
-      end
-
       should "use default_options" do
         @notifier.default_options = {:foo => 'bar', 'short_message' => 'will be hidden by explicit argument', 'host' => 'some_host'}
         hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })

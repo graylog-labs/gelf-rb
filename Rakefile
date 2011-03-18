@@ -1,7 +1,5 @@
 require 'rake'
 
-`gem install jeweler json shoulda mocha metric_fu`
-
 begin
   gem 'jeweler', '~> 1.5.2'
   require 'jeweler'

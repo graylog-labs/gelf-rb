@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aleksey Palazhchenko", "Lennart Koopmann"]
-  s.date = %q{2011-01-23}
+  s.date = %q{2011-03-18}
   s.description = %q{Library to send GELF messages to Graylog2 logging server. Supports plain-text, GELF messages and exceptions.}
   s.email = %q{aleksey.palazhchenko@gmail.com}
   s.extra_rdoc_files = [
@@ -42,19 +42,18 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/Graylog2/gelf-rb}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.6.1}
   s.summary = %q{Library to send GELF messages to Graylog2 logging server.}
   s.test_files = [
     "test/helper.rb",
+     "test/test_deprecations.rb",
      "test/test_logger.rb",
      "test/test_notifier.rb",
-     "test/test_severity.rb",
      "test/test_ruby_sender.rb",
-     "test/test_deprecations.rb"
+     "test/test_severity.rb"
   ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then

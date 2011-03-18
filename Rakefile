@@ -1,9 +1,9 @@
-require 'rubygems'
 require 'rake'
 
 begin
   gem 'jeweler', '~> 1.5.2'
   require 'jeweler'
+
   Jeweler::Tasks.new do |gem|
     gem.name = "gelf"
     gem.summary = 'Library to send GELF messages to Graylog2 logging server.'
@@ -16,9 +16,8 @@ begin
     gem.add_development_dependency "mocha"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
-  Jeweler::GemcutterTasks.new
 rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
+  abort "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
 
 require 'rake/testtask'
@@ -27,6 +26,8 @@ Rake::TestTask.new(:test) do |test|
   test.pattern = 'test/**/test_*.rb'
   test.verbose = true
 end
+
+task :default => :test
 
 begin
   require 'rcov/rcovtask'
@@ -38,18 +39,41 @@ begin
   end
 rescue LoadError
   task :rcov do
-    abort "RCov is not available. In order to run rcov, you must: gem install rcov"
+    abort "rcov is not available. Run: gem install rcov"
   end
 end
 
 begin
+  gem 'ruby_parser', '= 2.0.5'
+  gem 'activesupport', '~> 2.3.0'
+  gem 'metric_fu', '~> 2.1.1'
   require 'metric_fu'
+
+  MetricFu::Configuration.run do |config|
+    # Saikuro is useless
+    config.metrics -= [:saikuro]
+
+    config.flay     = { :dirs_to_flay  => ['lib'],
+                        :minimum_score => 10  }
+    config.flog     = { :dirs_to_flog  => ['lib'] }
+    config.reek     = { :dirs_to_reek  => ['lib'] }
+    config.roodi    = { :dirs_to_roodi => ['lib'] }
+    config.rcov     = { :environment => 'test',
+                        :test_files => ['test/test_*.rb'],
+                        :rcov_opts => ["-I 'lib:test'",
+                                       "--sort coverage",
+                                       "--no-html",
+                                       "--text-coverage",
+                                       "--no-color",
+                                       "--exclude /test/,/gems/"]}
+    config.graph_engine = :gchart
+  end
+
 rescue LoadError
+  task :'metrics:all' do
+    abort "metric_fu is not available. Run: gem install metric_fu"
+  end
 end
-
-task :test => :check_dependencies
-
-task :default => :test
 
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|

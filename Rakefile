@@ -16,7 +16,8 @@ begin
     gem.add_development_dependency "mocha"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
-rescue LoadError
+rescue LoadError => e
+  puts e
   abort "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
 
@@ -27,6 +28,7 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
+task :test => :check_dependencies
 task :default => :test
 
 begin
@@ -37,8 +39,9 @@ begin
     test.rcov_opts << '--exclude gem'
     test.verbose = true
   end
-rescue LoadError
+rescue LoadError => e
   task :rcov do
+    puts e
     abort "rcov is not available. Run: gem install rcov"
   end
 end
@@ -69,8 +72,9 @@ begin
     config.graph_engine = :gchart
   end
 
-rescue LoadError
+rescue LoadError => e
   task :'metrics:all' do
+    puts e
     abort "metric_fu is not available. Run: gem install metric_fu"
   end
 end

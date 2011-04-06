@@ -8,9 +8,9 @@ begin
     gem.name = "gelf"
     gem.summary = 'Library to send GELF messages to Graylog2 logging server.'
     gem.description = 'Library to send GELF messages to Graylog2 logging server. Supports plain-text, GELF messages and exceptions.'
-    gem.email = "aleksey.palazhchenko@gmail.com"
+    gem.email = "alexey.palazhchenko@gmail.com"
     gem.homepage = "http://github.com/Graylog2/gelf-rb"
-    gem.authors = ["Aleksey Palazhchenko", "Lennart Koopmann"]
+    gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
     gem.add_dependency "json"
     gem.add_development_dependency "shoulda"
     gem.add_development_dependency "mocha"

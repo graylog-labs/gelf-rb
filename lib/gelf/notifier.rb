@@ -72,6 +72,7 @@ module GELF
     # - string-like object (anything which responds to +to_s+) with optional hash-like object:
     #    notify!('Plain olde text message', :scribe => 'AlekSi')
     # Resulted fields are merged with +default_options+, the latter will never overwrite the former.
+    # This method will raise +ArgumentError+ if arguments are wrong. Consider using notify instead.
     def notify!(*args)
       notify_with_level!(nil, *args)
     end

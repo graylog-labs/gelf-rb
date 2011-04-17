@@ -48,7 +48,7 @@ end
 
 begin
   gem 'ruby_parser', '= 2.0.5'
-  gem 'activesupport', '~> 2.3.0'
+  gem 'activesupport', '~> 3.0.0'
   gem 'metric_fu', '~> 2.1.1'
   require 'metric_fu'
 
@@ -72,9 +72,11 @@ begin
     config.graph_engine = :gchart
   end
 
-rescue LoadError => e
+rescue LoadError, NameError => e
+  desc 'Generate all metrics reports'
   task :'metrics:all' do
-    puts e
+    puts e.inspect
+    # puts e.backtrace
     abort "metric_fu is not available. Run: gem install metric_fu"
   end
 end

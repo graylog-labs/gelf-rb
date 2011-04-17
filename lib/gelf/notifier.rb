@@ -144,8 +144,8 @@ module GELF
         frame = stack.shift
       end while frame.include?(LIB_GELF_PATTERN)
       match = CALLER_REGEXP.match(frame)
-      @hash['file'] = match[1] if @hash['file'] == nil
-      @hash['line'] = match[2].to_i if @hash['line'] == nil
+      @hash['file'] = match[1]
+      @hash['line'] = match[2].to_i
     end
 
     def set_timestamp

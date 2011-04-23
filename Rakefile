@@ -1,6 +1,12 @@
 require 'rake'
 
 begin
+  require 'ci/reporter/rake/test_unit'
+rescue
+  # nothing
+end
+
+begin
   gem 'jeweler', '~> 1.5.2'
   require 'jeweler'
 

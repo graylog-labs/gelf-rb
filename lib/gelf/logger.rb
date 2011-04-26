@@ -49,4 +49,10 @@ module GELF
     include LoggerCompatibility
     @last_chunk_id = 0
   end
+  
+  class RailsLogger < Logger
+    def map_level(level)
+      GELF::RAILS_LEVELS_MAPPING[level]
+    end
+  end
 end

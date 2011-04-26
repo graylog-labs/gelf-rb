@@ -183,11 +183,15 @@ module GELF
     def serialize_hash
       raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
 
-      @hash['level'] = GELF::LEVELS_MAPPING[@hash['level']]
+      @hash['level'] = map_level(@hash['level'])
 
       Zlib::Deflate.deflate(@hash.to_json).bytes
     end
-
+    
+    def map_level(level)
+      GELF::LEVELS_MAPPING[level]
+    end
+    
     def stringify_hash_keys
       @hash.keys.each do |key|
         value, key_s = @hash.delete(key), key.to_s

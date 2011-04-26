@@ -20,7 +20,8 @@ module GELF
                             [args[0], nil]
                           end
 
-      hash = {'short_message' => message, 'facility' => facility}
+      hash = {'short_message' => message}
+      hash['facility'] = facility if facility
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
       notify_with_level(level, hash)
     end
@@ -48,5 +49,11 @@ module GELF
   class Logger < Notifier
     include LoggerCompatibility
     @last_chunk_id = 0
+  end
+  
+  class RailsLogger < Logger
+    def map_level(level)
+      GELF::RAILS_LEVELS_MAPPING[level]
+    end
   end
 end

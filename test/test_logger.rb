@@ -132,4 +132,22 @@ class TestLogger < Test::Unit::TestCase
       @notifier << "Message"
     end
   end
+  
+  context "with rails logger" do
+    setup do
+      Socket.stubs(:gethostname).returns('stubbed_hostname')
+      @notifier = GELF::RailsLogger.new('host', 12345)
+      @sender = mock
+      @notifier.instance_variable_set('@sender', @sender)
+    end
+    
+    should "map level" do
+      @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value' })
+      @data = @notifier.__send__(:serialize_hash)
+      @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data.to_a.pack('C*')))
+      assert_not_equal GELF::WARN, @deserialized_hash['level']
+      assert_equal GELF::RAILS_LEVELS_MAPPING[GELF::WARN], @deserialized_hash['level']
+    end
+  end
+    
 end

@@ -25,4 +25,14 @@ module GELF
                     ERROR   => 4, # Warning
                     FATAL   => 3, # Error
                     UNKNOWN => 1} # Alert – shouldn't be used
+
+  # Maps Rails Logger levels
+  RAILS_LEVELS_MAPPING = {DEBUG   => 7, # Debug
+                          INFO    => 6, # Informational
+                          # INFO    => 5, # Notice
+                          WARN    => 4, # Warning
+                          ERROR   => 3, # Error
+                          FATAL   => 2, # Critical
+                          # FATAL   => 0, # Emergency
+                          UNKNOWN => 1} # Alert – shouldn't be used
 end

@@ -18,7 +18,9 @@ module GELF
       self.level = GELF::DEBUG
 
       self.host, self.port, self.max_chunk_size = host, port, max_size
-
+      
+      stringify_keys(default_options)
+      
       self.default_options = default_options
       self.default_options['version'] = SPEC_VERSION
       self.default_options['host'] ||= Socket.gethostname
@@ -183,17 +185,26 @@ module GELF
     def serialize_hash
       raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
 
-      @hash['level'] = GELF::LEVELS_MAPPING[@hash['level']]
+      @hash['level'] = map_level(@hash['level'])
 
       Zlib::Deflate.deflate(@hash.to_json).bytes
     end
-
+    
+    def map_level(level)
+      GELF::LEVELS_MAPPING[level]
+    end
+    
     def stringify_hash_keys
-      @hash.keys.each do |key|
-        value, key_s = @hash.delete(key), key.to_s
-        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if @hash.has_key?(key_s)
-        @hash[key_s] = value
+      stringify_keys(@hash)
+    end
+    
+    def stringify_keys(hash)
+      hash.keys.each do |key|
+        value, key_s = hash.delete(key), key.to_s
+        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.has_key?(key_s)
+        hash[key_s] = value
       end
     end
+    
   end
 end

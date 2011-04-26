@@ -18,7 +18,9 @@ module GELF
       self.level = GELF::DEBUG
 
       self.host, self.port, self.max_chunk_size = host, port, max_size
-
+      
+      stringify_keys(default_options)
+      
       self.default_options = default_options
       self.default_options['version'] = SPEC_VERSION
       self.default_options['host'] ||= Socket.gethostname
@@ -193,11 +195,16 @@ module GELF
     end
     
     def stringify_hash_keys
-      @hash.keys.each do |key|
-        value, key_s = @hash.delete(key), key.to_s
-        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if @hash.has_key?(key_s)
-        @hash[key_s] = value
+      stringify_keys(@hash)
+    end
+    
+    def stringify_keys(hash)
+      hash.keys.each do |key|
+        value, key_s = hash.delete(key), key.to_s
+        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.has_key?(key_s)
+        hash[key_s] = value
       end
     end
+    
   end
 end

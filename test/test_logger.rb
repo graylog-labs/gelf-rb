@@ -4,7 +4,7 @@ class TestLogger < Test::Unit::TestCase
   context "with notifier with mocked sender" do
     setup do
       Socket.stubs(:gethostname).returns('stubbed_hostname')
-      @notifier = GELF::Logger.new('host', 12345)
+      @notifier = GELF::Logger.new('host', 12345, "WAN", { 'facility' => 'test-app' })
       @sender = mock
       @notifier.instance_variable_set('@sender', @sender)
     end
@@ -15,10 +15,11 @@ class TestLogger < Test::Unit::TestCase
 
     context "#add" do
       # logger.add(Logger::INFO, 'Message')
-      should "implement add method with level and message from parameters" do
+      should "implement add method with level and message from parameters and do not delete default facility" do
         @notifier.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
-          hash['short_message'] == 'Message'
+          hash['short_message'] == 'Message' &&
+          !hash.key?('facility')
         end
         @notifier.add(GELF::INFO, 'Message')
       end

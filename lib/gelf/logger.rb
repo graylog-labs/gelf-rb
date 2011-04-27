@@ -29,11 +29,6 @@ module GELF
     # Redefines methods in +Notifier+.
     GELF::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}(*args)                  # def debug(*args)
-          args.unshift(yield) if block_given?         #   args.unshift(yield) if block_given?
-          add(GELF::#{const}, *args)                  #   add(GELF::DEBUG, *args)
-        end                                           # end
-
         def #{const.downcase}?                        # def debug?
           GELF::#{const} >= level                     #   GELF::DEBUG >= level
         end                                           # end
@@ -49,17 +44,21 @@ module GELF
   class Logger < Notifier
     include LoggerCompatibility
     @last_chunk_id = 0
-  end
-  
-  class RailsLogger < Notifier
+
+    # Redefines methods in +Notifier+.
     GELF::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}?                        # def debug?
-          GELF::#{const} >= level                     #   GELF::DEBUG >= level
+        def #{const.downcase}(*args)                  # def debug(*args)
+          args.unshift(yield) if block_given?         #   args.unshift(yield) if block_given?
+          add(GELF::#{const}, *args)                  #   add(GELF::DEBUG, *args)
         end                                           # end
       EOT
     end
-    
+  end
+  
+  class RailsLogger < Notifier
+    include LoggerCompatibility
+
     def map_level(level)
       GELF::RAILS_LEVELS_MAPPING[level]
     end

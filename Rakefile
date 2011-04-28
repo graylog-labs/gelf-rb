@@ -2,7 +2,7 @@ require 'rake'
 
 begin
   require 'ci/reporter/rake/test_unit'
-rescue
+rescue LoadError
   # nothing
 end
 

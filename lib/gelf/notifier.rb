@@ -31,13 +31,13 @@ module GELF
     # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
     # Default (safe) value is 'WAN'.
     def max_chunk_size=(size)
-      size_s = size.to_s.downcase
-      if size_s == 'wan'
-        @max_chunk_size = 1420
-      elsif size_s == 'lan'
-        @max_chunk_size = 8154
-      else
-        @max_chunk_size = size.to_int
+      case size.to_s.downcase
+        when 'wan'
+          @max_chunk_size = 1420
+        when 'lan'
+          @max_chunk_size = 8154
+        else
+          @max_chunk_size = size.to_int
       end
     end
 

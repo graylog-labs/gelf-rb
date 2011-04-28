@@ -10,17 +10,17 @@ module GELF
       raise ArgumentError.new('Wrong arguments.') unless (0..2).include?(args.count)
 
       # Ruby Logger's author is a maniac.
-      message, facility = if args.count == 2
+      message, progname = if args.count == 2
                             [args[0], args[1]]
                           elsif args.count == 0
-                            [yield, nil]
+                            [yield, default_options['facility']]
                           elsif block_given?
                             [yield, args[0]]
                           else
-                            [args[0], nil]
+                            [args[0], default_options['facility']]
                           end
 
-      hash = {'short_message' => message, 'facility' => facility}
+      hash = {'short_message' => message, 'facility' => progname}
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
       notify_with_level(level, hash)
     end
@@ -40,7 +40,7 @@ module GELF
     end
 
     def <<(message)
-      notify('short_message' => message, 'level' => GELF::UNKNOWN)
+      notify_with_level(GELF::UNKNOWN, 'short_message' => message)
     end
   end
 

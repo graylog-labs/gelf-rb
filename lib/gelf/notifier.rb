@@ -6,8 +6,8 @@ module GELF
       attr_accessor :last_chunk_id
     end
 
-    attr_accessor :host, :port, :default_options, :enabled
-    attr_reader :max_chunk_size, :level
+    attr_accessor :host, :port, :enabled
+    attr_reader :max_chunk_size, :level, :default_options
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
@@ -47,6 +47,10 @@ module GELF
                else
                  GELF.const_get(new_level.to_s.upcase)
                end
+    end
+
+    def default_options=(options)
+      @default_options = self.class.stringify_keys(options)
     end
 
     def disable
@@ -112,8 +116,7 @@ module GELF
                        { 'short_message' => object.to_s }
                      end
 
-      @hash = default_options.merge(args.merge(primary_data))
-      stringify_hash_keys
+      @hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
       convert_hoptoad_keys_to_graylog2
       set_file_and_line
       set_timestamp
@@ -188,12 +191,13 @@ module GELF
       Zlib::Deflate.deflate(@hash.to_json).bytes
     end
 
-    def stringify_hash_keys
-      @hash.keys.each do |key|
-        value, key_s = @hash.delete(key), key.to_s
-        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if @hash.has_key?(key_s)
-        @hash[key_s] = value
+    def self.stringify_keys(hash)
+      hash.keys.each do |key|
+        value, key_s = hash.delete(key), key.to_s
+        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.has_key?(key_s)
+        hash[key_s] = value
       end
+      hash
     end
   end
 end

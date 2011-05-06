@@ -5,7 +5,7 @@ module GELF
     def close
     end
 
-    # Use it like Logger#add… or better not to use at all.
+    # Use it like Logger#add... or better not to use at all.
     def add(level, *args)
       raise ArgumentError.new('Wrong arguments.') unless (0..2).include?(args.count)
 
@@ -45,6 +45,9 @@ module GELF
   end
 
   # Graylog2 notifier, compatible with Ruby Logger.
+  # You can use it with Rails like this:
+  #     config.logger = GELF::Logger.new("localhost", 12201, "WAN", { :facility => "appname" })
+  #     config.colorize_logging = false
   class Logger < Notifier
     include LoggerCompatibility
     @last_chunk_id = 0

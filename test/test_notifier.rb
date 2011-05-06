@@ -121,6 +121,7 @@ class TestNotifier < Test::Unit::TestCase
 
     context "serialize_hash" do
       setup do
+        @notifier.level_mapping = :direct
         @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value' })
         @data = @notifier.__send__(:serialize_hash)
         assert @data.respond_to?(:each)
@@ -128,9 +129,10 @@ class TestNotifier < Test::Unit::TestCase
         assert_instance_of Hash, @deserialized_hash
       end
 
-      should "map level" do
+      should "map level using mapping" do
         assert_not_equal GELF::WARN, @deserialized_hash['level']
-        assert_equal GELF::LEVELS_MAPPING[GELF::WARN], @deserialized_hash['level']
+        assert_not_equal GELF::LOGGER_MAPPING[GELF::WARN], @deserialized_hash['level']
+        assert_equal GELF::DIRECT_MAPPING[GELF::WARN], @deserialized_hash['level']
       end
     end
 

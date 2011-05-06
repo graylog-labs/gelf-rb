@@ -7,7 +7,7 @@ module GELF
     end
 
     attr_accessor :host, :port, :enabled
-    attr_reader :max_chunk_size, :level, :default_options
+    attr_reader :max_chunk_size, :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
@@ -26,6 +26,7 @@ module GELF
       self.default_options['facility'] ||= 'gelf-rb'
 
       @sender = RubyUdpSender.new(host, port)
+      self.level_mapping = :logger
     end
 
     # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
@@ -51,6 +52,19 @@ module GELF
 
     def default_options=(options)
       @default_options = self.class.stringify_keys(options)
+    end
+
+    # +mapping+ may be a hash, 'logger' (GELF::LOGGER_MAPPING) or 'direct' (GELF::DIRECT_MAPPING).
+    # Default (compatible) value is 'logger'.
+    def level_mapping=(mapping)
+      case mapping.to_s.downcase
+        when 'logger'
+          @level_mapping = GELF::LOGGER_MAPPING
+        when 'direct'
+          @level_mapping = GELF::DIRECT_MAPPING
+        else
+          @level_mapping = mapping
+      end
     end
 
     def disable
@@ -186,7 +200,7 @@ module GELF
     def serialize_hash
       raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
 
-      @hash['level'] = GELF::LEVELS_MAPPING[@hash['level']]
+      @hash['level'] = @level_mapping[@hash['level']]
 
       Zlib::Deflate.deflate(@hash.to_json).bytes
     end

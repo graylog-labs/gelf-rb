@@ -7,7 +7,6 @@ rescue LoadError
 end
 
 begin
-  gem 'jeweler', '~> 1.5.2'
   require 'jeweler'
 
   Jeweler::Tasks.new do |gem|
@@ -53,7 +52,7 @@ rescue LoadError => e
 end
 
 begin
-  gem 'ruby_parser', '= 2.0.5'
+  gem 'ruby_parser', '~> 2.0.6'
   gem 'activesupport', '~> 3.0.0'
   gem 'metric_fu', '~> 2.1.1'
   require 'metric_fu'

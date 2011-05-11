@@ -3,19 +3,16 @@ require 'helper'
 RANDOM_DATA = ('A'..'Z').to_a
 
 class TestNotifier < Test::Unit::TestCase
-  should "allow access to host, port, max_chunk_size and default_options" do
+  should "allow access to host, port and default_options" do
     Socket.expects(:gethostname).returns('default_hostname')
     n = SyslogSD::Notifier.new
-    assert_equal ['localhost', 12201, 1420], [n.host, n.port, n.max_chunk_size]
+    assert_equal ['localhost', 12201], [n.host, n.port]
     assert_equal( { 'level' => SyslogSD::UNKNOWN,
                     'host' => 'default_hostname', 'facility' => 'syslog-sd' },
                   n.default_options )
-    n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {:host => 'grayhost'}
-    assert_equal ['graylog2.org', 7777, 8154], [n.host, n.port, n.max_chunk_size]
+    n.host, n.port, n.default_options = 'graylog2.org', 7777, {:host => 'grayhost'}
+    assert_equal ['graylog2.org', 7777], [n.host, n.port]
     assert_equal({'host' => 'grayhost'}, n.default_options)
-
-    n.max_chunk_size = 1337.1
-    assert_equal 1337, n.max_chunk_size
   end
 
   context "with notifier with mocked sender" do
@@ -143,23 +140,6 @@ class TestNotifier < Test::Unit::TestCase
         assert_equal 1, datagrams.count
         assert_instance_of String, datagrams[0]
         assert_equal "\x78\x9c", datagrams[0][0..1] # zlib header
-      end
-
-      should "split long data" do
-        srand(1) # for stable tests
-        hash = { 'version' => '1.0', 'short_message' => 'message' }
-        hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
-        @notifier.instance_variable_set('@hash', hash)
-        datagrams = @notifier.__send__(:datagrams_from_hash)
-        assert_equal 2, datagrams.count
-        datagrams.each_index do |i|
-          datagram = datagrams[i]
-          assert_instance_of String, datagram
-          assert datagram[0..1] == "\x1e\x0f" # chunked GELF magic number
-          # datagram[2..9] is a message id
-          assert_equal i, datagram[10].ord
-          assert_equal datagrams.count, datagram[11].ord
-        end
       end
     end
 

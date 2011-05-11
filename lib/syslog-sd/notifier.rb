@@ -1,23 +1,17 @@
 module SyslogSD
   # Graylog2 notifier.
   class Notifier
-    @last_chunk_id = 0
-    class << self
-      attr_accessor :last_chunk_id
-    end
-
     attr_accessor :host, :port, :enabled
-    attr_reader :max_chunk_size, :level, :default_options, :level_mapping
+    attr_reader :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
-    # +max_size+ is passed to max_chunk_size=.
     # +default_options+ is used in notify!
-    def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
+    def initialize(host = 'localhost', port = 12201, default_options = {})
       @enabled = true
 
       self.level = SyslogSD::DEBUG
 
-      self.host, self.port, self.max_chunk_size = host, port, max_size
+      self.host, self.port = host, port
 
       self.default_options = default_options
       self.default_options['host'] ||= Socket.gethostname
@@ -26,19 +20,6 @@ module SyslogSD
 
       @sender = RubyUdpSender.new(host, port)
       self.level_mapping = :logger
-    end
-
-    # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
-    # Default (safe) value is 'WAN'.
-    def max_chunk_size=(size)
-      case size.to_s.downcase
-        when 'wan'
-          @max_chunk_size = 1420
-        when 'lan'
-          @max_chunk_size = 8154
-        else
-          @max_chunk_size = size.to_int
-      end
     end
 
     def level=(new_level)
@@ -177,23 +158,7 @@ module SyslogSD
     end
 
     def datagrams_from_hash
-      data = serialize_hash
-      datagrams = []
-
-      # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
-      if data.count > @max_chunk_size
-        id = self.class.last_chunk_id += 1
-        msg_id = Digest::MD5.digest("#{Time.now.to_f}-#{id}")[0, 8]
-        num, count = 0, (data.count.to_f / @max_chunk_size).ceil
-        data.each_slice(@max_chunk_size) do |slice|
-          datagrams << "\x1e\x0f" + msg_id + [num, count, *slice].pack('C*')
-          num += 1
-        end
-      else
-        datagrams << data.to_a.pack('C*')
-      end
-
-      datagrams
+      [serialize_hash.to_a.pack('C*')]
     end
 
     def serialize_hash

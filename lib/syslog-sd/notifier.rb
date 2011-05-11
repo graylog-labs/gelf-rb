@@ -1,4 +1,4 @@
-module GELF
+module SyslogSD
   # Graylog2 notifier.
   class Notifier
     @last_chunk_id = 0
@@ -15,15 +15,14 @@ module GELF
     def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
       @enabled = true
 
-      self.level = GELF::DEBUG
+      self.level = SyslogSD::DEBUG
 
       self.host, self.port, self.max_chunk_size = host, port, max_size
 
       self.default_options = default_options
-      self.default_options['version'] = SPEC_VERSION
       self.default_options['host'] ||= Socket.gethostname
-      self.default_options['level'] ||= GELF::UNKNOWN
-      self.default_options['facility'] ||= 'gelf-rb'
+      self.default_options['level'] ||= SyslogSD::UNKNOWN
+      self.default_options['facility'] ||= 'syslog-sd'
 
       @sender = RubyUdpSender.new(host, port)
       self.level_mapping = :logger
@@ -46,7 +45,7 @@ module GELF
       @level = if new_level.is_a?(Fixnum)
                  new_level
                else
-                 GELF.const_get(new_level.to_s.upcase)
+                 SyslogSD.const_get(new_level.to_s.upcase)
                end
     end
 
@@ -54,14 +53,14 @@ module GELF
       @default_options = self.class.stringify_keys(options)
     end
 
-    # +mapping+ may be a hash, 'logger' (GELF::LOGGER_MAPPING) or 'direct' (GELF::DIRECT_MAPPING).
+    # +mapping+ may be a hash, 'logger' (SyslogSD::LOGGER_MAPPING) or 'direct' (SyslogSD::DIRECT_MAPPING).
     # Default (compatible) value is 'logger'.
     def level_mapping=(mapping)
       case mapping.to_s.downcase
         when 'logger'
-          @level_mapping = GELF::LOGGER_MAPPING
+          @level_mapping = SyslogSD::LOGGER_MAPPING
         when 'direct'
-          @level_mapping = GELF::DIRECT_MAPPING
+          @level_mapping = SyslogSD::DIRECT_MAPPING
         else
           @level_mapping = mapping
       end
@@ -95,10 +94,10 @@ module GELF
       notify_with_level!(nil, *args)
     end
 
-    GELF::Levels.constants.each do |const|
+    SyslogSD::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
         def #{const.downcase}(*args)                          # def debug(*args)
-          notify_with_level(GELF::#{const}, *args)            #   notify_with_level(GELF::DEBUG, *args)
+          notify_with_level(SyslogSD::#{const}, *args)        #   notify_with_level(SyslogSD::DEBUG, *args)
         end                                                   # end
       EOT
     end
@@ -107,7 +106,7 @@ module GELF
     def notify_with_level(message_level, *args)
       notify_with_level!(message_level, *args)
     rescue Exception => exception
-      notify_with_level!(GELF::UNKNOWN, exception)
+      notify_with_level!(SyslogSD::UNKNOWN, exception)
     end
 
     def notify_with_level!(message_level, *args)
@@ -123,10 +122,10 @@ module GELF
       primary_data = if object.respond_to?(:to_hash)
                        object.to_hash
                      elsif object.is_a?(Exception)
-                       args['level'] ||= GELF::ERROR
+                       args['level'] ||= SyslogSD::ERROR
                        self.class.extract_hash_from_exception(object)
                      else
-                       args['level'] ||= GELF::INFO
+                       args['level'] ||= SyslogSD::INFO
                        { 'short_message' => object.to_s }
                      end
 
@@ -153,13 +152,13 @@ module GELF
     end
 
     CALLER_REGEXP = /^(.*):(\d+).*/
-    LIB_GELF_PATTERN = File.join('lib', 'gelf')
+    LIB_PATTERN = File.join('lib', 'syslog-sd')
 
     def set_file_and_line
       stack = caller
       begin
         frame = stack.shift
-      end while frame.include?(LIB_GELF_PATTERN)
+      end while frame.include?(LIB_PATTERN)
       match = CALLER_REGEXP.match(frame)
       @hash['file'] = match[1]
       @hash['line'] = match[2].to_i
@@ -170,9 +169,9 @@ module GELF
     end
 
     def check_presence_of_mandatory_attributes
-      %w(version short_message host).each do |attribute|
+      %w(short_message host).each do |attribute|
         if @hash[attribute].to_s.empty?
-          raise ArgumentError.new("#{attribute} is missing. Options version, short_message and host must be set.")
+          raise ArgumentError.new("#{attribute} is missing. Options short_message and host must be set.")
         end
       end
     end

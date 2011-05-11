@@ -5,10 +5,10 @@ RANDOM_DATA = ('A'..'Z').to_a
 class TestNotifier < Test::Unit::TestCase
   should "allow access to host, port, max_chunk_size and default_options" do
     Socket.expects(:gethostname).returns('default_hostname')
-    n = GELF::Notifier.new
+    n = SyslogSD::Notifier.new
     assert_equal ['localhost', 12201, 1420], [n.host, n.port, n.max_chunk_size]
-    assert_equal( { 'version' => '1.0', 'level' => GELF::UNKNOWN,
-                    'host' => 'default_hostname', 'facility' => 'gelf-rb' },
+    assert_equal( { 'level' => SyslogSD::UNKNOWN,
+                    'host' => 'default_hostname', 'facility' => 'syslog-sd' },
                   n.default_options )
     n.host, n.port, n.max_chunk_size, n.default_options = 'graylog2.org', 7777, :lan, {:host => 'grayhost'}
     assert_equal ['graylog2.org', 7777, 8154], [n.host, n.port, n.max_chunk_size]
@@ -21,7 +21,7 @@ class TestNotifier < Test::Unit::TestCase
   context "with notifier with mocked sender" do
     setup do
       Socket.stubs(:gethostname).returns('stubbed_hostname')
-      @notifier = GELF::Notifier.new('host', 12345)
+      @notifier = SyslogSD::Notifier.new('host', 12345)
       @sender = mock
       @notifier.instance_variable_set('@sender', @sender)
     end
@@ -52,7 +52,7 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, e)
         assert_equal 'RuntimeError: message', hash['short_message']
         assert_match /Backtrace/, hash['full_message']
-        assert_equal GELF::ERROR, hash['level']
+        assert_equal SyslogSD::ERROR, hash['level']
       end
 
       should "work with exception without backtrace" do
@@ -62,23 +62,23 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "work with exception and hash" do
-        e, h = RuntimeError.new('message'), {'param' => 1, 'level' => GELF::FATAL, 'short_message' => 'will be hidden by exception'}
+        e, h = RuntimeError.new('message'), {'param' => 1, 'level' => SyslogSD::FATAL, 'short_message' => 'will be hidden by exception'}
         hash = @notifier.__send__(:extract_hash, e, h)
         assert_equal 'RuntimeError: message', hash['short_message']
-        assert_equal GELF::FATAL, hash['level']
+        assert_equal SyslogSD::FATAL, hash['level']
         assert_equal 1, hash['param']
       end
 
       should "work with plain text" do
         hash = @notifier.__send__(:extract_hash, 'message')
         assert_equal 'message', hash['short_message']
-        assert_equal GELF::INFO, hash['level']
+        assert_equal SyslogSD::INFO, hash['level']
       end
 
       should "work with plain text and hash" do
-        hash = @notifier.__send__(:extract_hash, 'message', 'level' => GELF::WARN)
+        hash = @notifier.__send__(:extract_hash, 'message', 'level' => SyslogSD::WARN)
         assert_equal 'message', hash['short_message']
-        assert_equal GELF::WARN, hash['level']
+        assert_equal SyslogSD::WARN, hash['level']
       end
 
       should "covert hash keys to strings" do
@@ -122,7 +122,7 @@ class TestNotifier < Test::Unit::TestCase
     context "serialize_hash" do
       setup do
         @notifier.level_mapping = :direct
-        @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value' })
+        @notifier.instance_variable_set('@hash', { 'level' => SyslogSD::WARN, 'field' => 'value' })
         @data = @notifier.__send__(:serialize_hash)
         assert @data.respond_to?(:each)
         @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data.to_a.pack('C*')))
@@ -130,9 +130,9 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "map level using mapping" do
-        assert_not_equal GELF::WARN, @deserialized_hash['level']
-        assert_not_equal GELF::LOGGER_MAPPING[GELF::WARN], @deserialized_hash['level']
-        assert_equal GELF::DIRECT_MAPPING[GELF::WARN], @deserialized_hash['level']
+        assert_not_equal SyslogSD::WARN, @deserialized_hash['level']
+        assert_not_equal SyslogSD::LOGGER_MAPPING[SyslogSD::WARN], @deserialized_hash['level']
+        assert_equal SyslogSD::DIRECT_MAPPING[SyslogSD::WARN], @deserialized_hash['level']
       end
     end
 
@@ -165,25 +165,25 @@ class TestNotifier < Test::Unit::TestCase
 
     context "level threshold" do
       setup do
-        @notifier.level = GELF::WARN
+        @notifier.level = SyslogSD::WARN
         @hash = { 'version' => '1.0', 'short_message' => 'message' }
       end
 
       ['debug', 'DEBUG', :debug].each do |l|
         should "allow to set threshold as #{l.inspect}" do
           @notifier.level = l
-          assert_equal GELF::DEBUG, @notifier.level
+          assert_equal SyslogSD::DEBUG, @notifier.level
         end
       end
 
       should "not send notifications with level below threshold" do
         @sender.expects(:send_datagrams).never
-        @notifier.notify!(@hash.merge('level' => GELF::DEBUG))
+        @notifier.notify!(@hash.merge('level' => SyslogSD::DEBUG))
       end
 
       should "not notifications with level equal or above threshold" do
         @sender.expects(:send_datagrams).once
-        @notifier.notify!(@hash.merge('level' => GELF::WARN))
+        @notifier.notify!(@hash.merge('level' => SyslogSD::WARN))
       end
     end
 
@@ -217,9 +217,9 @@ class TestNotifier < Test::Unit::TestCase
       @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
     end
 
-    GELF::Levels.constants.each do |const|
+    SyslogSD::Levels.constants.each do |const|
       should "call notify with level #{const} from method name" do
-        @notifier.expects(:notify_with_level).with(GELF.const_get(const), { 'version' => '1.0', 'short_message' => 'message' })
+        @notifier.expects(:notify_with_level).with(SyslogSD.const_get(const), { 'version' => '1.0', 'short_message' => 'message' })
         @notifier.__send__(const.downcase, { 'version' => '1.0', 'short_message' => 'message' })
       end
     end
@@ -230,7 +230,7 @@ class TestNotifier < Test::Unit::TestCase
 
     should "rescue from invalid invocation of #notify" do
       @notifier.expects(:notify_with_level!).with(nil, instance_of(Hash)).raises(ArgumentError)
-      @notifier.expects(:notify_with_level!).with(GELF::UNKNOWN, instance_of(ArgumentError))
+      @notifier.expects(:notify_with_level!).with(SyslogSD::UNKNOWN, instance_of(ArgumentError))
       assert_nothing_raised { @notifier.notify(:no_short_message => 'too bad') }
     end
   end

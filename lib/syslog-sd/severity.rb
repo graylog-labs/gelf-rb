@@ -1,4 +1,4 @@
-module GELF
+module SyslogSD
   # There are two things you should know about log levels/severity:
   #  - syslog defines levels from 0 (Emergency) to 7 (Debug).
   #    0 (Emergency) and 1 (Alert) levels are reserved for OS kernel.

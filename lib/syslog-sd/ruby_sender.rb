@@ -1,4 +1,4 @@
-module GELF
+module SyslogSD
   # Plain Ruby UDP sender.
   class RubyUdpSender
     def initialize(host, port)

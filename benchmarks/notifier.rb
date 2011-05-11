@@ -6,7 +6,7 @@ require 'benchmark'
 require 'rubygems'
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-require 'gelf'
+require 'syslog-sd'
 
 puts "Generating random data..."
 srand(1)
@@ -18,12 +18,12 @@ TARGET_PORT = 12201
 DEFAULT_OPTIONS = { '_host' => 'localhost' }
 TIMES = 5000
 
-SHORT_HASH = { '_short_message' => 'message' }
-LONG_HASH  = { '_short_message' => 'message', '_long_message' => k3_message }
+SHORT_HASH = { 'short_message' => 'message' }
+LONG_HASH  = { 'short_message' => 'message', 'long_message' => k3_message }
 
 
-notifier_lan = GELF::Notifier.new(TARGET_HOST, TARGET_PORT, 'LAN', DEFAULT_OPTIONS)
-notifier_wan = GELF::Notifier.new(TARGET_HOST, TARGET_PORT, 'WAN', DEFAULT_OPTIONS)
+notifier_lan = SyslogSD::Notifier.new(TARGET_HOST, TARGET_PORT, 'LAN', DEFAULT_OPTIONS)
+notifier_wan = SyslogSD::Notifier.new(TARGET_HOST, TARGET_PORT, 'WAN', DEFAULT_OPTIONS)
 
 # to create mongo collections, etc.
 notifier_lan.notify!(LONG_HASH)

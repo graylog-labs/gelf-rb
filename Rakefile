@@ -10,7 +10,7 @@ begin
   require 'jeweler'
 
   Jeweler::Tasks.new do |gem|
-    gem.name = "gelf"
+    gem.name = "syslog-sd"
     gem.summary = 'Library to send GELF messages to Graylog2 logging server.'
     gem.description = 'Library to send GELF messages to Graylog2 logging server. Supports plain-text, GELF messages and exceptions.'
     gem.email = "alexey.palazhchenko@gmail.com"

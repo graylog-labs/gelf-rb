@@ -1,4 +1,4 @@
-module GELF
+module SyslogSD
   # Methods for compatibility with Ruby Logger.
   module LoggerCompatibility
     # Does nothing.
@@ -26,27 +26,27 @@ module GELF
     end
 
     # Redefines methods in +Notifier+.
-    GELF::Levels.constants.each do |const|
+    SyslogSD::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
         def #{const.downcase}(*args)                  # def debug(*args)
           args.unshift(yield) if block_given?         #   args.unshift(yield) if block_given?
-          add(GELF::#{const}, *args)                  #   add(GELF::DEBUG, *args)
+          add(SyslogSD::#{const}, *args)              #   add(SyslogSD::DEBUG, *args)
         end                                           # end
 
         def #{const.downcase}?                        # def debug?
-          GELF::#{const} >= level                     #   GELF::DEBUG >= level
+          SyslogSD::#{const} >= level                 #   SyslogSD::DEBUG >= level
         end                                           # end
       EOT
     end
 
     def <<(message)
-      notify_with_level(GELF::UNKNOWN, 'short_message' => message)
+      notify_with_level(SyslogSD::UNKNOWN, 'short_message' => message)
     end
   end
 
   # Graylog2 notifier, compatible with Ruby Logger.
   # You can use it with Rails like this:
-  #     config.logger = GELF::Logger.new("localhost", 12201, "WAN", { :facility => "appname" })
+  #     config.logger = SyslogSD::Logger.new("localhost", 12201, "WAN", { :facility => "appname" })
   #     config.colorize_logging = false
   class Logger < Notifier
     include LoggerCompatibility

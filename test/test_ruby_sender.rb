@@ -4,7 +4,7 @@ class TestRubyUdpSender < Test::Unit::TestCase
   context "with ruby sender" do
     setup do
       @host, @port = 'localhost', 12201
-      @sender = GELF::RubyUdpSender.new('localhost', 12201)
+      @sender = SyslogSD::RubyUdpSender.new('localhost', 12201)
       @datagrams = %w(d1 d2 d3)
     end
 

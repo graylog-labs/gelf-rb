@@ -19,7 +19,7 @@ class TestLogger < Test::Unit::TestCase
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == SyslogSD::INFO &&
           hash['short_message'] == 'Message' &&
-          hash['facility'] == 'syslog-sd'
+          hash['facility'] == 'syslog-sd-rb'
         end
         @logger.add(SyslogSD::INFO, 'Message')
       end
@@ -30,7 +30,7 @@ class TestLogger < Test::Unit::TestCase
           level == SyslogSD::INFO &&
           hash['short_message'] == 'RuntimeError: Boom!' &&
           hash['full_message'] =~ /^Backtrace/ &&
-          hash['facility'] == 'syslog-sd'
+          hash['facility'] == 'syslog-sd-rb'
         end
         @logger.add(SyslogSD::INFO, RuntimeError.new('Boom!'))
       end
@@ -40,7 +40,7 @@ class TestLogger < Test::Unit::TestCase
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == SyslogSD::INFO &&
           hash['short_message'] == 'Message' &&
-          hash['facility'] == 'syslog-sd'
+          hash['facility'] == 'syslog-sd-rb'
         end
         @logger.add(SyslogSD::INFO) { 'Message' }
       end
@@ -51,7 +51,7 @@ class TestLogger < Test::Unit::TestCase
           level == SyslogSD::INFO &&
           hash['short_message'] == 'RuntimeError: Boom!' &&
           hash['full_message'] =~ /^Backtrace/ &&
-          hash['facility'] == 'syslog-sd'
+          hash['facility'] == 'syslog-sd-rb'
         end
         @logger.add(SyslogSD::INFO) { RuntimeError.new('Boom!') }
       end

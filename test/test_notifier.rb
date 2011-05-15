@@ -8,7 +8,7 @@ class TestNotifier < Test::Unit::TestCase
     n = SyslogSD::Notifier.new
     assert_equal ['localhost', 514], [n.host, n.port]
     assert_equal( { 'level' => SyslogSD::UNKNOWN,
-                    'host' => 'default_hostname', 'facility' => 'syslog-sd' },
+                    'host' => 'default_hostname', 'facility' => 'syslog-sd-rb' },
                   n.default_options )
     n.host, n.port, n.default_options = 'graylog2.org', 7777, {:host => 'grayhost'}
     assert_equal ['graylog2.org', 7777], [n.host, n.port]

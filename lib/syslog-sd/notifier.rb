@@ -16,7 +16,7 @@ module SyslogSD
       self.default_options = default_options
       self.default_options['host'] ||= Socket.gethostname
       self.default_options['level'] ||= SyslogSD::UNKNOWN
-      self.default_options['facility'] ||= 'syslog-sd'
+      self.default_options['facility'] ||= 'syslog-sd-rb'
 
       @sender = RubyUdpSender.new(host, port)
       self.level_mapping = :logger

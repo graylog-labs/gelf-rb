@@ -121,8 +121,7 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.level_mapping = :direct
         @notifier.instance_variable_set('@hash', { 'level' => SyslogSD::WARN, 'field' => 'value' })
         @data = @notifier.__send__(:serialize_hash)
-        assert @data.respond_to?(:each)
-        @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data.to_a.pack('C*')))
+        @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data))
         assert_instance_of Hash, @deserialized_hash
       end
 
@@ -130,16 +129,6 @@ class TestNotifier < Test::Unit::TestCase
         assert_not_equal SyslogSD::WARN, @deserialized_hash['level']
         assert_not_equal SyslogSD::LOGGER_MAPPING[SyslogSD::WARN], @deserialized_hash['level']
         assert_equal SyslogSD::DIRECT_MAPPING[SyslogSD::WARN], @deserialized_hash['level']
-      end
-    end
-
-    context "datagrams_from_hash" do
-      should "not split short data" do
-        @notifier.instance_variable_set('@hash', { 'version' => '1.0', 'short_message' => 'message' })
-        datagrams = @notifier.__send__(:datagrams_from_hash)
-        assert_equal 1, datagrams.count
-        assert_instance_of String, datagrams[0]
-        assert_equal "\x78\x9c", datagrams[0][0..1] # zlib header
       end
     end
 
@@ -157,12 +146,12 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "not send notifications with level below threshold" do
-        @sender.expects(:send_datagrams).never
+        @sender.expects(:send_datagram).never
         @notifier.notify!(@hash.merge('level' => SyslogSD::DEBUG))
       end
 
       should "not notifications with level equal or above threshold" do
-        @sender.expects(:send_datagrams).once
+        @sender.expects(:send_datagram).once
         @notifier.notify!(@hash.merge('level' => SyslogSD::WARN))
       end
     end
@@ -172,8 +161,8 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.disable
       end
 
-      should "not send datagrams" do
-        @sender.expects(:send_datagrams).never
+      should "not send datagram" do
+        @sender.expects(:send_datagram).never
         @notifier.expects(:extract_hash).never
         @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
       end
@@ -183,16 +172,16 @@ class TestNotifier < Test::Unit::TestCase
           @notifier.enable
         end
 
-        should "send datagrams" do
-          @sender.expects(:send_datagrams)
+        should "send datagram" do
+          @sender.expects(:send_datagram)
           @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
         end
       end
     end
 
     should "pass valid data to sender" do
-      @sender.expects(:send_datagrams).with do |datagrams|
-        datagrams.is_a?(Array) && datagrams[0].is_a?(String)
+      @sender.expects(:send_datagram).with do |datagram|
+        datagram.is_a?(String)
       end
       @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
     end

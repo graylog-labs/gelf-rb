@@ -6,10 +6,8 @@ module SyslogSD
       @socket = UDPSocket.open
     end
 
-    def send_datagrams(datagrams)
-      datagrams.each do |datagram|
-        @socket.send(datagram, 0, @host, @port)
-      end
+    def send_datagram(datagram)
+      @socket.send(datagram, 0, @host, @port)
     end
   end
 end

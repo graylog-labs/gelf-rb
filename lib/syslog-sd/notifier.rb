@@ -95,7 +95,7 @@ module SyslogSD
       extract_hash(*args)
       @hash['level'] = message_level unless message_level.nil?
       if @hash['level'] >= level
-        @sender.send_datagrams(datagrams_from_hash)
+        @sender.send_datagram(serialize_hash)
       end
     end
 
@@ -157,16 +157,12 @@ module SyslogSD
       end
     end
 
-    def datagrams_from_hash
-      [serialize_hash.to_a.pack('C*')]
-    end
-
     def serialize_hash
       raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
 
       @hash['level'] = @level_mapping[@hash['level']]
 
-      Zlib::Deflate.deflate(@hash.to_json).bytes
+      Zlib::Deflate.deflate(@hash.to_json).bytes.to_a.pack('C*')
     end
 
     def self.stringify_keys(hash)

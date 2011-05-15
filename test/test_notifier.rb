@@ -121,7 +121,7 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.level_mapping = :direct
         @notifier.instance_variable_set('@hash', { 'level' => SyslogSD::WARN, 'field' => 'value' })
         @data = @notifier.__send__(:serialize_hash)
-        @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data))
+        @deserialized_hash = eval(@data)
         assert_instance_of Hash, @deserialized_hash
       end
 

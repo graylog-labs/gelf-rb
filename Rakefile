@@ -16,7 +16,6 @@ begin
     gem.email = "alexey.palazhchenko@gmail.com"
     gem.homepage = "http://github.com/Graylog2/gelf-rb"
     gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
-    gem.add_dependency "json"
     gem.add_development_dependency "shoulda"
     gem.add_development_dependency "mocha"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings

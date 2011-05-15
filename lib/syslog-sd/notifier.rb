@@ -162,7 +162,7 @@ module SyslogSD
 
       @hash['level'] = @level_mapping[@hash['level']]
 
-      Zlib::Deflate.deflate(@hash.to_json).bytes.to_a.pack('C*')
+      @hash.inspect
     end
 
     def self.stringify_keys(hash)

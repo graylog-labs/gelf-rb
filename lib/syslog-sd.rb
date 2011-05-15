@@ -1,6 +1,4 @@
-require 'json'
 require 'socket'
-require 'zlib'
 require 'digest/md5'
 
 require 'syslog-sd/severity'

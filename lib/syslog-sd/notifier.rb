@@ -1,12 +1,12 @@
 module SyslogSD
-  # Graylog2 notifier.
+  # syslog notifier.
   class Notifier
     attr_accessor :host, :port, :enabled
     attr_reader :level, :default_options, :level_mapping
 
-    # +host+ and +port+ are host/ip and port of graylog2-server.
+    # +host+ and +port+ are host/ip and port of syslog server.
     # +default_options+ is used in notify!
-    def initialize(host = 'localhost', port = 12201, default_options = {})
+    def initialize(host = 'localhost', port = 514, default_options = {})
       @enabled = true
 
       self.level = SyslogSD::DEBUG

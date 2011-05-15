@@ -6,7 +6,7 @@ class TestNotifier < Test::Unit::TestCase
   should "allow access to host, port and default_options" do
     Socket.expects(:gethostname).returns('default_hostname')
     n = SyslogSD::Notifier.new
-    assert_equal ['localhost', 12201], [n.host, n.port]
+    assert_equal ['localhost', 514], [n.host, n.port]
     assert_equal( { 'level' => SyslogSD::UNKNOWN,
                     'host' => 'default_hostname', 'facility' => 'syslog-sd' },
                   n.default_options )

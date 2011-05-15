@@ -22,18 +22,15 @@ SHORT_HASH = { 'short_message' => 'message' }
 LONG_HASH  = { 'short_message' => 'message', 'long_message' => k3_message }
 
 
-notifier_lan = SyslogSD::Notifier.new(TARGET_HOST, TARGET_PORT, 'LAN', DEFAULT_OPTIONS)
-notifier_wan = SyslogSD::Notifier.new(TARGET_HOST, TARGET_PORT, 'WAN', DEFAULT_OPTIONS)
+notifier = SyslogSD::Notifier.new(TARGET_HOST, TARGET_PORT, DEFAULT_OPTIONS)
 
 # to create mongo collections, etc.
-notifier_lan.notify!(LONG_HASH)
+notifier.notify!(LONG_HASH)
 sleep(5)
 
 puts "Sending #{TIMES} notifications...\n"
 tms = Benchmark.bm(25) do |b|
-  b.report('lan, short data, 1 chunk ') { TIMES.times { notifier_lan.notify!(SHORT_HASH) } }
+  b.report('short data') { TIMES.times { notifier.notify!(SHORT_HASH) } }
   sleep(5)
-  b.report('lan,  long data, 1 chunk ') { TIMES.times { notifier_lan.notify!(LONG_HASH) } }
-  sleep(5)
-  b.report('wan,  long data, 2 chunks') { TIMES.times { notifier_wan.notify!(LONG_HASH) } }
+  b.report('long data ') { TIMES.times { notifier.notify!(LONG_HASH) } }
 end

@@ -5,7 +5,7 @@ module SyslogSD
   #  - Ruby default Logger defines levels from 0 (DEBUG) to 4 (FATAL) and 5 (UNKNOWN).
   #    Note that order is inverted.
   # For compatibility we define our constants as Ruby Logger, and convert values before
-  # generating GELF message, using defined mapping.
+  # generating syslog message, using defined mapping.
 
   module Levels
     DEBUG   = 0

@@ -19,6 +19,7 @@
    + GELF::Logger#close
    + GELF::Logger#level = GELF::INFO
  + allow to change severity mapping;
+ + send messages to receivers in round-robin;
  - deprecated Gelf class removed.
 
 1.0.2, 2010-11-29:

@@ -25,8 +25,18 @@ module GELF
       self.default_options['level'] ||= GELF::UNKNOWN
       self.default_options['facility'] ||= 'gelf-rb'
 
-      @sender = RubyUdpSender.new(host, port)
+      @sender = RubyUdpSender.new([[host, port]])
       self.level_mapping = :logger
+    end
+
+    # proxy addresses getter to sender
+    def addresses
+      @sender.addresses
+    end
+
+    # proxy addresses setter to sender
+    def addresses=(addrs)
+      @sender.addresses = addrs
     end
 
     # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).

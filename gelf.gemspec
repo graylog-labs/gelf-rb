@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Alexey Palazhchenko}, %q{Lennart Koopmann}]
-  s.date = %q{2011-05-06}
+  s.date = %q{2011-05-16}
   s.description = %q{Library to send GELF messages to Graylog2 logging server. Supports plain-text, GELF messages and exceptions.}
   s.email = %q{alexey.palazhchenko@gmail.com}
   s.extra_rdoc_files = [
@@ -25,7 +25,6 @@ Gem::Specification.new do |s|
     "benchmarks/notifier.rb",
     "gelf.gemspec",
     "lib/gelf.rb",
-    "lib/gelf/em_sender.rb",
     "lib/gelf/logger.rb",
     "lib/gelf/notifier.rb",
     "lib/gelf/ruby_sender.rb",
@@ -38,7 +37,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = %q{http://github.com/Graylog2/gelf-rb}
   s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.1}
+  s.rubygems_version = %q{1.8.2}
   s.summary = %q{Library to send GELF messages to Graylog2 logging server.}
 
   if s.respond_to? :specification_version then

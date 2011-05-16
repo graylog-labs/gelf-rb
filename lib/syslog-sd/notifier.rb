@@ -19,8 +19,18 @@ module SyslogSD
       self.default_options['facility'] ||= 'syslog-sd-rb'
       self.default_options['procid'] ||= Process.pid
 
-      @sender = RubyUdpSender.new(host, port)
+      @sender = RubyUdpSender.new([[host, port]])
       self.level_mapping = :logger
+    end
+
+    # proxy addresses getter to sender
+    def addresses
+      @sender.addresses
+    end
+
+    # proxy addresses setter to sender
+    def addresses=(addrs)
+      @sender.addresses = addrs
     end
 
     def level=(new_level)

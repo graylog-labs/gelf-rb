@@ -113,7 +113,6 @@ module SyslogSD
       @hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
       convert_hoptoad_keys_to_graylog2
       set_file_and_line
-      set_timestamp
       check_presence_of_mandatory_attributes
       @hash
     end
@@ -145,10 +144,6 @@ module SyslogSD
       @hash['line'] = match[2].to_i
     end
 
-    def set_timestamp
-      @hash['timestamp'] = Time.now.utc.to_f
-    end
-
     def check_presence_of_mandatory_attributes
       %w(short_message host).each do |attribute|
         if @hash[attribute].to_s.empty?
@@ -162,7 +157,10 @@ module SyslogSD
 
       @hash['level'] = @level_mapping[@hash['level']]
 
-      @hash.inspect
+      prival = 128 + @hash['level'] # 128 = 16(local0) * 8
+      t = Time.now.utc
+      timestamp = t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec.to_s[0,3]}Z")
+      "<#{prival}>1 #{timestamp} #{@hash['host']} - - - - #{@hash['short_message']}"
     end
 
     def self.stringify_keys(hash)

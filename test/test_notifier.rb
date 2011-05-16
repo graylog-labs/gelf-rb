@@ -107,28 +107,27 @@ class TestNotifier < Test::Unit::TestCase
         assert_match /test_notifier.rb/, hash['file']
         assert_equal line + 1, hash['line']
       end
-
-      should "set timestamp" do
-        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
-        assert_instance_of Float, hash['timestamp']
-        now = Time.now.utc.to_i
-        assert ((now - 1)..(now + 1)).include?(hash['timestamp'])
-      end
     end
 
     context "serialize_hash" do
       setup do
         @notifier.level_mapping = :direct
-        @notifier.instance_variable_set('@hash', { 'level' => SyslogSD::WARN, 'field' => 'value' })
-        @data = @notifier.__send__(:serialize_hash)
-        @deserialized_hash = eval(@data)
-        assert_instance_of Hash, @deserialized_hash
+        Timecop.freeze(Time.utc(2010, 5, 16, 12, 13, 14))
       end
 
-      should "map level using mapping" do
-        assert_not_equal SyslogSD::WARN, @deserialized_hash['level']
-        assert_not_equal SyslogSD::LOGGER_MAPPING[SyslogSD::WARN], @deserialized_hash['level']
-        assert_equal SyslogSD::DIRECT_MAPPING[SyslogSD::WARN], @deserialized_hash['level']
+      expected = {
+        {'short_message' => 'message', 'level' => SyslogSD::WARN} => '<132>1 2010-05-16T12:13:14.0Z  - - - - message'
+      }
+
+      expected.each_pair do |key, value|
+        should "be as #{value}" do
+          @notifier.instance_variable_set('@hash', key)
+          assert_equal value, @notifier.__send__(:serialize_hash)
+        end
+      end
+
+      teardown do
+        Timecop.return
       end
     end
 

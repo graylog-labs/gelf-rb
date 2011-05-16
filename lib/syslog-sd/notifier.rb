@@ -17,6 +17,7 @@ module SyslogSD
       self.default_options['host'] ||= Socket.gethostname
       self.default_options['level'] ||= SyslogSD::UNKNOWN
       self.default_options['facility'] ||= 'syslog-sd-rb'
+      self.default_options['procid'] ||= Process.pid
 
       @sender = RubyUdpSender.new(host, port)
       self.level_mapping = :logger
@@ -160,7 +161,10 @@ module SyslogSD
       prival = 128 + @hash['level'] # 128 = 16(local0) * 8
       t = Time.now.utc
       timestamp = t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec.to_s[0,3]}Z")
-      "<#{prival}>1 #{timestamp} #{@hash['host']} - - - - #{@hash['short_message']}"
+      msgid = @hash['msgid'] || '-'
+      sd = '-'
+      "<#{prival}>1 #{timestamp} #{@hash['host']} #{@hash['facility']} #{@hash['procid']} #{msgid} " +
+        "#{sd} #{@hash['short_message']}"
     end
 
     def self.stringify_keys(hash)

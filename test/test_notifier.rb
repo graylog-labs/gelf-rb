@@ -8,7 +8,8 @@ class TestNotifier < Test::Unit::TestCase
     n = SyslogSD::Notifier.new
     assert_equal ['localhost', 514], [n.host, n.port]
     assert_equal( { 'level' => SyslogSD::UNKNOWN,
-                    'host' => 'default_hostname', 'facility' => 'syslog-sd-rb' },
+                    'host' => 'default_hostname', 'facility' => 'syslog-sd-rb',
+                    'procid' => Process.pid },
                   n.default_options )
     n.host, n.port, n.default_options = 'graylog2.org', 7777, {:host => 'grayhost'}
     assert_equal ['graylog2.org', 7777], [n.host, n.port]
@@ -116,7 +117,9 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       expected = {
-        {'short_message' => 'message', 'level' => SyslogSD::WARN} => '<132>1 2010-05-16T12:13:14.0Z  - - - - message'
+        {'short_message' => 'message', 'level' => SyslogSD::WARN,
+         'host' => 'host', 'facility' => 'facility', 'procid' => 123,
+         'msgid' => 'msgid'} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid - message'
       }
 
       expected.each_pair do |key, value|

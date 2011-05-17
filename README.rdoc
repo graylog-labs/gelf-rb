@@ -1,6 +1,6 @@
 = syslog-sd
 
-Super-Duper library to send syslog messages to logging server such as Graylog2 (http://graylog2.org).
+Super-Duper library to send syslog messages over UDP to logging server such as Graylog2 (http://graylog2.org).
 Supports Structured Data elements as defined by RFC 5424.
 
 Based on GELF gem (https://github.com/graylog2/gelf-rb).

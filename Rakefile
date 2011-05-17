@@ -11,8 +11,8 @@ begin
 
   Jeweler::Tasks.new do |gem|
     gem.name = "syslog-sd"
-    gem.summary = 'Library to send syslog messages to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424.'
-    gem.description = 'Super-Duper library to send syslog messages to logging server such as Graylog2. ' +
+    gem.summary = 'Library to send syslog messages over UDP to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424.'
+    gem.description = 'Super-Duper library to send syslog messages over UDP to logging server such as Graylog2. ' +
                       'Supports Structured Data elements as defined by RFC 5424.'
     gem.email = "alexey.palazhchenko@gmail.com"
     gem.homepage = "http://github.com/AlekSi/syslog-sd-rb"

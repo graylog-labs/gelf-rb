@@ -1,13 +1,14 @@
 module SyslogSD
   # syslog notifier.
   class Notifier
-    attr_accessor  :enabled
+    attr_accessor :enabled, :collect_file_and_line
     attr_reader :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of syslog server.
     # +default_options+ is used in notify!
     def initialize(host = 'localhost', port = 514, default_options = {})
       @enabled = true
+      @collect_file_and_line = true
       @sd_id = "_@37797"
 
       self.level = SyslogSD::DEBUG
@@ -134,7 +135,7 @@ module SyslogSD
 
       @hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
       convert_hoptoad_keys_to_graylog2
-      set_file_and_line
+      set_file_and_line if @collect_file_and_line
       check_presence_of_mandatory_attributes
       @hash
     end

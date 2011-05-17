@@ -1,2 +1,5 @@
+1.2.1, 2010-05-17:
+ * Minor metadata update. Moved to http://github.com/Graylog2/syslog-sd-rb
+
 1.2.0, 2010-05-17:
  + Initial version, based on master branch of `gelf` gem.

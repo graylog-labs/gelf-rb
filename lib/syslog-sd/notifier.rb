@@ -118,7 +118,9 @@ module SyslogSD
       extract_hash(*args)
       @hash['level'] = message_level unless message_level.nil?
       if @hash['level'] >= level
-        @sender.send_datagram(serialize_hash)
+        str = serialize_hash
+        @sender.send_datagram(str)
+        str
       end
     end
 

@@ -1,8 +1,9 @@
-= GELF
+= syslog-sd
 
-This is the new GELF gem written by Alexey Palazhchenko. It is based on the old gem by Lennart Koopmann and allows you to send GELF
-messages to Graylog2 server instances. See http://www.graylog2.org/about/gelf for more information about GELF and
-http://www.graylog2.org/documentation/libraries for usage examples.
+Super-Duper library to send syslog messages to logging server such as Graylog2 (http://graylog2.org).
+Supports Structured Data elements as defined by RFC 5424.
+
+Based on GELF gem (https://github.com/graylog2/gelf-rb).
 
 Works with Ruby 1.8.7 and 1.9.2. 1.8.6 is not supported.
 
@@ -17,4 +18,4 @@ Works with Ruby 1.8.7 and 1.9.2. 1.8.6 is not supported.
 
 == Copyright
 
-Copyright (c) 2010 Lennart Koopmann and Alexey Palazhchenko. See LICENSE for details.
+Copyright (c) 2010-2011 Lennart Koopmann and Alexey Palazhchenko. See LICENSE for details.

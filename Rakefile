@@ -11,10 +11,11 @@ begin
 
   Jeweler::Tasks.new do |gem|
     gem.name = "syslog-sd"
-    gem.summary = 'Library to send GELF messages to Graylog2 logging server.'
-    gem.description = 'Library to send GELF messages to Graylog2 logging server. Supports plain-text, GELF messages and exceptions.'
+    gem.summary = 'Library to send syslog messages to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424.'
+    gem.description = 'Super-Duper library to send syslog messages to logging server such as Graylog2. ' +
+                      'Supports Structured Data elements as defined by RFC 5424.'
     gem.email = "alexey.palazhchenko@gmail.com"
-    gem.homepage = "http://github.com/Graylog2/gelf-rb"
+    gem.homepage = "http://github.com/AlekSi/syslog-sd-rb"
     gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
     gem.add_development_dependency "shoulda"
     gem.add_development_dependency "mocha"
@@ -91,7 +92,7 @@ Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "gelf #{version}"
+  rdoc.title = "syslog-sd #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

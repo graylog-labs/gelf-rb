@@ -36,12 +36,12 @@ module SyslogSD
     end
 
     def host
-      warn "GELF::Notifier#host is deprecated. Use #addresses instead."
+      warn "SyslogSD::Notifier#host is deprecated. Use #addresses instead."
       self.addresses.first[0]
     end
 
     def port
-      warn "GELF::Notifier#port is deprecated. Use #addresses instead."
+      warn "SyslogSD::Notifier#port is deprecated. Use #addresses instead."
       self.addresses.first[1]
     end
 

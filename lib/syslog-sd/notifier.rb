@@ -8,6 +8,7 @@ module SyslogSD
     # +default_options+ is used in notify!
     def initialize(host = 'localhost', port = 514, default_options = {})
       @enabled = true
+      @sd_id = "_@37797"
 
       self.level = SyslogSD::DEBUG
 
@@ -178,13 +179,26 @@ module SyslogSD
 
       @hash['level'] = @level_mapping[@hash['level']]
 
-      prival = 128 + @hash['level'] # 128 = 16(local0) * 8
+      prival = 128 + @hash.delete('level') # 128 = 16(local0) * 8
       t = Time.now.utc
       timestamp = t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec.to_s[0,3]}Z")
-      msgid = @hash['msgid'] || '-'
-      sd = '-'
-      "<#{prival}>1 #{timestamp} #{@hash['host']} #{@hash['facility']} #{@hash['procid']} #{msgid} " +
-        "#{sd} #{@hash['short_message']}"
+      host = @hash.delete('host')
+      facility = @hash.delete('facility') || '-'
+      procid = @hash.delete('procid')
+      msgid = @hash.delete('msgid') || '-'
+      short_message = @hash.delete('short_message')
+      "<#{prival}>1 #{timestamp} #{host} #{facility} #{procid} #{msgid} #{serialize_sd} #{short_message}"
+    end
+
+    def serialize_sd
+      return '-' if @hash.empty?
+
+      res = "@sd_id"
+      @hash.each_pair do |key, value|
+        value = value.to_s.gsub(/([\\\]\"])/) { "\\#{$1}" }
+        res += " #{key}=\"#{value}\""
+      end
+      '[' + res + ']'
     end
 
     def self.stringify_keys(hash)

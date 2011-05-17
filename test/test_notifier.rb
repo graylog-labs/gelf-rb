@@ -119,7 +119,13 @@ class TestNotifier < Test::Unit::TestCase
       expected = {
         {'short_message' => 'message', 'level' => SyslogSD::WARN,
          'host' => 'host', 'facility' => 'facility', 'procid' => 123,
-         'msgid' => 'msgid'} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid - message'
+         'msgid' => 'msgid'} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid - message',
+        {'short_message' => 'message', 'level' => SyslogSD::WARN,
+         'host' => 'host', 'facility' => 'facility', 'procid' => 123,
+         'msgid' => 'msgid', 'user_id' => 123} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid [@sd_id user_id="123"] message',
+        {'short_message' => 'message', 'level' => SyslogSD::WARN,
+         'host' => 'host', 'facility' => 'facility', 'procid' => 123,
+         'msgid' => 'msgid', 'user_id' => '\\"]'} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid [@sd_id user_id="\\\\\"\]"] message'
       }
 
       expected.each_pair do |key, value|

@@ -6,7 +6,7 @@ module GELF
       attr_accessor :last_chunk_id
     end
 
-    attr_accessor :enabled
+    attr_accessor :enabled, :collect_file_and_line
     attr_reader :max_chunk_size, :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
@@ -14,6 +14,7 @@ module GELF
     # +default_options+ is used in notify!
     def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
       @enabled = true
+      @collect_file_and_line = true
 
       self.level = GELF::DEBUG
       self.max_chunk_size = max_size
@@ -153,7 +154,7 @@ module GELF
 
       @hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
       convert_hoptoad_keys_to_graylog2
-      set_file_and_line
+      set_file_and_line if @collect_file_and_line
       set_timestamp
       check_presence_of_mandatory_attributes
       @hash

@@ -6,7 +6,7 @@ module GELF
       attr_accessor :last_chunk_id
     end
 
-    attr_accessor :host, :port, :enabled
+    attr_accessor :enabled
     attr_reader :max_chunk_size, :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
@@ -16,8 +16,7 @@ module GELF
       @enabled = true
 
       self.level = GELF::DEBUG
-
-      self.host, self.port, self.max_chunk_size = host, port, max_size
+      self.max_chunk_size = max_size
 
       self.default_options = default_options
       self.default_options['version'] = SPEC_VERSION
@@ -29,14 +28,26 @@ module GELF
       self.level_mapping = :logger
     end
 
-    # proxy addresses getter to sender
+    # Get a list of receivers.
+    #    notifier.addresses  # => [['localhost', 12201], ['localhost', 12202]]
     def addresses
       @sender.addresses
     end
 
-    # proxy addresses setter to sender
+    # Set a list of receivers.
+    #    notifier.addresses = [['localhost', 12201], ['localhost', 12202]]
     def addresses=(addrs)
       @sender.addresses = addrs
+    end
+
+    def host
+      warn "GELF::Notifier#host is deprecated. Use #addresses instead."
+      self.addresses.first[0]
+    end
+
+    def port
+      warn "GELF::Notifier#port is deprecated. Use #addresses instead."
+      self.addresses.first[1]
     end
 
     # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).

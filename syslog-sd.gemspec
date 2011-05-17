@@ -35,7 +35,7 @@ Gem::Specification.new do |s|
     "test/test_ruby_sender.rb",
     "test/test_severity.rb"
   ]
-  s.homepage = %q{http://github.com/AlekSi/syslog-sd-rb}
+  s.homepage = %q{http://github.com/Graylog2/syslog-sd-rb}
   s.require_paths = [%q{lib}]
   s.rubygems_version = %q{1.8.2}
   s.summary = %q{Library to send syslog messages over UDP to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424.}

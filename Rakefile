@@ -15,7 +15,7 @@ begin
     gem.description = 'Super-Duper library to send syslog messages over UDP to logging server such as Graylog2. ' +
                       'Supports Structured Data elements as defined by RFC 5424.'
     gem.email = "alexey.palazhchenko@gmail.com"
-    gem.homepage = "http://github.com/AlekSi/syslog-sd-rb"
+    gem.homepage = "http://github.com/Graylog2/syslog-sd-rb"
     gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
     gem.add_development_dependency "shoulda"
     gem.add_development_dependency "mocha"

@@ -20,6 +20,7 @@
    + GELF::Logger#level = GELF::INFO
  + allow to change severity mapping;
  + send messages to receivers in round-robin;
+   * GELF::Notifier#host and #port are attr_readers now and deprecated (were attr_accessor)
  - deprecated Gelf class removed.
 
 1.0.2, 2010-11-29:

@@ -1,7 +1,7 @@
 module SyslogSD
   # syslog notifier.
   class Notifier
-    attr_accessor :host, :port, :enabled
+    attr_accessor  :enabled
     attr_reader :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of syslog server.
@@ -10,8 +10,6 @@ module SyslogSD
       @enabled = true
 
       self.level = SyslogSD::DEBUG
-
-      self.host, self.port = host, port
 
       self.default_options = default_options
       self.default_options['host'] ||= Socket.gethostname
@@ -23,14 +21,26 @@ module SyslogSD
       self.level_mapping = :logger
     end
 
-    # proxy addresses getter to sender
+    # Get a list of receivers.
+    #    notifier.addresses  # => [['localhost', 12201], ['localhost', 12202]]
     def addresses
       @sender.addresses
     end
 
-    # proxy addresses setter to sender
+    # Set a list of receivers.
+    #    notifier.addresses = [['localhost', 12201], ['localhost', 12202]]
     def addresses=(addrs)
       @sender.addresses = addrs
+    end
+
+    def host
+      warn "GELF::Notifier#host is deprecated. Use #addresses instead."
+      self.addresses.first[0]
+    end
+
+    def port
+      warn "GELF::Notifier#port is deprecated. Use #addresses instead."
+      self.addresses.first[1]
     end
 
     def level=(new_level)

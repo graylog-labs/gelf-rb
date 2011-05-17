@@ -6,13 +6,13 @@ class TestNotifier < Test::Unit::TestCase
   should "allow access to host, port and default_options" do
     Socket.expects(:gethostname).returns('default_hostname')
     n = SyslogSD::Notifier.new
-    assert_equal ['localhost', 514], [n.host, n.port]
+    assert_equal [['localhost', 514]], n.addresses
     assert_equal( { 'level' => SyslogSD::UNKNOWN,
                     'host' => 'default_hostname', 'facility' => 'syslog-sd-rb',
                     'procid' => Process.pid },
                   n.default_options )
-    n.host, n.port, n.default_options = 'graylog2.org', 7777, {:host => 'grayhost'}
-    assert_equal ['graylog2.org', 7777], [n.host, n.port]
+    n.addresses, n.default_options = [['graylog2.org', 7777]], {:host => 'grayhost'}
+    assert_equal [['graylog2.org', 7777]], n.addresses
     assert_equal({'host' => 'grayhost'}, n.default_options)
   end
 

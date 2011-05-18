@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{syslog-sd}
-  s.version = "1.2.2"
+  s.version = "1.2.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Alexey Palazhchenko}, %q{Lennart Koopmann}]
-  s.date = %q{2011-05-17}
+  s.date = %q{2011-05-18}
   s.description = %q{Super-Duper library to send syslog messages over UDP to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424.}
   s.email = %q{alexey.palazhchenko@gmail.com}
   s.extra_rdoc_files = [

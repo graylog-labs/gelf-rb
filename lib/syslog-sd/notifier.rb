@@ -1,7 +1,7 @@
 module SyslogSD
   # syslog notifier.
   class Notifier
-    attr_accessor :enabled, :collect_file_and_line
+    attr_accessor :enabled, :collect_file_and_line, :timestamp_as_float
     attr_reader :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of syslog server.
@@ -12,6 +12,7 @@ module SyslogSD
       @sd_id = "_@37797"
 
       self.level = SyslogSD::DEBUG
+      self.timestamp_as_float = false
 
       self.default_options = default_options
       self.default_options['host'] ||= Socket.gethostname
@@ -184,7 +185,7 @@ module SyslogSD
 
       prival = 128 + @hash.delete('level') # 128 = 16(local0) * 8
       t = Time.now.utc
-      timestamp = t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec.to_s[0,3]}Z")
+      timestamp = timestamp_as_float ? t.to_f : t.strftime("%Y-%m-%dT%H:%M:%S.#{t.usec.to_s[0,3]}Z")
       host = @hash.delete('host')
       facility = @hash.delete('facility') || '-'
       procid = @hash.delete('procid')

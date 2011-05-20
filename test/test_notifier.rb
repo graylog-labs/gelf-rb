@@ -122,10 +122,10 @@ class TestNotifier < Test::Unit::TestCase
          'msgid' => 'msgid'} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid - message',
         {'short_message' => 'message', 'level' => SyslogSD::WARN,
          'host' => 'host', 'facility' => 'facility', 'procid' => 123,
-         'msgid' => 'msgid', 'user_id' => 123} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid [@sd_id user_id="123"] message',
+         'msgid' => 'msgid', 'user_id' => 123} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid [_@37797 user_id="123"] message',
         {'short_message' => 'message', 'level' => SyslogSD::WARN,
          'host' => 'host', 'facility' => 'facility', 'procid' => 123,
-         'msgid' => 'msgid', 'user_id' => '\\"]'} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid [@sd_id user_id="\\\\\"\]"] message'
+         'msgid' => 'msgid', 'user_id' => '\\"]'} => '<132>1 2010-05-16T12:13:14.0Z host facility 123 msgid [_@37797 user_id="\\\\\"\]"] message'
       }
 
       expected.each_pair do |key, value|
@@ -139,7 +139,7 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.timestamp_as_float = true
         hash = { 'short_message' => 'message', 'level' => SyslogSD::WARN, 'host' => 'host', 'facility' => 'facility', 'procid' => 123,
                  'msgid' => 'msgid', 'user_id' => 123 }
-        expected = '<132>1 1274011994.0 host facility 123 msgid [@sd_id user_id="123"] message'
+        expected = '<132>1 1274011994.0 host facility 123 msgid [_@37797 user_id="123"] message'
         @notifier.instance_variable_set('@hash', hash)
         assert_equal expected, @notifier.__send__(:serialize_hash)
       end

@@ -197,7 +197,7 @@ module SyslogSD
     def serialize_sd
       return '-' if @hash.empty?
 
-      res = "@sd_id"
+      res = @sd_id
       @hash.each_pair do |key, value|
         value = value.to_s.gsub(/([\\\]\"])/) { "\\#{$1}" }
         res += " #{key}=\"#{value}\""

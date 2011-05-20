@@ -1,4 +1,7 @@
-1.2.2, 2010-05-18:
+1.2.4, 2010-05-20:
+ * Fix a bug with SD-ID.
+
+1.2.3, 2010-05-18:
  + Allow to send timestamp as float if desired. It may improve server's parsing speed.
 
 1.2.2, 2010-05-17:

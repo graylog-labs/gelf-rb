@@ -164,12 +164,12 @@ class TestNotifier < Test::Unit::TestCase
 
       should "not send notifications with level below threshold" do
         @sender.expects(:send_datagram).never
-        @notifier.notify!(@hash.merge('level' => SyslogSD::DEBUG))
+        assert_nil @notifier.notify!(@hash.merge('level' => SyslogSD::DEBUG))
       end
 
       should "not notifications with level equal or above threshold" do
         @sender.expects(:send_datagram).once
-        @notifier.notify!(@hash.merge('level' => SyslogSD::WARN))
+        assert_kind_of String, @notifier.notify!(@hash.merge('level' => SyslogSD::WARN))
       end
     end
 
@@ -181,7 +181,7 @@ class TestNotifier < Test::Unit::TestCase
       should "not send datagram" do
         @sender.expects(:send_datagram).never
         @notifier.expects(:extract_hash).never
-        @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
+        assert_nil @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
       end
 
       context "and enabled again" do
@@ -191,7 +191,7 @@ class TestNotifier < Test::Unit::TestCase
 
         should "send datagram" do
           @sender.expects(:send_datagram)
-          @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
+          assert_kind_of String, @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
         end
       end
     end
@@ -200,7 +200,7 @@ class TestNotifier < Test::Unit::TestCase
       @sender.expects(:send_datagram).with do |datagram|
         datagram.is_a?(String)
       end
-      @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
+      assert_kind_of String, @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
     end
 
     SyslogSD::Levels.constants.each do |const|
@@ -217,7 +217,7 @@ class TestNotifier < Test::Unit::TestCase
     should "rescue from invalid invocation of #notify" do
       @notifier.expects(:notify_with_level!).with(nil, instance_of(Hash)).raises(ArgumentError)
       @notifier.expects(:notify_with_level!).with(SyslogSD::UNKNOWN, instance_of(ArgumentError))
-      assert_nothing_raised { @notifier.notify(:no_short_message => 'too bad') }
+      assert_kind_of ArgumentError, @notifier.notify(:no_short_message => 'too bad')
     end
   end
 end

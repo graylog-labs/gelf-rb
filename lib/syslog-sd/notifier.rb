@@ -112,6 +112,7 @@ module SyslogSD
       notify_with_level!(message_level, *args)
     rescue Exception => exception
       notify_with_level!(SyslogSD::UNKNOWN, exception)
+      exception
     end
 
     def notify_with_level!(message_level, *args)

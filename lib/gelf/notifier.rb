@@ -188,7 +188,7 @@ module GELF
     end
 
     def set_timestamp
-      @hash['timestamp'] = Time.now.utc.to_f
+      @hash['timestamp'] = Time.now.utc.to_f if @hash['timestamp'].nil?
     end
 
     def check_presence_of_mandatory_attributes

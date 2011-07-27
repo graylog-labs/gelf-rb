@@ -112,18 +112,25 @@ class TestNotifier < Test::Unit::TestCase
         assert_equal line + 1, hash['line']
       end
 
-      should "set timestamp" do
+      should "set timestamp to current time if not set" do
         hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
         assert_instance_of Float, hash['timestamp']
-        now = Time.now.utc.to_i
+        now = Time.now.utc.to_f
         assert ((now - 1)..(now + 1)).include?(hash['timestamp'])
+      end
+
+      should "set timestamp to specified time" do
+        date = Time.now.utc-9001.to_f
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message', 'timestamp' => date })
+        assert_equal date, hash['timestamp']
       end
     end
 
     context "serialize_hash" do
       setup do
         @notifier.level_mapping = :direct
-        @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value' })
+        @date = Time.now.utc-9001.to_f
+        @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value', 'timestamp' => @date })
         @data = @notifier.__send__(:serialize_hash)
         assert @data.respond_to?(:each)
         @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data.to_a.pack('C*')))
@@ -134,6 +141,7 @@ class TestNotifier < Test::Unit::TestCase
         assert_not_equal GELF::WARN, @deserialized_hash['level']
         assert_not_equal GELF::LOGGER_MAPPING[GELF::WARN], @deserialized_hash['level']
         assert_equal GELF::DIRECT_MAPPING[GELF::WARN], @deserialized_hash['level']
+        assert_equal @date.to_s, @deserialized_hash['timestamp']
       end
     end
 

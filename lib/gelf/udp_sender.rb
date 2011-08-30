@@ -1,6 +1,6 @@
 module GELF
   # Plain Ruby UDP sender.
-  class RubyUdpSender
+  class UdpSender
     attr_accessor :addresses
 
     def initialize(addresses)

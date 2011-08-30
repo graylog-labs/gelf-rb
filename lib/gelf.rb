@@ -8,6 +8,6 @@ module GELF
 end
 
 require 'gelf/severity'
-require 'gelf/ruby_sender'
+require 'gelf/udp_sender'
 require 'gelf/notifier'
 require 'gelf/logger'

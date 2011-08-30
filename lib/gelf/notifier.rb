@@ -25,7 +25,7 @@ module GELF
       self.default_options['level'] ||= GELF::UNKNOWN
       self.default_options['facility'] ||= 'gelf-rb'
 
-      @sender = RubyUdpSender.new([[host, port]])
+      @sender = UdpSender.new([[host, port]])
       self.level_mapping = :logger
     end
 

@@ -1,4 +1,10 @@
-1.2.0, 2010-0x-yy:
+1.3.1, 2001-10-28:
+ + allow to rescue from network errors.
+
+1.3.0, 2011-07-27:
+ + allow to set timestamp manually.
+
+1.2.0.beta1, 2011-05-23:
  + compatibility with GELF specification 1.0:
    * requires modern graylog2-server and graylog2-web-interface;
  + Notifier#default_options, Notifier#default_options=;

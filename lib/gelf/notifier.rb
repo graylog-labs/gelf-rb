@@ -6,7 +6,7 @@ module GELF
       attr_accessor :last_chunk_id
     end
 
-    attr_accessor :enabled, :collect_file_and_line
+    attr_accessor :enabled, :collect_file_and_line, :rescue_network_errors
     attr_reader :max_chunk_size, :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of graylog2-server.
@@ -18,6 +18,7 @@ module GELF
 
       self.level = GELF::DEBUG
       self.max_chunk_size = max_size
+      self.rescue_network_errors = false
 
       self.default_options = default_options
       self.default_options['version'] = SPEC_VERSION
@@ -128,6 +129,8 @@ module GELF
   private
     def notify_with_level(message_level, *args)
       notify_with_level!(message_level, *args)
+    rescue SocketError
+      raise unless self.rescue_network_errors
     rescue Exception => exception
       notify_with_level!(GELF::UNKNOWN, exception)
     end
@@ -203,7 +206,7 @@ module GELF
       data = serialize_hash
       datagrams = []
 
-      # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELFv2 supports chunking)
+      # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELF v1.0 supports chunking)
       if data.count > @max_chunk_size
         id = self.class.last_chunk_id += 1
         msg_id = Digest::MD5.digest("#{Time.now.to_f}-#{id}")[0, 8]

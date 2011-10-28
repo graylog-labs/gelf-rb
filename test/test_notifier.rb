@@ -120,19 +120,18 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "set timestamp to specified time" do
-        date = Time.now.utc-9001.to_f
-        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message', 'timestamp' => date })
-        assert_equal date, hash['timestamp']
+        timestamp = 1319799449.13765
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message', 'timestamp' => timestamp })
+        assert_equal timestamp, hash['timestamp']
       end
     end
 
     context "serialize_hash" do
       setup do
         @notifier.level_mapping = :direct
-        @date = Time.now.utc-9001.to_f
-        @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value', 'timestamp' => @date })
+        @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value' })
         @data = @notifier.__send__(:serialize_hash)
-        assert @data.respond_to?(:each)
+        assert @data.respond_to?(:each)  # Enumerable::Enumerator in 1.8, ::Enumerator in 1.9, so...
         @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data.to_a.pack('C*')))
         assert_instance_of Hash, @deserialized_hash
       end
@@ -141,7 +140,6 @@ class TestNotifier < Test::Unit::TestCase
         assert_not_equal GELF::WARN, @deserialized_hash['level']
         assert_not_equal GELF::LOGGER_MAPPING[GELF::WARN], @deserialized_hash['level']
         assert_equal GELF::DIRECT_MAPPING[GELF::WARN], @deserialized_hash['level']
-        assert_equal @date.to_s, @deserialized_hash['timestamp']
       end
     end
 

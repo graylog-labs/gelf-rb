@@ -241,4 +241,19 @@ class TestNotifier < Test::Unit::TestCase
       assert_nothing_raised { @notifier.notify(:no_short_message => 'too bad') }
     end
   end
+
+  context "with notifier with real sender" do
+    setup do
+      @notifier = GELF::Notifier.new('no_such_host_321')
+    end
+
+    should "raise exception" do
+      assert_raise(SocketError) { @notifier.notify('Hello!') }
+    end
+
+    should "not raise exception if asked" do
+      @notifier.rescue_network_errors = true
+      assert_nothing_raised { @notifier.notify('Hello!') }
+    end
+  end
 end

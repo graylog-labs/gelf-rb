@@ -3,6 +3,8 @@
 Super-Duper library to send syslog messages over UDP to logging server such as Graylog2 (http://graylog2.org).
 Supports Structured Data elements as defined by RFC 5424.
 
+API documentation: http://rubydoc.info/github/Graylog2/syslog-sd-rb/master/frames
+
 Based on GELF gem (https://github.com/graylog2/gelf-rb).
 
 Works with Ruby 1.8.7 and 1.9.2. 1.8.6 is not supported.

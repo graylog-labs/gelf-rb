@@ -1,7 +1,7 @@
 module SyslogSD
   # syslog notifier.
   class Notifier
-    attr_accessor :enabled, :collect_file_and_line, :timestamp_as_float
+    attr_accessor :enabled, :collect_file_and_line, :rescue_network_errors, :timestamp_as_float
     attr_reader :level, :default_options, :level_mapping
 
     # +host+ and +port+ are host/ip and port of syslog server.
@@ -13,6 +13,7 @@ module SyslogSD
 
       self.level = SyslogSD::DEBUG
       self.timestamp_as_float = false
+      self.rescue_network_errors = false
 
       self.default_options = default_options
       self.default_options['host'] ||= Socket.gethostname
@@ -110,6 +111,8 @@ module SyslogSD
   private
     def notify_with_level(message_level, *args)
       notify_with_level!(message_level, *args)
+    rescue SocketError
+      raise unless self.rescue_network_errors
     rescue Exception => exception
       notify_with_level!(SyslogSD::UNKNOWN, exception)
       exception
@@ -140,6 +143,7 @@ module SyslogSD
       @hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
       convert_hoptoad_keys_to_graylog2
       set_file_and_line if @collect_file_and_line
+      set_timestamp
       check_presence_of_mandatory_attributes
       @hash
     end
@@ -169,6 +173,10 @@ module SyslogSD
       match = CALLER_REGEXP.match(frame)
       @hash['file'] = match[1]
       @hash['line'] = match[2].to_i
+    end
+
+    def set_timestamp
+      @hash['timestamp'] = Time.now.utc.to_f if @hash['timestamp'].nil?
     end
 
     def check_presence_of_mandatory_attributes

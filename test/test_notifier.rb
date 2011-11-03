@@ -108,6 +108,19 @@ class TestNotifier < Test::Unit::TestCase
         assert_match /test_notifier.rb/, hash['file']
         assert_equal line + 1, hash['line']
       end
+
+      should "set timestamp to current time if not set" do
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
+        assert_instance_of Float, hash['timestamp']
+        now = Time.now.utc.to_f
+        assert ((now - 1)..(now + 1)).include?(hash['timestamp'])
+      end
+
+      should "set timestamp to specified time" do
+        timestamp = 1319799449.13765
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message', 'timestamp' => timestamp })
+        assert_equal timestamp, hash['timestamp']
+      end
     end
 
     context "serialize_hash" do
@@ -218,6 +231,21 @@ class TestNotifier < Test::Unit::TestCase
       @notifier.expects(:notify_with_level!).with(nil, instance_of(Hash)).raises(ArgumentError)
       @notifier.expects(:notify_with_level!).with(SyslogSD::UNKNOWN, instance_of(ArgumentError))
       assert_kind_of ArgumentError, @notifier.notify(:no_short_message => 'too bad')
+    end
+  end
+
+  context "with notifier with real sender" do
+    setup do
+      @notifier = SyslogSD::Notifier.new('no_such_host_321')
+    end
+
+    should "raise exception" do
+      assert_raise(SocketError) { @notifier.notify('Hello!') }
+    end
+
+    should "not raise exception if asked" do
+      @notifier.rescue_network_errors = true
+      assert_nothing_raised { @notifier.notify('Hello!') }
     end
   end
 end

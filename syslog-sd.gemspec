@@ -4,19 +4,20 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{syslog-sd}
-  s.version = "1.2.4"
+  s.name = "syslog-sd"
+  s.version = "1.3.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{Alexey Palazhchenko}, %q{Lennart Koopmann}]
-  s.date = %q{2011-05-20}
-  s.description = %q{Super-Duper library to send syslog messages over UDP to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424.}
-  s.email = %q{alexey.palazhchenko@gmail.com}
+  s.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
+  s.date = "2011-11-03"
+  s.description = "Super-Duper library to send syslog messages over UDP to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424."
+  s.email = "alexey.palazhchenko@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE",
     "README.rdoc"
   ]
   s.files = [
+    ".travis.yml",
     "CHANGELOG",
     "LICENSE",
     "README.rdoc",
@@ -35,10 +36,10 @@ Gem::Specification.new do |s|
     "test/test_ruby_sender.rb",
     "test/test_severity.rb"
   ]
-  s.homepage = %q{http://github.com/Graylog2/syslog-sd-rb}
-  s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.2}
-  s.summary = %q{Library to send syslog messages over UDP to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424.}
+  s.homepage = "http://github.com/Graylog2/syslog-sd-rb"
+  s.require_paths = ["lib"]
+  s.rubygems_version = "1.8.11"
+  s.summary = "Library to send syslog messages over UDP to logging server such as Graylog2. Supports Structured Data elements as defined by RFC 5424."
 
   if s.respond_to? :specification_version then
     s.specification_version = 3

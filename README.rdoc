@@ -2,7 +2,7 @@
 
 This is the new GELF gem written by Alexey Palazhchenko. It is based on the old gem by Lennart Koopmann and allows you to send GELF messages to Graylog2 server instances. See http://www.graylog2.org/about/gelf for more information about GELF and http://rdoc.info/github/Graylog2/gelf-rb/master/frames for API documentation.
 
-Works with Ruby 1.8.7 and 1.9.2. 1.8.6 is not supported.
+Works with Ruby 1.8.7 and 1.9.x. 1.8.6 is not supported.
 
 == Note on Patches/Pull Requests
 
@@ -15,4 +15,4 @@ Works with Ruby 1.8.7 and 1.9.2. 1.8.6 is not supported.
 
 == Copyright
 
-Copyright (c) 2010 Lennart Koopmann and Alexey Palazhchenko. See LICENSE for details.
+Copyright (c) 2010-2011 Lennart Koopmann and Alexey Palazhchenko. See LICENSE for details.

@@ -9,6 +9,7 @@ require 'gelf'
 
 Thread.abort_on_exception = true
 
+puts "Running on #{RUBY_DESCRIPTION}"
 puts "Generating random data..."
 srand(1)
 RANDOM_DATA = ('A'..'z').to_a

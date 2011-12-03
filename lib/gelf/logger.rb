@@ -5,7 +5,7 @@ module GELF
     def close
     end
 
-    # Use it like Logger#add... or better not to use at all.
+    # Use it like Logger#add... or better not use directly at all.
     def add(level, *args)
       raise ArgumentError.new('Wrong arguments.') unless (0..2).include?(args.count)
 

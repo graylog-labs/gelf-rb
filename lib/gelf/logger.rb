@@ -50,6 +50,5 @@ module GELF
   #     config.colorize_logging = false
   class Logger < Notifier
     include LoggerCompatibility
-    @last_chunk_id = 0
   end
 end

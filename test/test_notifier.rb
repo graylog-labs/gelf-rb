@@ -99,10 +99,12 @@ class TestNotifier < Test::Unit::TestCase
         assert_equal 'message', hash['short_message']
       end
 
-      should "be compatible with HoptoadNotifier" do
-        # https://github.com/thoughtbot/hoptoad_notifier/blob/master/README.rdoc, section Going beyond exceptions
+      should "be compatible with Airbrake" do
+        # https://github.com/airbrake/airbrake/blob/master/README.md, section Going beyond exceptions
         hash = @notifier.__send__(:extract_hash, :error_class => 'Class', :error_message => 'Message')
         assert_equal 'Class: Message', hash['short_message']
+        assert_equal 'Class',   hash['error_class']
+        assert_equal 'Message', hash['error_message']
       end
 
       should "set file and line" do

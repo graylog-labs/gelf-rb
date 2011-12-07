@@ -160,7 +160,10 @@ module GELF
 
     def self.extract_hash_from_exception(exception)
       bt = exception.backtrace || ["Backtrace is not available."]
-      { 'short_message' => "#{exception.class}: #{exception.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
+      error_class = exception.class.name
+      error_message = exception.message
+      { 'short_message' => "#{error_class}: #{error_message}", 'full_message' => "Backtrace:\n" + bt.join("\n"),
+        'error_class' => error_class, 'error_message' => error_message }
     end
 
     # Converts Airbrake-specific keys in +hash+ to Graylog2-specific.

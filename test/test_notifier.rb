@@ -52,6 +52,8 @@ class TestNotifier < Test::Unit::TestCase
         e.set_backtrace(caller)
         hash = @notifier.__send__(:extract_hash, e)
         assert_equal 'RuntimeError: message', hash['short_message']
+        assert_equal 'RuntimeError', hash['error_class']
+        assert_equal 'message', hash['error_message']
         assert_match /Backtrace/, hash['full_message']
         assert_equal GELF::ERROR, hash['level']
       end
@@ -66,6 +68,8 @@ class TestNotifier < Test::Unit::TestCase
         e, h = RuntimeError.new('message'), {'param' => 1, 'level' => GELF::FATAL, 'short_message' => 'will be hidden by exception'}
         hash = @notifier.__send__(:extract_hash, e, h)
         assert_equal 'RuntimeError: message', hash['short_message']
+        assert_equal 'RuntimeError', hash['error_class']
+        assert_equal 'message', hash['error_message']
         assert_equal GELF::FATAL, hash['level']
         assert_equal 1, hash['param']
       end

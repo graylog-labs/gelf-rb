@@ -54,22 +54,28 @@ class TestNotifier < Test::Unit::TestCase
         assert_equal 'RuntimeError: message', hash['short_message']
         assert_equal 'RuntimeError', hash['error_class']
         assert_equal 'message', hash['error_message']
+        assert_match /shoulda/, hash['file']
+        assert       hash['line'] > 300  # 382 in shoulda 2.11.3
         assert_match /Backtrace/, hash['full_message']
         assert_equal GELF::ERROR, hash['level']
       end
 
       should "work with exception without backtrace" do
         e = RuntimeError.new('message')
-        hash = @notifier.__send__(:extract_hash, e)
+        hash, line = @notifier.__send__(:extract_hash, e), __LINE__
+        assert_equal __FILE__, hash['file']
+        assert_equal line, hash['line']
         assert_match /Backtrace is not available/, hash['full_message']
       end
 
       should "work with exception and hash" do
         e, h = RuntimeError.new('message'), {'param' => 1, 'level' => GELF::FATAL, 'short_message' => 'will be hidden by exception'}
-        hash = @notifier.__send__(:extract_hash, e, h)
+        hash, line = @notifier.__send__(:extract_hash, e, h), __LINE__
         assert_equal 'RuntimeError: message', hash['short_message']
         assert_equal 'RuntimeError', hash['error_class']
         assert_equal 'message', hash['error_message']
+        assert_equal __FILE__, hash['file']
+        assert_equal line, hash['line']
         assert_equal GELF::FATAL, hash['level']
         assert_equal 1, hash['param']
       end

@@ -152,18 +152,35 @@ module GELF
 
       hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
       hash = convert_airbrake_keys_to_graylog2(hash)
-      hash = set_file_and_line(hash) if @collect_file_and_line
+      hash = set_file_and_line(hash)
       hash = set_timestamp(hash)
       check_presence_of_mandatory_attributes(hash)
       hash
     end
 
+    CALLER_REGEXP = /^(.*):(\d+).*/
+
     def self.extract_hash_from_exception(exception)
-      bt = exception.backtrace || ["Backtrace is not available."]
       error_class = exception.class.name
       error_message = exception.message
+
+      # always collect file and line there (ignore @collect_file_and_line)
+      # since we already know them, no need to call `caller`
+      file, line = nil, nil
+      bt = exception.backtrace
+      if bt
+        match = CALLER_REGEXP.match(bt[0])
+        if match
+          file = match[1]
+          line = match[2].to_i
+        end
+      else
+        bt = ["Backtrace is not available."]
+      end
+
       { 'short_message' => "#{error_class}: #{error_message}", 'full_message' => "Backtrace:\n" + bt.join("\n"),
-        'error_class' => error_class, 'error_message' => error_message }
+        'error_class' => error_class, 'error_message' => error_message,
+        'file' => file, 'line' => line }
     end
 
     # Converts Airbrake-specific keys in +hash+ to Graylog2-specific.
@@ -176,22 +193,32 @@ module GELF
       hash
     end
 
-    CALLER_REGEXP = /^(.*):(\d+).*/
     LIB_GELF_PATTERN = File.join('lib', 'gelf')
 
     def set_file_and_line(hash)
-      stack = caller
-      begin
-        frame = stack.shift
-      end while frame.include?(LIB_GELF_PATTERN)
-      match = CALLER_REGEXP.match(frame)
-      hash['file'] = match[1]
-      hash['line'] = match[2].to_i
+      return hash unless hash['file'].nil? || hash['line'].nil?
+
+      if @collect_file_and_line
+        stack = caller
+        begin
+          frame = stack.shift
+        end while frame.include?(LIB_GELF_PATTERN)
+
+        match = CALLER_REGEXP.match(frame)
+        if match
+          hash['file'] = match[1]
+          hash['line'] = match[2].to_i
+        else
+          hash['file'] = 'unknown'
+          hash['line'] = -1
+        end
+      end
+
       hash
     end
 
     def set_timestamp(hash)
-      hash['timestamp'] = Time.now.utc.to_f if hash['timestamp'].nil?
+      hash['timestamp'] ||= Time.now.utc.to_f
       hash
     end
 

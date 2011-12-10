@@ -140,6 +140,8 @@ module GELF
     end
 
     def extract_hash(object = nil, args = {})
+      args = self.class.stringify_keys(args)
+
       primary_data = if object.respond_to?(:to_hash)
                        object.to_hash
                      elsif object.is_a?(Exception)
@@ -150,7 +152,8 @@ module GELF
                        { 'short_message' => object.to_s }
                      end
 
-      hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
+      hash = self.class.stringify_keys(primary_data)
+      hash = default_options.merge(args.merge(hash))
       hash = convert_airbrake_keys_to_graylog2(hash)
       hash = set_file_and_line(hash)
       hash = set_timestamp(hash)

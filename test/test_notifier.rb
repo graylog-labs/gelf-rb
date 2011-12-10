@@ -90,6 +90,10 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, 'message', 'level' => GELF::WARN)
         assert_equal 'message', hash['short_message']
         assert_equal GELF::WARN, hash['level']
+
+        hash = @notifier.__send__(:extract_hash, 'message', :level => GELF::WARN)
+        assert_equal 'message', hash['short_message']
+        assert_equal GELF::WARN, hash['level']
       end
 
       should "covert hash keys to strings" do

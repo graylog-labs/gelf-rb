@@ -1,11 +1,10 @@
-require 'thread'
-
 module GELF
   # Plain Ruby UDP sender.
   class RubyUdpSender
     def initialize(addrs)
       @mutex = ::Mutex.new
       @socket = UDPSocket.open
+      @socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_SNDBUF, 65507)  # 65535 - 20 (ip header) - 8 (udp header)
       self.addresses = addrs
     end
 

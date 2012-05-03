@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
-  s.date = "2012-01-17"
+  s.date = "2012-05-03"
   s.description = "Library to send GELF messages to Graylog2 logging server. Supports plain-text, GELF messages and exceptions."
   s.email = "alexey.palazhchenko@gmail.com"
   s.extra_rdoc_files = [
@@ -40,7 +40,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "http://github.com/Graylog2/gelf-rb"
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.15"
+  s.rubygems_version = "1.8.24"
   s.summary = "Library to send GELF messages to Graylog2 logging server."
 
   if s.respond_to? :specification_version then
@@ -48,17 +48,29 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<json>, [">= 0"])
+      s.add_development_dependency(%q<bundler>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<mocha>, [">= 0"])
+      s.add_development_dependency(%q<rdoc>, [">= 0"])
+      s.add_development_dependency(%q<rcov>, [">= 0"])
     else
       s.add_dependency(%q<json>, [">= 0"])
+      s.add_dependency(%q<bundler>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<mocha>, [">= 0"])
+      s.add_dependency(%q<rdoc>, [">= 0"])
+      s.add_dependency(%q<rcov>, [">= 0"])
     end
   else
     s.add_dependency(%q<json>, [">= 0"])
+    s.add_dependency(%q<bundler>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<mocha>, [">= 0"])
+    s.add_dependency(%q<rdoc>, [">= 0"])
+    s.add_dependency(%q<rcov>, [">= 0"])
   end
 end
 

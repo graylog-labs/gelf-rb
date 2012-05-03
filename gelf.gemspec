@@ -20,6 +20,8 @@ Gem::Specification.new do |s|
     ".gemtest",
     ".travis.yml",
     "CHANGELOG",
+    "Gemfile",
+    "Gemfile.lock",
     "LICENSE",
     "README.rdoc",
     "Rakefile",
@@ -53,7 +55,6 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<mocha>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, [">= 0"])
-      s.add_development_dependency(%q<rcov>, [">= 0"])
     else
       s.add_dependency(%q<json>, [">= 0"])
       s.add_dependency(%q<bundler>, [">= 0"])
@@ -61,7 +62,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<mocha>, [">= 0"])
       s.add_dependency(%q<rdoc>, [">= 0"])
-      s.add_dependency(%q<rcov>, [">= 0"])
     end
   else
     s.add_dependency(%q<json>, [">= 0"])
@@ -70,7 +70,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<mocha>, [">= 0"])
     s.add_dependency(%q<rdoc>, [">= 0"])
-    s.add_dependency(%q<rcov>, [">= 0"])
   end
 end
 

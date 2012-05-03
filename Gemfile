@@ -8,5 +8,4 @@ group :development do
   gem "shoulda"
   gem "mocha"
   gem "rdoc"
-  gem "rcov"
 end

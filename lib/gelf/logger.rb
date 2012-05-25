@@ -22,6 +22,12 @@ module GELF
 
       hash = {'short_message' => message, 'facility' => progname}
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
+      if default_options['tags']
+        tags = current_tags
+        default_options['tags'].each_with_index do |tag_name, index|
+          hash.merge!("_#{tag_name}" => tags[index]) if tags[index]
+        end
+      end
       notify_with_level(level, hash)
     end
 
@@ -42,12 +48,35 @@ module GELF
     def <<(message)
       notify_with_level(GELF::UNKNOWN, 'short_message' => message)
     end
+
+    def tagged(*new_tags)
+      tags     = current_tags
+      new_tags = new_tags.flatten.reject(&:blank?)
+      tags.concat new_tags
+      yield self
+    ensure
+      tags.pop(new_tags.size)
+    end
+
+    def current_tags
+      Thread.current[:gelf_tagged_logging_tags] ||= []
+    end
+
   end
 
   # Graylog2 notifier, compatible with Ruby Logger.
   # You can use it with Rails like this:
   #     config.logger = GELF::Logger.new("localhost", 12201, "WAN", { :facility => "appname" })
   #     config.colorize_logging = false
+  #
+  # Tagged logging (with tags from rack middleware) (order of tags is important)
+  # Adds custom gelf messages: { '_uuid_name' => <uuid>, '_remote_ip_name' => <remote_ip> }
+  #     config.log_tags = [:uuid, :remote_ip]
+  #     config.colorize_logging = false
+  #     config.logger = GELF::Logger.new("localhost", 12201, 'LAN', {
+  #       tags: [:uuid_name, :remote_ip_name], # same order as config.log_tags
+  #       facility: 'Jobmensa 2'
+  #     })
   class Logger < Notifier
     include LoggerCompatibility
   end

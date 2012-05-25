@@ -22,6 +22,12 @@ module GELF
 
       hash = {'short_message' => message, 'facility' => progname}
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
+      if default_options['tags']
+        tags = current_tags
+        default_options['tags'].each_with_index do |tag_name, index|
+          hash.merge!("_#{tag_name}" => tags[index]) if tags[index]
+        end
+      end
       notify_with_level(level, hash)
     end
 
@@ -42,6 +48,20 @@ module GELF
     def <<(message)
       notify_with_level(GELF::UNKNOWN, 'short_message' => message)
     end
+
+    def tagged(*new_tags)
+      tags     = formatter.current_tags
+      new_tags = new_tags.flatten.reject(&:blank?)
+      tags.concat new_tags
+      yield self
+    ensure
+      tags.pop(new_tags.size)
+    end
+
+    def current_tags
+      Thread.current[:gelf_tagged_logging_tags] ||= []
+    end
+
   end
 
   # Graylog2 notifier, compatible with Ruby Logger.

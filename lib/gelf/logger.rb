@@ -50,7 +50,7 @@ module GELF
     end
 
     def tagged(*new_tags)
-      tags     = formatter.current_tags
+      tags     = current_tags
       new_tags = new_tags.flatten.reject(&:blank?)
       tags.concat new_tags
       yield self

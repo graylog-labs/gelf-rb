@@ -14,6 +14,11 @@ module GELF
     ERROR   = 3
     FATAL   = 4
     UNKNOWN = 5
+    # Additional non-Ruby Logger levels
+    # These will work in direct mapping mode only, for compatibility with non-Ruby log sources
+    ALERT   = 101
+    CRIT    = 102
+    NOTICE  = 105
   end
 
   include Levels
@@ -29,9 +34,11 @@ module GELF
   # Maps Ruby Logger levels to syslog levels as is.
   DIRECT_MAPPING = {DEBUG   => 7, # Debug
                     INFO    => 6, # Info
-                    # skip 5 Notice
+                    NOTICE  => 5, # Notice
                     WARN    => 4, # Warning
                     ERROR   => 3, # Error
+                    CRIT    => 2, # Critical
                     FATAL   => 2, # Critical
-                    UNKNOWN => 1} # Alert – shouldn't be used
+                    ALERT   => 1, # Alert
+                    UNKNOWN => 1} # Alert - mapping for compatibility
 end

@@ -6,15 +6,18 @@ module GELF
     def initialize(addresses)
       @addresses = addresses
       @i = 0
-      @socket = UDPSocket.open
     end
 
     def send_datagrams(datagrams)
       host, port = @addresses[@i]
       @i = (@i + 1) % @addresses.length
       datagrams.each do |datagram|
-        @socket.send(datagram, 0, host, port)
+        socket.send(datagram, 0, host, port)
       end
+    end
+    
+    def socket
+      @socket ||= UDPSocket.open
     end
   end
 end

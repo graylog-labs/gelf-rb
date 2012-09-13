@@ -135,5 +135,9 @@ class TestLogger < Test::Unit::TestCase
       end
       @logger << "Message"
     end
+
+    should "have formatter attribute" do
+      @logger.formatter
+    end
   end
 end

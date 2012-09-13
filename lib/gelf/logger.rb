@@ -1,6 +1,9 @@
 module GELF
   # Methods for compatibility with Ruby Logger.
   module LoggerCompatibility
+
+    attr_accessor :formatter
+
     # Does nothing.
     def close
     end

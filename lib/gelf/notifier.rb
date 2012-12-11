@@ -12,7 +12,7 @@ module GELF
     # +host+ and +port+ are host/ip and port of graylog2-server.
     # +max_size+ is passed to max_chunk_size=.
     # +default_options+ is used in notify!
-    def initialize(host = 'localhost', port = 12201, max_size = 'WAN', default_options = {})
+    def initialize(host = 'localhost', port = 12201, max_size = 'WAN', options = {})
       @enabled = true
       @collect_file_and_line = true
 
@@ -20,11 +20,18 @@ module GELF
       self.max_chunk_size = max_size
       self.rescue_network_errors = false
 
-      self.default_options = default_options
+      self.default_options = options
       self.default_options['version'] = SPEC_VERSION
       self.default_options['host'] ||= Socket.gethostname
       self.default_options['level'] ||= GELF::UNKNOWN
       self.default_options['facility'] ||= 'gelf-rb'
+      
+      # create an array of default and possible provided logging library exclusions
+      # don't know if this will work on Windows 
+      exclusions  = ([File.join('lib', 'gelf')] + [options['logging_exclusions']]).compact
+      paths = exclusions.join('|').gsub(File::SEPARATOR,"\\#{File::SEPARATOR}")
+      @exclusions_regex = /.*(#{paths}).*/
+      # ie /.*(lib\/gelf|lib\/my_logger|buffered_logger).*/
 
       @sender = RubyUdpSender.new([[host, port]])
       self.level_mapping = :logger
@@ -178,13 +185,12 @@ module GELF
     end
 
     CALLER_REGEXP = /^(.*):(\d+).*/
-    LIB_GELF_PATTERN = File.join('lib', 'gelf')
-
     def set_file_and_line
       stack = caller
+      #require 'pry';binding.pry
       begin
         frame = stack.shift
-      end while frame.include?(LIB_GELF_PATTERN)
+      end while frame.match(@exclusions_regex)
       match = CALLER_REGEXP.match(frame)
       @hash['file'] = match[1]
       @hash['line'] = match[2].to_i

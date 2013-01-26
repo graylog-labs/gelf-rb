@@ -51,47 +51,12 @@ rescue LoadError => e
   end
 end
 
-begin
-  gem 'ruby_parser', '~> 2.0.6'
-  gem 'activesupport', '~> 3.0.0'
-  gem 'metric_fu', '~> 2.1.1'
-  require 'metric_fu'
-
-  MetricFu::Configuration.run do |config|
-    # Saikuro is useless
-    config.metrics -= [:saikuro]
-
-    config.flay     = { :dirs_to_flay  => ['lib'],
-                        :minimum_score => 10  }
-    config.flog     = { :dirs_to_flog  => ['lib'] }
-    config.reek     = { :dirs_to_reek  => ['lib'] }
-    config.roodi    = { :dirs_to_roodi => ['lib'] }
-    config.rcov     = { :environment => 'test',
-                        :test_files => ['test/test_*.rb'],
-                        :rcov_opts => ["-I 'lib:test'",
-                                       "--sort coverage",
-                                       "--no-html",
-                                       "--text-coverage",
-                                       "--no-color",
-                                       "--exclude /test/,/gems/"]}
-    config.graph_engine = :gchart
-  end
-
-rescue LoadError, NameError => e
-  desc 'Generate all metrics reports'
-  task :'metrics:all' do
-    puts e.inspect
-    # puts e.backtrace
-    abort "metric_fu is not available. Run: gem install metric_fu"
-  end
-end
-
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "gelf #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
+#require 'rake/rdoctask'
+#Rake::RDocTask.new do |rdoc|
+#  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+#
+#  rdoc.rdoc_dir = 'rdoc'
+#  rdoc.title = "gelf #{version}"
+#  rdoc.rdoc_files.include('README*')
+#  rdoc.rdoc_files.include('lib/**/*.rb')
+#end

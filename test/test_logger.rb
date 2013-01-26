@@ -97,6 +97,43 @@ class TestLogger < Test::Unit::TestCase
         end
         @logger.add(GELF::INFO, 'Facility') { RuntimeError.new('Boom!') }
       end
+
+
+  #####################
+
+      # logger.add(Logger::INFO, { :short_message => "Some message" })
+      should "implement add method with level and message from hash, facility from defaults" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Some message' &&
+          hash['facility'] == 'gelf-rb'
+        end
+        @logger.add(GELF::INFO, { :short_message => "Some message" })
+      end
+
+      # logger.add(Logger::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat" })
+      should "implement add method with level and message from hash, facility from defaults and some additional fields" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Some message' &&
+          hash['facility'] == 'gelf-rb' &&
+          hash['_foo'] == 'bar' &&
+          hash['_zomg'] == 'wat'
+        end
+        @logger.add(GELF::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat"})
+      end
+
+      # logger.add(Logger::INFO, "somefac", { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat" })
+      should "implement add method with level and message from hash, facility from parameters and some additional fields" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Some message' &&
+          hash['facility'] == 'somefac' &&
+          hash['_foo'] == 'bar' &&
+          hash['_zomg'] == 'wat'
+        end
+        @logger.add(GELF::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat"}, "somefac")
+      end
     end
 
     GELF::Levels.constants.each do |const|

@@ -23,8 +23,20 @@ module GELF
                             [args[0], default_options['facility']]
                           end
 
-      hash = {'short_message' => message, 'facility' => progname}
+      if message.is_a?(Hash)
+        # Stringify keys.
+        hash = {}
+        message.each do |k,v|
+          hash[k.to_s] = message[k]
+        end
+
+        hash['facility'] = progname
+      else
+        hash = {'short_message' => message, 'facility' => progname}
+      end
+
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
+
       notify_with_level(level, hash)
     end
 
@@ -55,4 +67,5 @@ module GELF
     include LoggerCompatibility
     @last_chunk_id = 0
   end
+
 end

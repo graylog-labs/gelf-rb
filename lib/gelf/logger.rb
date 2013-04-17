@@ -29,14 +29,15 @@ module GELF
         message.each do |k,v|
           hash[k.to_s] = message[k]
         end
+      else
+        hash['short_message'] = message.to_s
       end
       hash['facility'] = progname unless hash.has_key?('facility')
-      hash['short_message'] = message unless hash.has_key?('short_message')
 
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
 
       # need to strip out empty messages
-      unless hash['short_message'].to_s.empty?
+      unless !hash.has_key?('short_message') || hash['short_message'].to_s.empty?
         notify_with_level(level, hash)
       end
     end

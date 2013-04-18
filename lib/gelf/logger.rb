@@ -35,7 +35,7 @@ module GELF
       end
 
       # need to strip out empty messages
-      unless !message_hash.has_key?('short_message') || message_hash['short_message'].to_s.empty?
+      if message_hash.has_key?('short_message') && !message_hash['short_message'].to_s.empty?
         notify_with_level(level, message_hash)
       end
     end

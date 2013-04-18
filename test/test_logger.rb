@@ -134,6 +134,40 @@ class TestLogger < Test::Unit::TestCase
         end
         @logger.add(GELF::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat"}, "somefac")
       end
+
+      should "implement add method with level and ignore zero-length message strings" do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, "")
+      end
+
+      should "implement add method with level and ignore nil message" do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, nil)
+      end
+
+      should "implement add method with level and ignore hash without short_message key" do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, { :message => "Some message" })
+      end
+
+      should "implement add method with level and ignore hash with zero-length short_message entry" do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, { :short_message => "" })
+      end
+
+      should "implement add method with level and ignore hash with nil short_message entry" do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, { :short_message => nil })
+      end
+
+      should "implement add method with level and message and facility from hash" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Some message' &&
+          hash['facility'] == 'somefac'
+        end
+        @logger.add(GELF::INFO, { :short_message => "Some message", :facility => "somefac" })
+      end
     end
 
     GELF::Levels.constants.each do |const|

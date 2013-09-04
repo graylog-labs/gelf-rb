@@ -168,6 +168,29 @@ class TestNotifier < Test::Unit::TestCase
           assert_equal datagrams.count, datagram[11].ord
         end
       end
+
+      should "split long data when subclassed" do
+        class MyNotifier < GELF::Notifier; end
+
+        @notifier = MyNotifier.new('host', 1234)
+        @sender = mock
+        @notifier.instance_variable_set('@sender', @sender)
+
+        srand(1) # for stable tests
+        hash = { 'version' => '1.0', 'short_message' => 'message' }
+        hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
+        @notifier.instance_variable_set('@hash', hash)
+        datagrams = @notifier.__send__(:datagrams_from_hash)
+        assert_equal 2, datagrams.count
+        datagrams.each_index do |i|
+          datagram = datagrams[i]
+          assert_instance_of String, datagram
+          assert datagram[0..1] == "\x1e\x0f" # chunked GELF magic number
+          # datagram[2..9] is a message id
+          assert_equal i, datagram[10].ord
+          assert_equal datagrams.count, datagram[11].ord
+        end
+      end
     end
 
     context "level threshold" do

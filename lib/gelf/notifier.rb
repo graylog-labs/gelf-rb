@@ -208,7 +208,7 @@ module GELF
 
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELF v1.0 supports chunking)
       if data.count > @max_chunk_size
-        id = self.class.last_chunk_id += 1
+        id = GELF::Notifier.last_chunk_id += 1
         msg_id = Digest::MD5.digest("#{Time.now.to_f}-#{id}")[0, 8]
         num, count = 0, (data.count.to_f / @max_chunk_size).ceil
         data.each_slice(@max_chunk_size) do |slice|

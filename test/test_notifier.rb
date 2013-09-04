@@ -155,10 +155,10 @@ class TestNotifier < Test::Unit::TestCase
       should "split long data" do
         srand(1) # for stable tests
         hash = { 'version' => '1.0', 'short_message' => 'message' }
-        hash.merge!('something' => (0..30000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
+        hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
         @notifier.instance_variable_set('@hash', hash)
         datagrams = @notifier.__send__(:datagrams_from_hash)
-        assert -> {datagrams.count > 1}, "There should be more than one datagram"
+        assert_equal 2, datagrams.count
         datagrams.each_index do |i|
           datagram = datagrams[i]
           assert_instance_of String, datagram
@@ -178,10 +178,10 @@ class TestNotifier < Test::Unit::TestCase
 
         srand(1) # for stable tests
         hash = { 'version' => '1.0', 'short_message' => 'message' }
-        hash.merge!('something' => (0..30000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
+        hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
         @notifier.instance_variable_set('@hash', hash)
         datagrams = @notifier.__send__(:datagrams_from_hash)
-        assert -> {datagrams.count > 1}, "There should be more than one datagram"
+        assert_equal 2, datagrams.count
         datagrams.each_index do |i|
           datagram = datagrams[i]
           assert_instance_of String, datagram

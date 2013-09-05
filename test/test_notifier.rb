@@ -149,7 +149,15 @@ class TestNotifier < Test::Unit::TestCase
         datagrams = @notifier.__send__(:datagrams_from_hash)
         assert_equal 1, datagrams.count
         assert_instance_of String, datagrams[0]
-        assert_equal "\x78\x9c", datagrams[0][0..1] # zlib header
+
+        asserted = "\x78\x9c"
+        if RUBY_VERSION[0].to_i >= 2
+          # lol well yeah, Rubby. 
+          # http://stackoverflow.com/questions/15843684/binary-string-literals-in-ruby-2-0
+          asserted = asserted.b
+        end
+
+        assert_equal asserted, datagrams[0][0..1] # zlib header
       end
 
       should "split long data" do

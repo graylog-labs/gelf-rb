@@ -152,6 +152,7 @@ class TestNotifier < Test::Unit::TestCase
 
         asserted = "\x78\x9c"
         if RUBY_VERSION[0].to_i >= 2
+          puts "I'm a Ruby > 2.0.0. Enforcing ASCII-8BIT. (#{RUBY_VERSION}/#{RUBY_VERSION[0].to_i})"
           # lol well yeah, Rubby. 
           # http://stackoverflow.com/questions/15843684/binary-string-literals-in-ruby-2-0
           asserted = asserted.b

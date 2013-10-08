@@ -35,6 +35,8 @@ module GELF
         hash = {'short_message' => message, 'facility' => progname}
       end
 
+      hash['facility'] = default_options['facility'] unless progname
+
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
 
       notify_with_level(level, hash)

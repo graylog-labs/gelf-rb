@@ -68,7 +68,7 @@ class TestLogger < Test::Unit::TestCase
 
       # logger.add(Logger::INFO, 'Message', 'Facility')
       should "use facility from initialization if facility is nil" do
-        logger = GELF::Logger.new('localhost', 12202, 'WAN', facility: 'foo-bar')
+        logger = GELF::Logger.new('localhost', 12202, 'WAN', :facility => 'foo-bar')
         logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
           hash['short_message'] == 'Message' &&

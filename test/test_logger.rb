@@ -66,6 +66,27 @@ class TestLogger < Test::Unit::TestCase
         @logger.add(GELF::INFO, 'Message', 'Facility')
       end
 
+      # logger.add(Logger::INFO, 'Message', 'Facility')
+      should "use facility from initialization if facility is nil" do
+        logger = GELF::Logger.new('localhost', 12202, 'WAN', facility: 'foo-bar')
+        logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Message' &&
+          hash['facility'] == 'foo-bar'
+        end
+        logger.add(GELF::INFO, 'Message', nil)
+      end
+
+      # logger.add(Logger::INFO, 'Message', 'Facility')
+      should "use default facility if facility is nil" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Message' &&
+          hash['facility'] == 'gelf-rb'
+        end
+        @logger.add(GELF::INFO, 'Message', nil)
+      end
+
       # logger.add(Logger::INFO, RuntimeError.new('Boom!'), 'Facility')
       should "implement add method with level, exception and facility from parameters" do
         @logger.expects(:notify_with_level!).with do |level, hash|

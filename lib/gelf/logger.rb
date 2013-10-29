@@ -15,7 +15,7 @@ module GELF
       # Ruby Logger's author is a maniac.
       message, progname = if args.count == 2
                             [args[0], args[1]]
-                          elsif args.count == 0
+                          elsif args.count == 0 and block_given?
                             [yield, default_options['facility']]
                           elsif block_given?
                             [yield, args[0]]

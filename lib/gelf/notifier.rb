@@ -25,8 +25,13 @@ module GELF
       self.default_options['host'] ||= Socket.gethostname
       self.default_options['level'] ||= GELF::UNKNOWN
       self.default_options['facility'] ||= 'gelf-rb'
+      self.default_options['protocol'] ||= GELF::Protocols::UDP
 
-      @sender = RubyUdpSender.new([[host, port]])
+      if self.default_options['protocol'] == GELF::Protocols::TCP
+        @sender = RubyTcpSender.new([[host, port]])
+      else
+        @sender = RubyUdpSender.new([[host, port]])
+      end
       self.level_mapping = :logger
     end
 
@@ -140,7 +145,12 @@ module GELF
       extract_hash(*args)
       @hash['level'] = message_level unless message_level.nil?
       if @hash['level'] >= level
-        @sender.send_datagrams(datagrams_from_hash)
+        if self.default_options['protocol'] == GELF::Protocols::TCP
+          validate_hash
+          @sender.send(@hash.to_json + "\0")
+        else
+          @sender.send_datagrams(datagrams_from_hash)
+        end
       end
     end
 
@@ -222,10 +232,14 @@ module GELF
       datagrams
     end
 
-    def serialize_hash
+    def validate_hash
       raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
 
       @hash['level'] = @level_mapping[@hash['level']]
+    end
+
+    def serialize_hash
+      validate_hash
 
       Zlib::Deflate.deflate(@hash.to_json).bytes
     end

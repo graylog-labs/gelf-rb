@@ -19,7 +19,7 @@ module GELF
   end
 
   class RubyTcpSocket
-    attr_reader :socket
+    attr_accessor :socket
 
     def initialize(host, port)
       @host = host
@@ -27,13 +27,35 @@ module GELF
       connect
     end
 
+    def connected?
+      if not @connected
+        begin
+          if @socket.nil?
+            @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+          end
+          sockaddr = Socket.sockaddr_in(@port, @host)
+          @socket.connect_nonblock(sockaddr)
+        rescue Errno::EISCONN
+          @connected = true
+        rescue Errno::EINPROGRESS, Errno::EALREADY
+          @connected = false
+        rescue SystemCallError
+          @socket = nil
+          @connected = false
+        end
+      end
+      return @connected
+    end
+
     def connect
+      @connected = false
       socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
       sockaddr = Socket.sockaddr_in(@port, @host)
       begin
         socket.connect_nonblock(sockaddr)
-      rescue Errno::EINPROGRESS, Errno::EISCONN
-      rescue Errno::EINVAL
+      rescue Errno::EISCONN
+        @connected = true
+      rescue SystemCallError
         return false
       end
       @socket = socket
@@ -80,10 +102,15 @@ module GELF
     def send(message)
       while true do
         sent = false
-        # need to only add sockets which are connected
-        sockets = @sockets.map { |s| s.socket }
+        sockets = @sockets.map { |s|
+          if s.connected?
+            s.socket
+          end
+        }
+        sockets.compact!
+        next unless not sockets.empty?
         begin
-          result = select( nil, sockets, nil, 5)
+          result = select( nil, sockets, nil, 1)
           if result
             writers = result[1]
             sent = write_any(writers, message)
@@ -97,13 +124,14 @@ module GELF
     private
     def write_any(writers, message)
       writers.shuffle.each do |w|
-        curr_handle = w
         begin
-          curr_handle.write(message)
+          w.write(message)
           return true
         rescue Errno::EPIPE
           @sockets.each do |s|
-            if s.socket == curr_handle
+            if s.socket == w
+              s.socket.close
+              s.socket = nil
               s.connect
             end
           end

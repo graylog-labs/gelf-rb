@@ -1,6 +1,9 @@
 module GELF
   # Methods for compatibility with Ruby Logger.
   module LoggerCompatibility
+
+    attr_accessor :formatter
+
     # Does nothing.
     def close
     end
@@ -20,14 +23,29 @@ module GELF
                             [args[0], default_options['facility']]
                           end
 
-      hash = {'short_message' => message, 'facility' => progname}
+      if message.is_a?(Hash)
+        # Stringify keys.
+        hash = {}
+        message.each do |k,v|
+          hash[k.to_s] = message[k]
+        end
+
+        hash['facility'] = progname
+      else
+        hash = {'short_message' => message, 'facility' => progname}
+      end
+
+      hash['facility'] = default_options['facility'] unless progname
+
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
+
       if default_options['tags']
         tags = current_tags
         default_options['tags'].each_with_index do |tag_name, index|
           hash.merge!("_#{tag_name}" => tags[index]) if tags[index]
         end
       end
+
       notify_with_level(level, hash)
     end
 
@@ -80,4 +98,5 @@ module GELF
   class Logger < Notifier
     include LoggerCompatibility
   end
+
 end

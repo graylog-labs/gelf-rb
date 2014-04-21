@@ -4,10 +4,15 @@ rvm:
   - ree
   - 1.9.2
   - 1.9.3
+<<<<<<< HEAD
   - jruby-18mode
   - jruby-19mode
   - rbx-18mode
   # - rbx-19mode
+=======
+  - 2.0.0
+  - jruby-19mode
+>>>>>>> master
 
 notifications:
   irc: "irc.freenode.org#graylog2"

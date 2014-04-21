@@ -46,7 +46,7 @@ module GELF
         end
       end
 
-      notify_with_level(level, hash)
+      notify_with_level(level, format_message(level, Time.now, progname, hash))
     end
 
     # Redefines methods in +Notifier+.
@@ -78,6 +78,11 @@ module GELF
 
     def current_tags
       Thread.current[:gelf_tagged_logging_tags] ||= []
+    end
+
+    def format_message(severity, datetime, progname, message)
+      return message if formatter.nil?
+      formatter.call(severity, datetime, progname, message)
     end
 
   end

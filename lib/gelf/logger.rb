@@ -9,50 +9,46 @@ module GELF
     end
 
     # Use it like Logger#add... or better not to use at all.
-    def add(level, *args)
-      raise ArgumentError.new('Wrong arguments.') unless (0..2).include?(args.count)
+    def add(level, message = nil, progname = nil, &block)
+      progname ||= default_options['facility']
 
-      # Ruby Logger's author is a maniac.
-      message, progname = if args.count == 2
-                            [args[0], args[1]]
-                          elsif args.count == 0
-                            [yield, default_options['facility']]
-                          elsif block_given?
-                            [yield, args[0]]
-                          else
-                            [args[0], default_options['facility']]
-                          end
+      if message.nil?
+        if block_given?
+          message = yield
+        else
+          message = progname
+          progname = default_options['facility']
+        end
+      end
+
+      message_hash = { 'facility' => progname }
 
       if message.is_a?(Hash)
         # Stringify keys.
-        hash = {}
         message.each do |k,v|
-          hash[k.to_s] = message[k]
+          message_hash[k.to_s] = message[k]
         end
-
-        hash['facility'] = progname
       else
-        hash = {'short_message' => message, 'facility' => progname}
+        message_hash['short_message'] = message
       end
 
-      hash['facility'] = default_options['facility'] unless progname
+      if message.is_a?(Exception)
+        message_hash.merge!(self.class.extract_hash_from_exception(message))
+      end
 
-      hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
-
-      notify_with_level(level, hash)
+      notify_with_level(level, message_hash)
     end
 
     # Redefines methods in +Notifier+.
     GELF::Levels.constants.each do |const|
       class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}(*args)                  # def debug(*args)
-          args.unshift(yield) if block_given?         #   args.unshift(yield) if block_given?
-          add(GELF::#{const}, *args)                  #   add(GELF::DEBUG, *args)
-        end                                           # end
+        def #{const.downcase}(progname = nil, &block)   # def debug(progname = nil, &block)
+          add(GELF::#{const}, nil, progname, &block)    #   add(GELF::DEBUG, nil, progname, &block)
+        end                                             # end
 
-        def #{const.downcase}?                        # def debug?
-          GELF::#{const} >= level                     #   GELF::DEBUG >= level
-        end                                           # end
+        def #{const.downcase}?                          # def debug?
+          GELF::#{const} >= level                       #   GELF::DEBUG >= level
+        end                                             # end
       EOT
     end
 

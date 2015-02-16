@@ -6,6 +6,7 @@ module GELF
       attr_accessor :last_chunk_id
     end
 
+    attr_accessor :sender
     attr_accessor :enabled, :collect_file_and_line, :rescue_network_errors
     attr_reader :max_chunk_size, :level, :default_options, :level_mapping
 
@@ -26,20 +27,20 @@ module GELF
       self.default_options['level'] ||= GELF::UNKNOWN
       self.default_options['facility'] ||= 'gelf-rb'
 
-      @sender = RubyUdpSender.new([[host, port]])
+      self.sender = default_options['sender'] || RubyUdpSender.new([[host, port]])
       self.level_mapping = :logger
     end
 
     # Get a list of receivers.
     #    notifier.addresses  # => [['localhost', 12201], ['localhost', 12202]]
     def addresses
-      @sender.addresses
+      sender.addresses
     end
 
     # Set a list of receivers.
     #    notifier.addresses = [['localhost', 12201], ['localhost', 12202]]
     def addresses=(addrs)
-      @sender.addresses = addrs
+      sender.addresses = addrs
     end
 
     def host
@@ -140,7 +141,7 @@ module GELF
       extract_hash(*args)
       @hash['level'] = message_level unless message_level.nil?
       if @hash['level'] >= level
-        @sender.send_datagrams(datagrams_from_hash)
+        sender.send_datagrams(datagrams_from_hash)
       end
     end
 

@@ -19,6 +19,18 @@ class TestNotifier < Test::Unit::TestCase
     assert_equal 1337, n.max_chunk_size
   end
 
+  should "allow passing in a sender of our choosing" do
+    sender = mock
+    notifier = GELF::Notifier.new('host', 12345, 'WAN', 'sender' => sender)
+    assert_equal sender, notifier.sender
+  end
+
+  should "use the provided UDP sender by default" do
+    sender = mock
+    notifier = GELF::Notifier.new('host', 12345)
+    assert_kind_of GELF::RubyUdpSender, notifier.sender
+  end
+
   context "with notifier with mocked sender" do
     setup do
       Socket.stubs(:gethostname).returns('stubbed_hostname')

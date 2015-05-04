@@ -209,5 +209,13 @@ class TestLogger < Test::Unit::TestCase
     should "have formatter attribute" do
       @logger.formatter
     end
+
+
+    context "close" do
+      should "close socket" do
+        @sender.expects(:close).once
+        @logger.close
+      end
+    end
   end
 end

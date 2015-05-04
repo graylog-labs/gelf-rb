@@ -4,10 +4,6 @@ module GELF
 
     attr_accessor :formatter
 
-    # Does nothing.
-    def close
-    end
-
     # Use it like Logger#add... or better not to use at all.
     def add(level, message = nil, progname = nil, &block)
       progname ||= default_options['facility']

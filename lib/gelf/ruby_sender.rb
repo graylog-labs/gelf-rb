@@ -16,5 +16,9 @@ module GELF
         @socket.send(datagram, 0, host, port)
       end
     end
+
+    def close
+      @socket.close
+    end
   end
 end

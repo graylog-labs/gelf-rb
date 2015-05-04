@@ -226,6 +226,13 @@ class TestNotifier < Test::Unit::TestCase
       end
     end
 
+    context "close" do
+      should "close sender" do
+        @sender.expects(:close).once
+        @notifier.close
+      end
+    end
+
     context "when disabled" do
       setup do
         @notifier.disable

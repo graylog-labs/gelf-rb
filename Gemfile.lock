@@ -25,7 +25,7 @@ GEM
       nokogiri (= 1.5.10)
       rake
       rdoc
-    json (1.8.0)
+    json (1.8.2)
     jwt (0.1.8)
       multi_json (>= 1.5)
     metaclass (0.0.1)

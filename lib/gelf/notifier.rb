@@ -98,6 +98,11 @@ module GELF
       @enabled = true
     end
 
+    # Closes sender
+    def close
+      @sender.close
+    end
+
     # Same as notify!, but rescues all exceptions (including +ArgumentError+)
     # and sends them instead.
     def notify(*args)

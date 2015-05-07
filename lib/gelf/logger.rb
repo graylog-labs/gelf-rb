@@ -2,7 +2,7 @@ module GELF
   # Methods for compatibility with Ruby Logger.
   module LoggerCompatibility
 
-    attr_accessor :formatter
+    attr_accessor :formatter, :log_tags
 
     # Use it like Logger#add... or better not to use at all.
     def add(level, message = nil, progname = nil, &block)
@@ -33,7 +33,7 @@ module GELF
       end
 
       # Include tags in message hash
-      Array(default_options['tags']).each_with_index do |tag_name, index|
+      Array(log_tags).each_with_index do |tag_name, index|
         message_hash.merge!("_#{tag_name}" => current_tags[index]) if current_tags[index]
       end
 
@@ -82,8 +82,9 @@ module GELF
   #
   # Tagged logging (with tags from rack middleware) (order of tags is important)
   # Adds custom gelf messages: { '_uuid_name' => <uuid>, '_remote_ip_name' => <remote_ip> }
+  #     config.logger = GELF::Logger.new("localhost", 12201, "LAN", { :facility => "appname" })
   #     config.log_tags = [:uuid, :remote_ip]
-  #     config.logger = GELF::Logger.new("localhost", 12201, "LAN", { :facility => "appname", :tags => config.log_tags })
+  #     config.logger.log_tags = [:uuid_name, :remote_ip_name] # Same order as config.log_tags
   class Logger < Notifier
     include LoggerCompatibility
   end

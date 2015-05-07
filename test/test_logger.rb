@@ -227,7 +227,7 @@ class TestLogger < Test::Unit::TestCase
 
       should "set custom gelf message with tag name and tag content" do
         # I want the first tag with name 'test_tag'
-        @logger.default_options.merge!('tags' => ['test_tag'])
+        @logger.log_tags = [:test_tag]
 
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&

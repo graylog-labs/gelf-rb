@@ -42,11 +42,14 @@ GEM
       multi_json (~> 1.0)
       multi_xml (~> 0.5)
       rack (~> 1.2)
+    power_assert (0.2.3)
     rack (1.5.2)
     rake (10.1.0)
     rdoc (4.0.1)
       json (~> 1.4)
     shoulda (2.11.3)
+    test-unit (3.0.9)
+      power_assert
 
 PLATFORMS
   ruby
@@ -55,3 +58,4 @@ DEPENDENCIES
   jeweler (~> 1.8.7)
   mocha (~> 0.14.0)
   shoulda (~> 2.11.3)
+  test-unit (~> 3.0.8)

@@ -27,10 +27,14 @@ class TestRubyUdpSender < Test::Unit::TestCase
       end
 
       should "set the proper hostname and ports" do
-        sockets = @sender.send(:sockets)
+        socket = mock
 
-        assert_equal ['localhost', '12201'], sockets[0].remote_address.getnameinfo
-        assert_equal ['localhost', '12202'], sockets[1].remote_address.getnameinfo
+        UDPSocket.stubs(:new).returns(socket)
+
+        socket.expects(:connect).with('localhost', 12201)
+        socket.expects(:connect).with('localhost', 12202)
+
+        @sender.send(:sockets)
       end
     end
 

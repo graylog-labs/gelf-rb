@@ -4,7 +4,7 @@ This is the new GELF gem written by Alexey Palazhchenko. It is based on the old 
 
 Tested with Ruby 1.8.7, 1.9.x. and 2.0.x.
 
-!()[https://travis-ci.org/Graylog2/gelf-rb.png?branch=master]
+![](https://travis-ci.org/Graylog2/gelf-rb.png?branch=master)
 
 ## Usage
 ### Gelf::Notifier

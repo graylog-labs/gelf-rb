@@ -23,6 +23,7 @@ class TestNotifier < Test::Unit::TestCase
     setup do
       Socket.stubs(:gethostname).returns('stubbed_hostname')
       @notifier = GELF::Notifier.new('host', 12345)
+      @notifier_with_exclusions = GELF::Notifier.new('host', 12345,'WAN',{'logging_exclusions' => ['test_notifier']})
       @sender = mock
       @notifier.instance_variable_set('@sender', @sender)
     end
@@ -110,6 +111,11 @@ class TestNotifier < Test::Unit::TestCase
         hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
         assert_match /test_notifier.rb/, hash['file']
         assert_equal line + 1, hash['line']
+      end
+
+      should "set file and line with exclusions" do
+        hash = @notifier_with_exclusions.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
+        assert_match /shoulda\/context.rb/, hash['file']
       end
 
       should "set timestamp to current time if not set" do

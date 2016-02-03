@@ -7,7 +7,7 @@ class TestNotifier < Test::Unit::TestCase
     Socket.expects(:gethostname).returns('default_hostname')
     n = GELF::Notifier.new
     assert_equal [[['localhost', 12201]], 1420], [n.addresses, n.max_chunk_size]
-    assert_equal( { 'version' => '1.0', 'level' => GELF::UNKNOWN,
+    assert_equal( { 'version' => '1.0', 'level' => GELF::UNKNOWN, 'protocol' => 0,
                     'host' => 'default_hostname', 'facility' => 'gelf-rb' },
                   n.default_options )
     n.addresses, n.max_chunk_size, n.default_options = [['graylog2.org', 7777]], :lan, {:host => 'grayhost'}
@@ -153,7 +153,7 @@ class TestNotifier < Test::Unit::TestCase
         asserted = "\x78\x9c"
         if RUBY_VERSION[0,1].to_i >= 2
           puts "I'm a Ruby > 2.0.0. Enforcing ASCII-8BIT. (#{RUBY_VERSION}/#{RUBY_VERSION[0,1].to_i})"
-          # lol well yeah, Rubby. 
+          # lol well yeah, Rubby.
           # http://stackoverflow.com/questions/15843684/binary-string-literals-in-ruby-2-0
           asserted = asserted.b
         end

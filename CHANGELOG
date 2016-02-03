@@ -1,5 +1,5 @@
 2.0.0, 2016-02-02
- * Added GELF support
+ + Added GELF TCP support.
 
 1.3.2, 2011-12-02:
  * support for rubygems-test.

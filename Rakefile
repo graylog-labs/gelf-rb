@@ -11,14 +11,13 @@ begin
 
   Jeweler::Tasks.new do |gem|
     gem.name = "gelf"
-    gem.summary = 'Library to send GELF messages to Graylog2 logging server.'
-    gem.description = 'Library to send GELF messages to Graylog2 logging server. Supports plain-text, GELF messages and exceptions.'
-    gem.email = "alexey.palazhchenko@gmail.com"
+    gem.summary = 'Library to send GELF messages to Graylog logging server.'
+    gem.description = 'Library to send GELF messages to Graylog logging server. Supports plain-text, GELF messages and exceptions via UDP and TCP.'
+    gem.email = "lennart@graylog.com"
     gem.homepage = "http://github.com/Graylog2/gelf-rb"
-    gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann"]
+    gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann", "Zac Sprackett"]
     gem.add_dependency "json"
-    gem.add_development_dependency "shoulda"
-    gem.add_development_dependency "mocha"
+    gem.licenses = ["MIT"]
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 rescue LoadError => e

@@ -19,20 +19,29 @@ This allows you to sent arbitary messages via UDP to your Graylog2 server.
     # Pass any object that responds to .to_hash
     n.notify!(Exception.new)
 
+The recommended default is to send via UDP but you can choose to send via TCP like this:
+
+    n = GELF::Notifier.new("127.0.0.1", 12201, "LAN", { :protocol => GELF::Protocol::TCP })
+
+Note that the `LAN` or `WAN` option is ignored for TCP because no chunking happens. (Read below for more information.)
+
 ### Gelf::Logger
 
 The Gelf::Logger is compatible with the standard Ruby Logger interface and can be used interchangeably.
-Under the hood it uses Gelf::Notifier to send log messages via UDP to Graylog2.
+Under the hood it uses Gelf::Notifier to send log messages via UDP to Graylog.
 
     logger = GELF::Logger.new("localhost", 12201, "WAN", { :facility => "appname" })
-  
+
     logger.debug "foobar"
     logger.info "foobar"
     logger.warn "foobar"
     logger.error "foobar"
     logger.fatal "foobar"
-  
+
     logger << "foobar"
+
+Then `WAN` or `LAN` option influences the UDP chunk size depending on if you send in your own
+network (LAN) or on a longer route (i.e. through the internet) and should be set accordingly.
 
 Since it's compatible with the Logger interface, you can also use it in your Rails application:
 
@@ -50,4 +59,4 @@ Since it's compatible with the Logger interface, you can also use it in your Rai
 
 ## Copyright
 
-Copyright (c) 2010-2015 Lennart Koopmann and Alexey Palazhchenko. See LICENSE for details.
+Copyright (c) 2010-2016 Lennart Koopmann and Alexey Palazhchenko. See LICENSE for details.

@@ -13,42 +13,39 @@ module GELF
       end
 
       def connected?
-        if not @connected
-          begin
-            if @socket.nil?
-              @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-            end
-            @socket.connect_nonblock(@sockaddr)
-          rescue Errno::EISCONN
-            @connected = true
-          rescue Errno::EINPROGRESS, Errno::EALREADY
-            @connected = false
-          rescue SystemCallError
-            @socket = nil
-            @connected = false
-          end
-        end
-        return @connected
+        socket_connect unless @connected
+        @connected
       end
 
       def connect
         @connected = false
-        @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+        socket_connect
+      end
+
+      def matches?(host, port)
+        @host == host and @port == port
+      end
+
+      private
+
+      def socket_connect
         begin
+          if @socket.nil?
+            @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+          end
+
           @socket.connect_nonblock(@sockaddr)
+          @connected = true
         rescue Errno::EISCONN
           @connected = true
         rescue Errno::EINPROGRESS, Errno::EALREADY
           @connected = false
         rescue SystemCallError
+          @connected = false
           @socket = nil
-          return false
         end
-        return true
-      end
 
-      def matches?(host, port)
-        @host == host and @port == port
+        @connected
       end
     end
   end

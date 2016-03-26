@@ -41,7 +41,7 @@ module GELF
           sockets.compact!
           next unless not sockets.empty?
           begin
-            result = select( nil, sockets, nil, 1)
+            result = IO.select(nil, sockets, nil, 1)
             if result
               writers = result[1]
               sent = write_any(writers, message)

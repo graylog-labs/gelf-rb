@@ -1,3 +1,6 @@
+require 'gelf/transport/udp'
+require 'gelf/transport/tcp'
+
 module GELF
   # Graylog2 notifier.
   class Notifier
@@ -28,9 +31,9 @@ module GELF
       self.default_options['protocol'] ||= GELF::Protocol::UDP
 
       if self.default_options['protocol'] == GELF::Protocol::TCP
-        @sender = RubyTcpSender.new([[host, port]])
+        @sender = GELF::Transport::TCP.new([[host, port]])
       else
-        @sender = RubyUdpSender.new([[host, port]])
+        @sender = GELF::Transport::UDP.new([[host, port]])
       end
       self.level_mapping = :logger
     end

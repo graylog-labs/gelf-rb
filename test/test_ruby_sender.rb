@@ -4,7 +4,7 @@ class TestRubyUdpSender < Test::Unit::TestCase
   context "with ruby sender" do
     setup do
       @addresses = [['localhost', 12201], ['localhost', 12202]]
-      @sender = GELF::RubyUdpSender.new(@addresses)
+      @sender = GELF::Transport::UDP.new(@addresses)
       @datagrams1 = %w(d1 d2 d3)
       @datagrams2 = %w(e1 e2 e3)
     end

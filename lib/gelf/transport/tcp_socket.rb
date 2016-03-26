@@ -6,7 +6,9 @@ module GELF
       def initialize(host, port)
         @host = host
         @port = port
+        @socket = nil
         @sockaddr = Socket.sockaddr_in(@port, @host)
+        @connected = false
         connect
       end
 
@@ -31,15 +33,17 @@ module GELF
 
       def connect
         @connected = false
-        socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+        @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
         begin
-          socket.connect_nonblock(@sockaddr)
+          @socket.connect_nonblock(@sockaddr)
         rescue Errno::EISCONN
           @connected = true
+        rescue Errno::EINPROGRESS, Errno::EALREADY
+          @connected = false
         rescue SystemCallError
+          @socket = nil
           return false
         end
-        @socket = socket
         return true
       end
 

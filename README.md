@@ -2,7 +2,7 @@
 
 This is the new GELF gem written by Alexey Palazhchenko. It is based on the old gem by Lennart Koopmann and allows you to send GELF messages to Graylog2 server instances. See [http://www.graylog2.org/about/gelf](http://www.graylog2.org/about/gelf) for more information about GELF and [http://rdoc.info/github/Graylog2/gelf-rb/master/frames](http://rdoc.info/github/Graylog2/gelf-rb/master/frames) for API documentation.
 
-Tested with Ruby 1.8.7, 1.9.x., 2.0.x and 2.1.x
+Tested with Ruby 1.8.7, 1.9.x. and 2.0.x.
 
 ![](https://travis-ci.org/Graylog2/gelf-rb.png?branch=master)
 
@@ -47,19 +47,6 @@ Since it's compatible with the Logger interface, you can also use it in your Rai
 
     # config/environments/production.rb
     config.logger = GELF::Logger.new("localhost", 12201, "WAN", { :facility => "appname" })
-
-### Sending GELF logs using TCP with TLS support
-
-An example of how to use TCP/TLS encryption with a good level of security.
-  logger = GELF::Logger.new("localhost", 12201, "WAN", :protocol: GELF::Protocol::TCP},
-    {:tls: true, :tcp_retry => "0", :check_ssl: true, :tls_version: "TLSv1_2" })
-
-Current config for tcp/tls:
-* tls: TLS option (true/**false**) to add TLS encryption for TCP protocol
-* tls_version: Force a TLS version (like "TLSv1_2") when TCP/TLS protocol is used
-* check_ssl: Check SSL trusted certificate (true/**false**) when TCP/TLS protocol is used
-* tcp_retry: Number of TCP retry to send a message (**0**: ulimited)
-* tcp_retry_ms: Number of ms to wait between each TCP retry
 
 ### Note on Patches/Pull Requests
 

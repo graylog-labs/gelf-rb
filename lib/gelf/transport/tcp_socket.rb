@@ -6,6 +6,7 @@ module GELF
       def initialize(host, port)
         @host = host
         @port = port
+        @sockaddr = Socket.sockaddr_in(@port, @host)
         connect
       end
 
@@ -15,8 +16,7 @@ module GELF
             if @socket.nil?
               @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
             end
-            sockaddr = Socket.sockaddr_in(@port, @host)
-            @socket.connect_nonblock(sockaddr)
+            @socket.connect_nonblock(@sockaddr)
           rescue Errno::EISCONN
             @connected = true
           rescue Errno::EINPROGRESS, Errno::EALREADY
@@ -32,9 +32,8 @@ module GELF
       def connect
         @connected = false
         socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-        sockaddr = Socket.sockaddr_in(@port, @host)
         begin
-          socket.connect_nonblock(sockaddr)
+          socket.connect_nonblock(@sockaddr)
         rescue Errno::EISCONN
           @connected = true
         rescue SystemCallError

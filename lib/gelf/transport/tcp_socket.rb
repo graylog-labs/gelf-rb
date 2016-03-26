@@ -48,11 +48,7 @@ module GELF
       end
 
       def matches?(host, port)
-        if @host == host and @port == port
-          true
-        else
-          false
-        end
+        @host == host and @port == port
       end
     end
   end

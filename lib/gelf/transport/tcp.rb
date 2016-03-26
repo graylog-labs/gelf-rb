@@ -31,15 +31,14 @@ module GELF
       end
 
       def send(message)
-        while true do
+        loop do
           sent = false
           sockets = @sockets.map { |s|
             if s.connected?
               s.socket
             end
-          }
-          sockets.compact!
-          next unless not sockets.empty?
+          }.compact
+          next if sockets.empty?
           begin
             result = IO.select(nil, sockets, nil, 1)
             if result
@@ -61,9 +60,7 @@ module GELF
           rescue Errno::EPIPE
             @sockets.each do |s|
               if s.socket == w
-                s.socket.close
-                s.socket = nil
-                s.connect
+                s.reconnect
               end
             end
           end

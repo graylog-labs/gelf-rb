@@ -1,7 +1,7 @@
 module GELF
   module Transport
     class TCPSocket
-      attr_accessor :socket
+      attr_reader :socket
 
       def initialize(host, port)
         @host = host
@@ -20,6 +20,12 @@ module GELF
       def connect
         @connected = false
         socket_connect
+      end
+
+      def reconnect
+        @socket.close unless @socket.nil?
+        @socket = nil
+        connect
       end
 
       def matches?(host, port)

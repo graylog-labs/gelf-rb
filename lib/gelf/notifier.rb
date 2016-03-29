@@ -4,6 +4,9 @@ require 'gelf/transport/tcp'
 module GELF
   # Graylog2 notifier.
   class Notifier
+    # Maximum number of GELF chunks as per GELF spec
+    MAX_CHUNKS = 128
+
     attr_accessor :enabled, :collect_file_and_line, :rescue_network_errors
     attr_reader :max_chunk_size, :level, :default_options, :level_mapping
 
@@ -225,6 +228,9 @@ module GELF
         id = @random.bytes(8)
         msg_id = Digest::MD5.digest("#{Time.now.to_f}-#{id}")[0, 8]
         num, count = 0, (data.count.to_f / @max_chunk_size).ceil
+        if count > MAX_CHUNKS
+          raise ArgumentError, "Data too big (#{data.count} bytes), would create more than #{MAX_CHUNKS} chunks!"
+        end
         data.each_slice(@max_chunk_size) do |slice|
           datagrams << "\x1e\x0f" + msg_id + [num, count, *slice].pack('C*')
           num += 1

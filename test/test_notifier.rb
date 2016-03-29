@@ -200,6 +200,17 @@ class TestNotifier < Test::Unit::TestCase
           assert_equal datagrams.count, datagram[11].ord
         end
       end
+
+      should "throw an error if more than MAX_CHUNKS will be created" do
+        srand(1) # for stable tests
+        hash = { 'version' => '1.0', 'short_message' => 'message' }
+        hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
+        @notifier.max_chunk_size = 10
+        @notifier.instance_variable_set('@hash', hash)
+        assert_raise(ArgumentError) do
+          @notifier.__send__(:datagrams_from_hash)
+        end
+      end
     end
 
     context "level threshold" do

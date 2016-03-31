@@ -1,40 +1,61 @@
 module GELF
   module Transport
     class UDP
-      attr_accessor :addresses
+      attr_reader :addresses
 
-      def initialize(addresses)
-        @addresses = addresses
+      def initialize(initial_addresses)
+        self.addresses = initial_addresses
       end
 
+      def addresses=(new_addresses)
+        @addresses = new_addresses
+        reset_sockets
+      end
+      
       def send_datagrams(datagrams)
-        socket = get_socket
-        idx = get_address_index
-
-        host, port = @addresses[idx]
-        set_address_index((idx + 1) % @addresses.length)
+        sock = socket
         datagrams.each do |datagram|
-          socket.send(datagram, 0, host, port)
+          sock.send(datagram, 0)
         end
       end
 
       def close
-        socket = get_socket
-        socket.close if socket
+        reset_sockets
       end
 
       private
 
-      def get_socket
-        Thread.current[:gelf_udp_socket] ||= UDPSocket.open
+      def socket
+        idx = socket_index
+        sock = sockets[idx]
+        set_socket_index((idx + 1) % @addresses.length)
+        sock
       end
 
-      def get_address_index
-        Thread.current[:gelf_udp_address_idx] ||= 0
+      def sockets
+        Thread.current[:gelf_udp_sockets] ||= configure_sockets
       end
 
-      def set_address_index(value)
-        Thread.current[:gelf_udp_address_idx] = value
+      def reset_sockets
+        return unless Thread.current.key?(:gelf_udp_sockets)
+        Thread.current[:gelf_udp_sockets].each(&:close)
+        Thread.current[:gelf_udp_sockets] = nil
+      end
+
+      def socket_index
+        Thread.current[:gelf_udp_socket_idx] ||= 0
+      end
+
+      def set_socket_index(value)
+        Thread.current[:gelf_udp_socket_idx] = value
+      end
+
+      def configure_sockets
+        @addresses.map do |host, port|
+          UDPSocket.new(Addrinfo.ip(host).afamily).tap do |socket|
+            socket.connect(host, port)
+          end
+        end
       end
     end
   end

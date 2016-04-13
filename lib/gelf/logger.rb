@@ -21,8 +21,8 @@ module GELF
 
       if message.is_a?(Hash)
         # Stringify keys.
-        message.each do |k,v|
-          message_hash[k.to_s] = message[k]
+        message.each_pair do |k,v|
+          message_hash[k.to_s] = v
         end
       else
         message_hash['short_message'] = message

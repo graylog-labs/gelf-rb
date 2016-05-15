@@ -72,4 +72,3 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<json>, [">= 0"])
   end
 end
-

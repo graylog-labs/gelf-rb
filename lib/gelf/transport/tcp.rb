@@ -1,71 +1,62 @@
-require 'gelf/transport/tcp_socket'
-
 module GELF
   module Transport
     class TCP
       attr_reader :addresses
 
+      # `addresses` Array of [host, port] pairs
       def initialize(addresses)
         @sockets = []
-        addresses.each do |address|
-          s = GELF::Transport::TCPSocket.new(address[0], address[1])
-          @sockets.push(s)
-        end
+        self.addresses = addresses
       end
 
       def addresses=(addresses)
-        addresses.each do |address|
-          found = false
-          # handle pre existing sockets
-          @sockets.each do |socket|
-            if socket.matches?(address[0], address[1])
-              found = true
-              break
-            end
-          end
-          if not found
-            s = GELF::Transport::TCPSocket.new(address[0], address[1])
-            @sockets.push(s)
-          end
+        @addresses = addresses.dup.freeze.tap do |addrs|
+          @sockets.each(&:close)
+          @sockets = addrs.map { |peer| connect(*peer) }
         end
       end
 
       def send(message)
+        return if @addresses.empty?
         loop do
-          sent = false
-          sockets = @sockets.map { |s|
-            if s.connected?
-              s.socket
-            end
-          }.compact
-          next if sockets.empty?
-          begin
-            result = IO.select(nil, sockets, nil, 1)
-            if result
-              writers = result[1]
-              sent = write_any(writers, message)
-            end
-            break if sent
-          rescue SystemCallError, IOError
-          end
+          connected = @sockets.reject(&:closed?)
+          reconnect_all if connected.empty?
+          break if write_any(connected, message)
         end
       end
 
       private
-      def write_any(writers, message)
-        writers.shuffle.each do |w|
-          begin
-            w.write(message)
-            return true
-          rescue Errno::EPIPE
-            @sockets.each do |s|
-              if s.socket == w
-                s.reconnect
-              end
-            end
-          end
+
+      def connect(host, port)
+        socket_class.new(host, port)
+      end
+
+      def reconnect_all
+        @sockets = @sockets.each_with_index.map do |old_socket, index|
+          old_socket.closed? ? connect(*@addresses[index]) : old_socket
         end
-        return false
+      end
+
+      def socket_class
+        if defined?(Celluloid::IO::TCPSocket)
+          Celluloid::IO::TCPSocket
+        else
+          ::TCPSocket
+        end
+      end
+
+      def write_any(sockets, message)
+        sockets.shuffle.each do |socket|
+          return true if write_socket(socket, message)
+        end
+        false
+      end
+
+      def write_socket(socket, message)
+        socket.write(message) > 0
+      rescue IOError, SystemCallError
+        socket.close unless socket.closed?
+        false
       end
     end
   end

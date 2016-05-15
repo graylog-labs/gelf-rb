@@ -35,23 +35,19 @@ module GELF
       private
 
       def socket_connect
-        begin
-          if @socket.nil?
-            @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
-          end
-
-          @socket.connect_nonblock(@sockaddr)
-          @connected = true
-        rescue Errno::EISCONN
-          @connected = true
-        rescue Errno::EINPROGRESS, Errno::EALREADY
-          @connected = false
-        rescue SystemCallError
-          @connected = false
-          @socket = nil
+        if @socket.nil?
+          @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
         end
 
-        @connected
+        @socket.connect_nonblock(@sockaddr)
+        @connected = true
+      rescue Errno::EISCONN
+        @connected = true
+      rescue Errno::EINPROGRESS, Errno::EALREADY
+        @connected = false
+      rescue SystemCallError
+        @socket = nil
+        @connected = false
       end
     end
   end

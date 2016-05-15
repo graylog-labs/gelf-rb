@@ -6,6 +6,8 @@ module GELF
   class Notifier
     # Maximum number of GELF chunks as per GELF spec
     MAX_CHUNKS = 128
+    MAX_CHUNK_SIZE_WAN = 1420
+    MAX_CHUNK_SIZE_LAN = 8154
 
     attr_accessor :enabled, :collect_file_and_line, :rescue_network_errors
     attr_reader :max_chunk_size, :level, :default_options, :level_mapping
@@ -51,12 +53,12 @@ module GELF
 
     def host
       warn "GELF::Notifier#host is deprecated. Use #addresses instead."
-      self.addresses.first[0]
+      addresses.first[0]
     end
 
     def port
       warn "GELF::Notifier#port is deprecated. Use #addresses instead."
-      self.addresses.first[1]
+      addresses.first[1]
     end
 
     # +size+ may be a number of bytes, 'WAN' (1420 bytes) or 'LAN' (8154).
@@ -64,9 +66,9 @@ module GELF
     def max_chunk_size=(size)
       case size.to_s.downcase
         when 'wan'
-          @max_chunk_size = 1420
+          @max_chunk_size = MAX_CHUNK_SIZE_WAN
         when 'lan'
-          @max_chunk_size = 8154
+          @max_chunk_size = MAX_CHUNK_SIZE_LAN
         else
           @max_chunk_size = size.to_int
       end
@@ -131,18 +133,17 @@ module GELF
     end
 
     GELF::Levels.constants.each do |const|
-      class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}(*args)                          # def debug(*args)
-          notify_with_level(GELF::#{const}, *args)            #   notify_with_level(GELF::DEBUG, *args)
-        end                                                   # end
-      EOT
+      define_method(const.downcase) do |*args|
+        level = GELF.const_get(const)
+        notify_with_level(level, *args)
+      end
     end
 
   private
     def notify_with_level(message_level, *args)
       notify_with_level!(message_level, *args)
     rescue SocketError, SystemCallError
-      raise unless self.rescue_network_errors
+      raise unless rescue_network_errors
     rescue Exception => exception
       notify_with_level!(GELF::UNKNOWN, exception)
     end
@@ -152,7 +153,7 @@ module GELF
       extract_hash(*args)
       @hash['level'] = message_level unless message_level.nil?
       if @hash['level'] >= level
-        if self.default_options['protocol'] == GELF::Protocol::TCP
+        if default_options['protocol'] == GELF::Protocol::TCP
           validate_hash
           @sender.send(@hash.to_json + "\0")
         else
@@ -182,7 +183,10 @@ module GELF
 
     def self.extract_hash_from_exception(exception)
       bt = exception.backtrace || ["Backtrace is not available."]
-      { 'short_message' => "#{exception.class}: #{exception.message}", 'full_message' => "Backtrace:\n" + bt.join("\n") }
+      {
+        'short_message' => "#{exception.class}: #{exception.message}",
+        'full_message' => "Backtrace:\n" + bt.join("\n")
+      }
     end
 
     # Converts Hoptoad-specific keys in +@hash+ to Graylog2-specific.
@@ -257,7 +261,7 @@ module GELF
     def self.stringify_keys(hash)
       hash.keys.each do |key|
         value, key_s = hash.delete(key), key.to_s
-        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.has_key?(key_s)
+        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.key?(key_s)
         hash[key_s] = value
       end
       hash

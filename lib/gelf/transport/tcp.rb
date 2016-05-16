@@ -1,12 +1,17 @@
 require 'gelf/transport/tcp_socket'
+require 'gelf/transport/tcp_tls_socket'
 
 module GELF
   module Transport
     class TCP
       attr_reader :addresses
 
-      def initialize(addresses)
+      # supported options:
+      # keepalive [Boolean] whether to turn on TCP keepalive on the socket
+      # tls [TrueClass, FalseClass, Hash] see {GELF::Transport::TCPTLSSocket} for a list of options
+      def initialize(addresses, options={})
         @sockets = []
+        @options = sanitize_options(options)
         @addresses = addresses.each { |a| create_socket(*a) }
       end
 
@@ -34,6 +39,17 @@ module GELF
 
       private
 
+      def sanitize_options(options)
+        case options['tls']
+        when TrueClass then options['tls'] = {}
+        when FalseClass then options.delete('tls')
+        when Hash then # all is well
+        else
+          raise ArgumentError, "Unsupported TLS options type #{options['tls'].class}"
+        end
+        options
+      end
+
       def write_any(writers, message)
         writers.shuffle.each do |w|
           begin
@@ -47,7 +63,11 @@ module GELF
       end
 
       def create_socket(host, port)
-        s = GELF::Transport::TCPSocket.new(host, port)
+        s = if @options['tls']
+          GELF::Transport::TCPTLSSocket.new(host, port, @options)
+        else
+          GELF::Transport::TCPSocket.new(host, port, !!@options['keepalive'])
+        end
         @sockets.push(s)
       end
     end

@@ -32,7 +32,8 @@ module GELF
       self.default_options['protocol'] ||= GELF::Protocol::UDP
 
       if self.default_options['protocol'] == GELF::Protocol::TCP
-        @sender = GELF::Transport::TCP.new([[host, port]])
+        tcp_options = self.default_options.delete('tcp') || {}
+        @sender = GELF::Transport::TCP.new([[host, port]], tcp_options)
       else
         @sender = GELF::Transport::UDP.new([[host, port]])
       end
@@ -140,6 +141,7 @@ module GELF
     end
 
   private
+
     def notify_with_level(message_level, *args)
       notify_with_level!(message_level, *args)
     rescue SocketError, SystemCallError
@@ -262,6 +264,7 @@ module GELF
       hash.keys.each do |key|
         value, key_s = hash.delete(key), key.to_s
         raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.key?(key_s)
+        value = stringify_keys(value) if value.is_a?(Hash)
         hash[key_s] = value
       end
       hash

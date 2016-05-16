@@ -3,10 +3,11 @@ module GELF
     class TCPSocket
       attr_reader :socket
 
-      def initialize(host, port)
+      def initialize(host, port, keepalive=false)
         @host = host
         @port = port
         @socket = nil
+        @keepalive = keepalive
         @sockaddr = Socket.sockaddr_in(@port, @host)
         @connected = false
         connect
@@ -37,6 +38,7 @@ module GELF
       def socket_connect
         if @socket.nil?
           @socket = Socket.new(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+          setup_keepalive if @keepalive
         end
 
         @socket.connect_nonblock(@sockaddr)
@@ -48,6 +50,14 @@ module GELF
       rescue SystemCallError
         @socket = nil
         @connected = false
+      end
+
+      def setup_keepalive
+        @socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+        # It may be useful to set up more elaborate timeouts depending on the situation
+        # @socket.setsockopt(Socket::SOL_TCP, Socket::TCP_KEEPIDLE, 50)
+        # @socket.setsockopt(Socket::SOL_TCP, Socket::TCP_KEEPINTVL, 10)
+        # @socket.setsockopt(Socket::SOL_TCP, Socket::TCP_KEEPCNT, 5)
       end
     end
   end

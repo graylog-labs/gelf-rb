@@ -37,15 +37,17 @@ module GELF
 
     # Redefines methods in +Notifier+.
     GELF::Levels.constants.each do |const|
-      class_eval <<-EOT, __FILE__, __LINE__ + 1
-        def #{const.downcase}(progname = nil, &block)   # def debug(progname = nil, &block)
-          add(GELF::#{const}, nil, progname, &block)    #   add(GELF::DEBUG, nil, progname, &block)
-        end                                             # end
+      method_name = const.downcase
+      
+      define_method(method_name) do |progname=nil, &block|
+        const_level = GELF.const_get(const)
+        add(const_level, nil, progname, &block)
+      end
 
-        def #{const.downcase}?                          # def debug?
-          GELF::#{const} >= level                       #   GELF::DEBUG >= level
-        end                                             # end
-      EOT
+      define_method("#{method_name}?") do
+        const_level = GELF.const_get(const)
+        const_level >= level
+      end
     end
 
     def <<(message)

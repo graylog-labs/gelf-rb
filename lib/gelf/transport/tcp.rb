@@ -1,71 +1,74 @@
 require 'gelf/transport/tcp_socket'
+require 'gelf/transport/tcp_tls_socket'
 
 module GELF
   module Transport
     class TCP
       attr_reader :addresses
 
-      def initialize(addresses)
+      # supported options:
+      # keepalive [Boolean] whether to turn on TCP keepalive on the socket
+      # tls [TrueClass, FalseClass, Hash] see {GELF::Transport::TCPTLSSocket} for a list of options
+      def initialize(addresses, options={})
         @sockets = []
-        addresses.each do |address|
-          s = GELF::Transport::TCPSocket.new(address[0], address[1])
-          @sockets.push(s)
-        end
+        @options = sanitize_options(options)
+        @addresses = addresses.each { |a| create_socket(*a) }
       end
 
       def addresses=(addresses)
-        addresses.each do |address|
-          found = false
-          # handle pre existing sockets
-          @sockets.each do |socket|
-            if socket.matches?(address[0], address[1])
-              found = true
-              break
-            end
-          end
-          if not found
-            s = GELF::Transport::TCPSocket.new(address[0], address[1])
-            @sockets.push(s)
-          end
+        @addresses = addresses.each do |address|
+          # handle pre-existing sockets
+          next if @sockets.any? { |s| s.matches?(*address) }
+          create_socket(*address)
         end
       end
 
       def send(message)
         loop do
-          sent = false
-          sockets = @sockets.map { |s|
-            if s.connected?
-              s.socket
-            end
-          }.compact
+          sockets = @sockets.find_all(&:connected?).map(&:socket)
           next if sockets.empty?
           begin
             result = IO.select(nil, sockets, nil, 1)
-            if result
-              writers = result[1]
-              sent = write_any(writers, message)
-            end
-            break if sent
+            next if result.nil?
+            writers = result[1]
+            break if write_any(writers, message)
           rescue SystemCallError, IOError
           end
         end
       end
 
       private
+
+      def sanitize_options(options)
+        case options['tls']
+        when TrueClass then options['tls'] = {}
+        when FalseClass then options.delete('tls')
+        when Hash then # all is well
+        else
+          raise ArgumentError, "Unsupported TLS options type #{options['tls'].class}"
+        end
+        options
+      end
+
       def write_any(writers, message)
         writers.shuffle.each do |w|
           begin
             w.write(message)
             return true
           rescue Errno::EPIPE
-            @sockets.each do |s|
-              if s.socket == w
-                s.reconnect
-              end
-            end
+            @sockets.find_all { |s| s.socket == w }.each(&:reconnect)
           end
         end
-        return false
+        false
+      end
+
+      def create_socket(host, port)
+        s = if @options['tls']
+          GELF::Transport::TCPTLSSocket.new(host, port, @options)
+        else
+          GELF::Transport::TCPSocket.new(host, port, !!@options['keepalive'])
+        end
+        @sockets.push(s)
       end
     end
   end

@@ -205,9 +205,7 @@ module GELF
 
     def set_file_and_line
       stack = caller
-      begin
-        frame = stack.shift
-      end while frame.include?(LIB_GELF_PATTERN)
+      frame = stack.find { |f| !f.include?(LIB_GELF_PATTERN) }
       match = CALLER_REGEXP.match(frame)
       @hash['file'] = match[1]
       @hash['line'] = match[2].to_i

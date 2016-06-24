@@ -5,7 +5,7 @@ module GELF
     attr_accessor :formatter
 
     # Use it like Logger#add... or better not to use at all.
-    def add(level, message = nil, progname = nil, &block)
+    def add(level, message = nil, progname = nil)
       progname ||= default_options['facility']
 
       if message.nil?
@@ -21,11 +21,11 @@ module GELF
 
       if message.is_a?(Hash)
         # Stringify keys.
-        message.each do |k,v|
-          message_hash[k.to_s] = message[k]
+        message.each do |key, value|
+          message_hash[key.to_s] = value
         end
       else
-        message_hash['short_message'] = message
+        message_hash['short_message'] = message.to_s
       end
 
       if message.is_a?(Exception)
@@ -38,7 +38,7 @@ module GELF
     # Redefines methods in +Notifier+.
     GELF::Levels.constants.each do |const|
       method_name = const.downcase
-      
+
       define_method(method_name) do |progname=nil, &block|
         const_level = GELF.const_get(const)
         add(const_level, nil, progname, &block)

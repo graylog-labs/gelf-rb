@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 group :development do
   gem "shoulda", "~> 2.11.3"
-  gem "jeweler", "~> 1.8.7"
-  gem "mocha", "~> 0.14.0"
-  gem "test-unit", "~> 3.0.8"
+  gem "jeweler", "~> 2.0.0"
+  gem "mocha", "~> 1.1.0"
+  gem "test-unit", "~> 3.2.0"
 end

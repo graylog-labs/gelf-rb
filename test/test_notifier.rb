@@ -52,14 +52,14 @@ class TestNotifier < Test::Unit::TestCase
         e.set_backtrace(caller)
         hash = @notifier.__send__(:extract_hash, e)
         assert_equal 'RuntimeError: message', hash['short_message']
-        assert_match /Backtrace/, hash['full_message']
+        assert_match(/Backtrace/, hash['full_message'])
         assert_equal GELF::ERROR, hash['level']
       end
 
       should "work with exception without backtrace" do
         e = RuntimeError.new('message')
         hash = @notifier.__send__(:extract_hash, e)
-        assert_match /Backtrace is not available/, hash['full_message']
+        assert_match(/Backtrace is not available/, hash['full_message'])
       end
 
       should "work with exception and hash" do
@@ -108,7 +108,7 @@ class TestNotifier < Test::Unit::TestCase
       should "set file and line" do
         line = __LINE__
         hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
-        assert_match /test_notifier.rb/, hash['file']
+        assert_match(/test_notifier.rb/, hash['file'])
         assert_equal line + 1, hash['line']
       end
 

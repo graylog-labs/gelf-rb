@@ -1,10 +1,10 @@
-3.0.0, 2016-06-25
- + Overhauled TCP support
- + Includes automatic support for Celluloid::IO if available
- + Added TLS support to TCP transport
- - removed support for ancient Rubygems versions
- - removed support for 1.9.2
- - removed deprecated `host` and `port` methods on GELF::Notifier
+3.0.0, 2016-08-21
+ + Overhaul TCP support
+ + Include automatic support for Celluloid::IO if available
+ + Add TLS support to TCP transport
+ - Remove support for ancient Rubygems versions
+ - Remove support for Ruby 1.9.2 (1.9.3 works!)
+ - Remove already-deprecated `host` and `port` methods on GELF::Notifier
 
 2.0.0, 2016-02-02
  + Added GELF TCP support.

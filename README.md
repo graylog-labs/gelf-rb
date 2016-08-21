@@ -4,7 +4,7 @@ This is the new GELF gem written by Alexey Palazhchenko. It is based on the old 
 
 Tested with Ruby 1.9, 2.0, 2.1, 2.2 and 2.3.
 
-![](https://travis-ci.org/Graylog2/gelf-rb.png?branch=master)
+![](https://travis-ci.org/Graylog2/gelf-rb.png?branch=master) [![Code Climate](https://codeclimate.com/github/Graylog2/gelf-rb/badges/gpa.svg)](https://codeclimate.com/github/Graylog2/gelf-rb)
 
 ## Usage
 ### Gelf::Notifier

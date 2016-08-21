@@ -13,9 +13,9 @@ begin
     gem.name = "gelf"
     gem.summary = 'Library to send GELF messages to Graylog logging server.'
     gem.description = 'Library to send GELF messages to Graylog logging server. Supports plain-text, GELF messages and exceptions via UDP and TCP.'
-    gem.email = "lennart@graylog.com"
+    gem.email = "mail@marcusilgner.com"
     gem.homepage = "http://github.com/Graylog2/gelf-rb"
-    gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann", "Zac Sprackett"]
+    gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann", "Zac Sprackett", "Marcus Ilgner"]
     gem.add_dependency "json"
     gem.licenses = ["MIT"]
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings

@@ -5,7 +5,7 @@ module GELF
     attr_accessor :formatter
 
     # Use it like Logger#add... or better not to use at all.
-    def add(level, message = nil, progname = nil)
+    def add(level, message = nil, progname = nil, &block)
       progname ||= default_options['facility']
 
       if message.nil?
@@ -20,9 +20,8 @@ module GELF
       message_hash = { 'facility' => progname }
 
       if message.is_a?(Hash)
-        # Stringify keys.
         message.each do |key, value|
-          message_hash[key.to_s] = value
+          message_hash[key.to_s] = value.to_s
         end
       else
         message_hash['short_message'] = message.to_s
@@ -32,7 +31,9 @@ module GELF
         message_hash.merge!(self.class.extract_hash_from_exception(message))
       end
 
-      notify_with_level(level, message_hash)
+      if message_hash.key?('short_message') && !message_hash['short_message'].empty?
+        notify_with_level(level, message_hash)
+      end
     end
 
     # Redefines methods in +Notifier+.

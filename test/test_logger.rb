@@ -14,6 +14,16 @@ class TestLogger < Test::Unit::TestCase
     end
 
     context "#add" do
+      # logger.add(Logger::INFO, nil)
+      should 'implement add method with level, message and facility from defaults' do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'gelf-rb' &&
+          hash['facility'] == 'gelf-rb'
+        end
+        @logger.add(GELF::INFO, nil)
+      end
+
       # logger.add(Logger::INFO, 'Message')
       should "implement add method with level and message from parameters, facility from defaults" do
         @logger.expects(:notify_with_level!).with do |level, hash|
@@ -119,9 +129,6 @@ class TestLogger < Test::Unit::TestCase
         @logger.add(GELF::INFO, nil, 'Facility') { RuntimeError.new('Boom!') }
       end
 
-
-  #####################
-
       # logger.add(Logger::INFO, { :short_message => "Some message" })
       should "implement add method with level and message from hash, facility from defaults" do
         @logger.expects(:notify_with_level!).with do |level, hash|
@@ -154,6 +161,26 @@ class TestLogger < Test::Unit::TestCase
           hash['_zomg'] == 'wat'
         end
         @logger.add(GELF::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat"}, "somefac")
+      end
+
+      should 'implement add method with level and ignore zero-length message strings' do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, '')
+      end
+
+      should 'implement add method with level and ignore hash without short_message key' do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, { :message => 'Some message' })
+      end
+
+      should 'implement add method with level and ignore hash with zero-length short_message entry' do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, { :short_message => '' })
+      end
+
+      should 'implement add method with level and ignore hash with nil short_message entry' do
+        @logger.expects(:notify_with_level!).never
+        @logger.add(GELF::INFO, { :short_message => nil })
       end
     end
 
@@ -209,7 +236,6 @@ class TestLogger < Test::Unit::TestCase
     should "have formatter attribute" do
       @logger.formatter
     end
-
 
     context "close" do
       should "close socket" do

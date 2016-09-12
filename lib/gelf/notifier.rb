@@ -152,14 +152,14 @@ module GELF
 
     def notify_with_level!(message_level, *args)
       return unless @enabled
-      extract_hash(*args)
-      @hash['level'] = message_level unless message_level.nil?
-      if @hash['level'] >= level
+      hash = extract_hash(*args)
+      hash['level'] = message_level unless message_level.nil?
+      if hash['level'] >= level
         if default_options['protocol'] == GELF::Protocol::TCP
-          validate_hash
-          @sender.send(@hash.to_json + "\0")
+          validate_hash(hash)
+          @sender.send(hash.to_json + "\0")
         else
-          @sender.send_datagrams(datagrams_from_hash)
+          @sender.send_datagrams(datagrams_from_hash(hash))
         end
       end
     end
@@ -175,12 +175,12 @@ module GELF
                        { 'short_message' => object.to_s }
                      end
 
-      @hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
-      convert_hoptoad_keys_to_graylog2
-      set_file_and_line if @collect_file_and_line
-      set_timestamp
-      check_presence_of_mandatory_attributes
-      @hash
+      hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
+      convert_hoptoad_keys_to_graylog2(hash)
+      set_file_and_line(hash) if @collect_file_and_line
+      set_timestamp(hash)
+      check_presence_of_mandatory_attributes(hash)
+      hash
     end
 
     def self.extract_hash_from_exception(exception)
@@ -192,10 +192,10 @@ module GELF
     end
 
     # Converts Hoptoad-specific keys in +@hash+ to Graylog2-specific.
-    def convert_hoptoad_keys_to_graylog2
-      if @hash['short_message'].to_s.empty?
-        if @hash.has_key?('error_class') && @hash.has_key?('error_message')
-          @hash['short_message'] = @hash.delete('error_class') + ': ' + @hash.delete('error_message')
+    def convert_hoptoad_keys_to_graylog2(hash)
+      if hash['short_message'].to_s.empty?
+        if hash.has_key?('error_class') && hash.has_key?('error_message')
+          hash['short_message'] = hash.delete('error_class') + ': ' + hash.delete('error_message')
         end
       end
     end
@@ -203,28 +203,28 @@ module GELF
     CALLER_REGEXP = /^(.*):(\d+).*/
     LIB_GELF_PATTERN = File.join('lib', 'gelf')
 
-    def set_file_and_line
+    def set_file_and_line(hash)
       stack = caller
       frame = stack.find { |f| !f.include?(LIB_GELF_PATTERN) }
       match = CALLER_REGEXP.match(frame)
-      @hash['file'] = match[1]
-      @hash['line'] = match[2].to_i
+      hash['file'] = match[1]
+      hash['line'] = match[2].to_i
     end
 
-    def set_timestamp
-      @hash['timestamp'] = Time.now.utc.to_f if @hash['timestamp'].nil?
+    def set_timestamp(hash)
+      hash['timestamp'] = Time.now.utc.to_f if hash['timestamp'].nil?
     end
 
-    def check_presence_of_mandatory_attributes
+    def check_presence_of_mandatory_attributes(hash)
       %w(version short_message host).each do |attribute|
-        if @hash[attribute].to_s.empty?
+        if hash[attribute].to_s.empty?
           raise ArgumentError.new("#{attribute} is missing. Options version, short_message and host must be set.")
         end
       end
     end
 
-    def datagrams_from_hash
-      data = serialize_hash
+    def datagrams_from_hash(hash)
+      data = serialize_hash(hash)
       datagrams = []
 
       # Maximum total size is 8192 byte for UDP datagram. Split to chunks if bigger. (GELF v1.0 supports chunking)
@@ -246,15 +246,15 @@ module GELF
       datagrams
     end
 
-    def validate_hash
-      raise ArgumentError.new("Hash is empty.") if @hash.nil? || @hash.empty?
-      @hash['level'] = @level_mapping[@hash['level']]
+    def validate_hash(hash)
+      raise ArgumentError.new("Hash is empty.") if hash.nil? || hash.empty?
+      hash['level'] = @level_mapping[hash['level']]
     end
 
-    def serialize_hash
-      validate_hash
+    def serialize_hash(hash)
+      validate_hash(hash)
 
-      Zlib::Deflate.deflate(@hash.to_json).bytes
+      Zlib::Deflate.deflate(hash.to_json).bytes
     end
 
     def self.stringify_keys(hash)

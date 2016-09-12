@@ -129,8 +129,8 @@ class TestNotifier < Test::Unit::TestCase
     context "serialize_hash" do
       setup do
         @notifier.level_mapping = :direct
-        @notifier.instance_variable_set('@hash', { 'level' => GELF::WARN, 'field' => 'value' })
-        @data = @notifier.__send__(:serialize_hash)
+        hash = { 'level' => GELF::WARN, 'field' => 'value' }
+        @data = @notifier.__send__(:serialize_hash, hash)
         assert @data.respond_to?(:each)  # Enumerable::Enumerator in 1.8, ::Enumerator in 1.9, so...
         @deserialized_hash = JSON.parse(Zlib::Inflate.inflate(@data.to_a.pack('C*')))
         assert_instance_of Hash, @deserialized_hash
@@ -145,8 +145,8 @@ class TestNotifier < Test::Unit::TestCase
 
     context "datagrams_from_hash" do
       should "not split short data" do
-        @notifier.instance_variable_set('@hash', { 'version' => '1.0', 'short_message' => 'message' })
-        datagrams = @notifier.__send__(:datagrams_from_hash)
+        hash = { 'version' => '1.0', 'short_message' => 'message' }
+        datagrams = @notifier.__send__(:datagrams_from_hash, hash)
         assert_equal 1, datagrams.count
         assert_instance_of String, datagrams[0]
 
@@ -165,8 +165,7 @@ class TestNotifier < Test::Unit::TestCase
         srand(1) # for stable tests
         hash = { 'version' => '1.0', 'short_message' => 'message' }
         hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
-        @notifier.instance_variable_set('@hash', hash)
-        datagrams = @notifier.__send__(:datagrams_from_hash)
+        datagrams = @notifier.__send__(:datagrams_from_hash, hash)
         assert_equal 2, datagrams.count
         datagrams.each_index do |i|
           datagram = datagrams[i]
@@ -188,8 +187,7 @@ class TestNotifier < Test::Unit::TestCase
         srand(1) # for stable tests
         hash = { 'version' => '1.0', 'short_message' => 'message' }
         hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
-        @notifier.instance_variable_set('@hash', hash)
-        datagrams = @notifier.__send__(:datagrams_from_hash)
+        datagrams = @notifier.__send__(:datagrams_from_hash, hash)
         assert_equal 2, datagrams.count
         datagrams.each_index do |i|
           datagram = datagrams[i]

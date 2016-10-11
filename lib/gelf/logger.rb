@@ -7,14 +7,11 @@ module GELF
     # Use it like Logger#add... or better not to use at all.
     def add(level, message = nil, progname = nil, &block)
       progname ||= default_options['facility']
+      message ||= block.call unless block.nil?
 
       if message.nil?
-        if block_given?
-          message = yield
-        else
-          message = progname
-          progname = default_options['facility']
-        end
+        message = progname
+        progname = default_options['facility']
       end
 
       message_hash = { 'facility' => progname }

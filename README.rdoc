@@ -1,6 +1,6 @@
 = GELF
 
-This is the new GELF gem written by Alexey Palazhchenko. It is based on the old gem by Lennart Koopmann and allows you to send GELF messages to Graylog2 server instances. See http://www.graylog2.org/about/gelf for more information about GELF and http://rdoc.info/github/Graylog2/gelf-rb/master/frames for API documentation.
+This is the new GELF gem written by Alexey Palazhchenko. It is based on the old gem by Lennart Koopmann and allows you to send GELF messages to Graylog2 server instances. See http://docs.graylog.org/en/stable/pages/gelf.html for more information about GELF and http://rdoc.info/github/Graylog2/gelf-rb/master/frames for API documentation.
 
 Works with Ruby 1.8.7, 1.9.x and JRuby. 1.8.6 is not supported.
 

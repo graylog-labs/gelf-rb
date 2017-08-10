@@ -13,4 +13,4 @@ deploy:
   gemspec: gelf.gemspec
   on:
     tags: true
-    repo: Graylog2/gelf-rb
+    repo: graylog-labs/gelf-rb

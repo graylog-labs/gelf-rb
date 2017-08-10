@@ -14,24 +14,37 @@ module GELF
     ERROR   = 3
     FATAL   = 4
     UNKNOWN = 5
+    # Additional native syslog severities. These will work in direct mapping mode
+    # only, for compatibility with syslog sources unrelated to Logger.
+    EMERGENCY     = 10
+    ALERT         = 11
+    CRITICAL      = 12
+    WARNING       = 14
+    NOTICE        = 15
+    INFORMATIONAL = 16
   end
 
   include Levels
 
   # Maps Ruby Logger levels to syslog levels as SyslogLogger and syslogger gems. This one is default.
   LOGGER_MAPPING = {DEBUG   => 7, # Debug
-                    INFO    => 6, # Info
+                    INFO    => 6, # Informational
                     WARN    => 5, # Notice
                     ERROR   => 4, # Warning
                     FATAL   => 3, # Error
                     UNKNOWN => 1} # Alert – shouldn't be used
 
-  # Maps Ruby Logger levels to syslog levels as is.
-  DIRECT_MAPPING = {DEBUG   => 7, # Debug
-                    INFO    => 6, # Info
-                    # skip 5 Notice
-                    WARN    => 4, # Warning
-                    ERROR   => 3, # Error
-                    FATAL   => 2, # Critical
-                    UNKNOWN => 1} # Alert – shouldn't be used
+  # Maps Syslog or Ruby Logger levels directly to standard syslog numerical severities.
+  DIRECT_MAPPING = {DEBUG         => 7, # Debug
+                    INFORMATIONAL => 6, # Informational (syslog source)
+                    INFO          => 6, # Informational (Logger source)
+                    NOTICE        => 5, # Notice
+                    WARNING       => 4, # Warning (syslog source)
+                    WARN          => 4, # Warning (Logger source)
+                    ERROR         => 3, # Error
+                    CRITICAL      => 2, # Critical (syslog source)
+                    FATAL         => 2, # Critical (Logger source)
+                    ALERT         => 1, # Alert (syslog source)
+                    UNKNOWN       => 1, # Alert - shouldn't be used (Logger source)
+                    EMERGENCY     => 0} # Emergency (syslog source)
 end

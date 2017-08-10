@@ -1,6 +1,9 @@
 module GELF
   # Methods for compatibility with Ruby Logger.
   module LoggerCompatibility
+
+    attr_accessor :formatter
+
     # Does nothing.
     def close
     end
@@ -20,9 +23,30 @@ module GELF
                             [args[0], default_options['facility']]
                           end
 
-      hash = {'short_message' => message, 'facility' => progname}
+      if message.is_a?(Hash)
+        # Stringify keys.
+        hash = {}
+        message.each do |k,v|
+          hash[k.to_s] = message[k]
+        end
+
+        hash['facility'] = progname
+      else
+        hash = {'short_message' => message, 'facility' => progname}
+      end
+
+      hash['facility'] = default_options['facility'] unless progname
+
       hash.merge!(self.class.extract_hash_from_exception(message)) if message.is_a?(Exception)
-      notify_with_level(level, hash)
+
+      if default_options['tags']
+        tags = current_tags
+        default_options['tags'].each_with_index do |tag_name, index|
+          hash.merge!("_#{tag_name}" => tags[index]) if tags[index]
+        end
+      end
+
+      notify_with_level(level, format_message(level, Time.now, progname, hash))
     end
 
     # Redefines methods in +Notifier+.
@@ -42,13 +66,42 @@ module GELF
     def <<(message)
       notify_with_level(GELF::UNKNOWN, 'short_message' => message)
     end
+
+    def tagged(*new_tags)
+      tags     = current_tags
+      new_tags = new_tags.flatten.reject(&:blank?)
+      tags.concat new_tags
+      yield self
+    ensure
+      tags.pop(new_tags.size)
+    end
+
+    def current_tags
+      Thread.current[:gelf_tagged_logging_tags] ||= []
+    end
+
+    def format_message(severity, datetime, progname, message)
+      return message if formatter.nil?
+      formatter.call(severity, datetime, progname, message)
+    end
+
   end
 
   # Graylog2 notifier, compatible with Ruby Logger.
   # You can use it with Rails like this:
   #     config.logger = GELF::Logger.new("localhost", 12201, "WAN", { :facility => "appname" })
   #     config.colorize_logging = false
+  #
+  # Tagged logging (with tags from rack middleware) (order of tags is important)
+  # Adds custom gelf messages: { '_uuid_name' => <uuid>, '_remote_ip_name' => <remote_ip> }
+  #     config.log_tags = [:uuid, :remote_ip]
+  #     config.colorize_logging = false
+  #     config.logger = GELF::Logger.new("localhost", 12201, 'LAN', {
+  #       tags: [:uuid_name, :remote_ip_name], # same order as config.log_tags
+  #       facility: 'Jobmensa 2'
+  #     })
   class Logger < Notifier
     include LoggerCompatibility
   end
+
 end

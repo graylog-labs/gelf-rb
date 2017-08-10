@@ -163,13 +163,45 @@ class TestNotifier < Test::Unit::TestCase
         datagrams = @notifier.__send__(:datagrams_from_hash, { 'version' => '1.0', 'short_message' => 'message' })
         assert_equal 1, datagrams.count
         assert_instance_of String, datagrams[0]
-        assert_equal "\x78\x9c", datagrams[0][0..1] # zlib header
+
+        asserted = "\x78\x9c"
+        if RUBY_VERSION[0,1].to_i >= 2
+          puts "I'm a Ruby > 2.0.0. Enforcing ASCII-8BIT. (#{RUBY_VERSION}/#{RUBY_VERSION[0,1].to_i})"
+          # lol well yeah, Rubby. 
+          # http://stackoverflow.com/questions/15843684/binary-string-literals-in-ruby-2-0
+          asserted = asserted.b
+        end
+
+        assert_equal asserted, datagrams[0][0..1] # zlib header
       end
 
       should "split long data" do
         srand(1) # for stable tests
         hash = { 'version' => '1.0', 'short_message' => 'message' }
         hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
+        datagrams = @notifier.__send__(:datagrams_from_hash, hash)
+        assert_equal 2, datagrams.count
+        datagrams.each_index do |i|
+          datagram = datagrams[i]
+          assert_instance_of String, datagram
+          assert datagram[0..1] == "\x1e\x0f" # chunked GELF magic number
+          # datagram[2..9] is a message id
+          assert_equal i, datagram[10].ord
+          assert_equal datagrams.count, datagram[11].ord
+        end
+      end
+
+      should "split long data when subclassed" do
+        class MyNotifier < GELF::Notifier; end
+
+        @notifier = MyNotifier.new('host', 1234)
+        @sender = mock
+        @notifier.instance_variable_set('@sender', @sender)
+
+        srand(1) # for stable tests
+        hash = { 'version' => '1.0', 'short_message' => 'message' }
+        hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
+        @notifier.instance_variable_set('@hash', hash)
         datagrams = @notifier.__send__(:datagrams_from_hash, hash)
         assert_equal 2, datagrams.count
         datagrams.each_index do |i|

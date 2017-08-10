@@ -66,6 +66,27 @@ class TestLogger < Test::Unit::TestCase
         @logger.add(GELF::INFO, 'Message', 'Facility')
       end
 
+      # logger.add(Logger::INFO, 'Message', 'Facility')
+      should "use facility from initialization if facility is nil" do
+        logger = GELF::Logger.new('localhost', 12202, 'WAN', :facility => 'foo-bar')
+        logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Message' &&
+          hash['facility'] == 'foo-bar'
+        end
+        logger.add(GELF::INFO, 'Message', nil)
+      end
+
+      # logger.add(Logger::INFO, 'Message', 'Facility')
+      should "use default facility if facility is nil" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Message' &&
+          hash['facility'] == 'gelf-rb'
+        end
+        @logger.add(GELF::INFO, 'Message', nil)
+      end
+
       # logger.add(Logger::INFO, RuntimeError.new('Boom!'), 'Facility')
       should "implement add method with level, exception and facility from parameters" do
         @logger.expects(:notify_with_level!).with do |level, hash|
@@ -96,6 +117,43 @@ class TestLogger < Test::Unit::TestCase
           hash['facility'] == 'Facility'
         end
         @logger.add(GELF::INFO, 'Facility') { RuntimeError.new('Boom!') }
+      end
+
+
+  #####################
+
+      # logger.add(Logger::INFO, { :short_message => "Some message" })
+      should "implement add method with level and message from hash, facility from defaults" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Some message' &&
+          hash['facility'] == 'gelf-rb'
+        end
+        @logger.add(GELF::INFO, { :short_message => "Some message" })
+      end
+
+      # logger.add(Logger::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat" })
+      should "implement add method with level and message from hash, facility from defaults and some additional fields" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Some message' &&
+          hash['facility'] == 'gelf-rb' &&
+          hash['_foo'] == 'bar' &&
+          hash['_zomg'] == 'wat'
+        end
+        @logger.add(GELF::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat"})
+      end
+
+      # logger.add(Logger::INFO, "somefac", { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat" })
+      should "implement add method with level and message from hash, facility from parameters and some additional fields" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Some message' &&
+          hash['facility'] == 'somefac' &&
+          hash['_foo'] == 'bar' &&
+          hash['_zomg'] == 'wat'
+        end
+        @logger.add(GELF::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat"}, "somefac")
       end
     end
 
@@ -134,6 +192,46 @@ class TestLogger < Test::Unit::TestCase
         hash['short_message'] == "Message"
       end
       @logger << "Message"
+    end
+
+    context "#tagged" do
+      
+      # logger.tagged("TAG") { logger.info "Message" }
+      should "support tagged method" do
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Message' &&
+          hash['facility'] == 'gelf-rb'
+        end
+
+        str = "TAG"
+        str.stubs(:blank?).returns(true)
+
+        @logger.tagged(str) { @logger.info "Message" }
+      end
+
+      should "set custom gelf message with tag name and tag content" do
+        # I want the first tag with name 'test_tag'
+        @logger.default_options.merge!('tags' => ['test_tag'])
+
+        @logger.expects(:notify_with_level!).with do |level, hash|
+          level == GELF::INFO &&
+          hash['short_message'] == 'Message' &&
+          hash['facility'] == 'gelf-rb' &&
+          hash['_test_tag'] == 'TAG' # TAG should be in the hash
+        end
+
+        str = "TAG"
+        str.stubs(:blank?).returns(false)
+
+        @logger.tagged(str) { @logger.info "Message" }
+
+      end
+
+    end
+
+    should "have formatter attribute" do
+      @logger.formatter
     end
   end
 end

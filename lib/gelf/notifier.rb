@@ -68,7 +68,7 @@ module GELF
     end
 
     def level=(new_level)
-      @level = if new_level.is_a?(Fixnum)
+      @level = if new_level.is_a?(Integer)
                  new_level
                else
                  GELF.const_get(new_level.to_s.upcase)

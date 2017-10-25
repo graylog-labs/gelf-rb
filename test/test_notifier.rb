@@ -272,6 +272,16 @@ class TestNotifier < Test::Unit::TestCase
       @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
     end
 
+    should "not mutate arguments" do
+      data = { 'version' => '1.0', 'short_message' => 'message', foo: { bar: "BAZ" } }
+      original_hash = data.hash
+
+      @sender.expects(:send_datagrams)
+      @notifier.notify!(data) 
+
+      assert_equal(data.hash, original_hash)
+    end
+
     GELF::Levels.constants.each do |const|
       should "call notify with level #{const} from method name" do
         @notifier.expects(:notify_with_level).with(GELF.const_get(const), { 'version' => '1.0', 'short_message' => 'message' })

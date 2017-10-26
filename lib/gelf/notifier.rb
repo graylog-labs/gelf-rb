@@ -263,14 +263,18 @@ module GELF
       Zlib::Deflate.deflate(hash.to_json).bytes
     end
 
-    def self.stringify_keys(hash)
-      hash.keys.each do |key|
-        value, key_s = hash.delete(key), key.to_s
-        raise ArgumentError.new("Both #{key.inspect} and #{key_s} are present.") if hash.key?(key_s)
-        value = stringify_keys(value) if value.is_a?(Hash)
-        hash[key_s] = value
+    def self.stringify_keys(data)
+      return data unless data.is_a? Hash
+
+      data.each_with_object({}) do |(key, value), obj|
+        key_s = key.to_s
+
+        if (key != key_s) && data.key?(key_s)
+          raise ArgumentError, "Both #{key.inspect} and #{key_s} are present."
+        end
+
+        obj[key_s] = value
       end
-      hash
     end
   end
 end

@@ -6,12 +6,20 @@ module GELF
     class TCPTLS < TCP
       # Supported tls_options:
       #   'no_default_ca' [Boolean] prevents OpenSSL from using the systems CA store.
-      #   'tls_version' [Symbol] any of :TLSv1, :TLSv1_1, :TLSv1_2 (default)
+      #   'version' [Symbol] any of :TLSv1, :TLSv1_1, :TLSv1_2 (default)
       #   'cert' [String, IO] the client certificate file
       #   'key' [String, IO] the key for the client certificate
       #   'all_ciphers' [Boolean] allows any ciphers to be used, may be insecure
+      #   'rescue_ssl_errors' [Boolean] similar to rescue_network_errors in notifier.rb, allows SSL exceptions to be raised
+
+      attr_accessor :rescue_ssl_errors
+
       def initialize(addresses, tls_options={})
         @tls_options = tls_options
+	self.rescue_ssl_errors = @tls_options['rescue_ssl_errors']
+	if self.rescue_ssl_errors == nil
+	  self.rescue_ssl_errors = true
+	end
         super(addresses)
       end
 
@@ -21,6 +29,7 @@ module GELF
         super(socket, message)
       rescue OpenSSL::SSL::SSLError
         socket.close unless socket.closed?
+        raise unless rescue_ssl_errors
         false
       end
 
@@ -29,6 +38,7 @@ module GELF
         start_tls(plain_socket)
       rescue OpenSSL::SSL::SSLError
         plain_socket.close unless plain_socket.closed?
+        raise unless rescue_ssl_errors 
         nil
       end
 

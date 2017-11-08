@@ -84,16 +84,21 @@ module GELF
         end
       end
 
-      # These are A-level ciphers as reported from Graylog 2.0.1
-      # which were also available on Ruby using OpenSSL 1.0.2h
-      # A lot of AES-128-CBC based ciphers were not available
-      SECURE_CIPHERS = %w(
-                           AES128-GCM-SHA256
-                           ECDHE-RSA-AES128-GCM-SHA256
-                           DHE-RSA-AES128-GCM-SHA256
-                         ).freeze
+      # Ciphers have to come from the CipherString class, specifically the _TXT_ constants here - https://github.com/jruby/jruby-openssl/blob/master/src/main/java/org/jruby/ext/openssl/CipherStrings.java#L47-L178
       def restrict_ciphers(ctx)
-        ctx.ciphers = SECURE_CIPHERS
+        # This CipherString is will allow the following Ciphers
+        # ECDHE-ECDSA-AES128-SHA256
+        # ECDHE-RSA-AES128-SHA256
+        # ECDH-ECDSA-AES128-SHA256
+        # ECDH-RSA-AES128-SHA256
+        # ECDHE-ECDSA-AES128-SHA
+        # ECDHE-RSA-AES128-SHA
+        # AES128-SHA
+        # ECDH-ECDSA-AES128-SHA
+        # ECDH-RSA-AES128-SHA
+        # DHE-RSA-AES128-SHA
+        
+        ctx.ciphers = "TLSv1:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!ECDSA:!ADH:!IDEA:!3DES" 
       end
 
       def verify_mode

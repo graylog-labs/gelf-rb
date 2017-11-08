@@ -86,18 +86,8 @@ module GELF
 
       # Ciphers have to come from the CipherString class, specifically the _TXT_ constants here - https://github.com/jruby/jruby-openssl/blob/master/src/main/java/org/jruby/ext/openssl/CipherStrings.java#L47-L178
       def restrict_ciphers(ctx)
-        # This CipherString is will allow the following Ciphers
-        # ECDHE-ECDSA-AES128-SHA256
-        # ECDHE-RSA-AES128-SHA256
-        # ECDH-ECDSA-AES128-SHA256
-        # ECDH-RSA-AES128-SHA256
-        # ECDHE-ECDSA-AES128-SHA
-        # ECDHE-RSA-AES128-SHA
-        # AES128-SHA
-        # ECDH-ECDSA-AES128-SHA
-        # ECDH-RSA-AES128-SHA
-        # DHE-RSA-AES128-SHA
-        
+        # This CipherString is will allow a variety of 'currently' cryptographically secure ciphers, 
+	# while also retaining a broad level of compatibility
         ctx.ciphers = "TLSv1:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!ECDSA:!ADH:!IDEA:!3DES" 
       end
 

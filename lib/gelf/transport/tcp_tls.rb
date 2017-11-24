@@ -6,10 +6,13 @@ module GELF
     class TCPTLS < TCP
       # Supported tls_options:
       #   'no_default_ca' [Boolean] prevents OpenSSL from using the systems CA store.
+      #   'ca' [String] the path to a custom CA store
       #   'tls_version' [Symbol] any of :TLSv1, :TLSv1_1, :TLSv1_2 (default)
       #   'cert' [String, IO] the client certificate file
       #   'key' [String, IO] the key for the client certificate
       #   'all_ciphers' [Boolean] allows any ciphers to be used, may be insecure
+      #   'no_verify' [Boolean] disable peer verification
+
       def initialize(addresses, tls_options={})
         @tls_options = tls_options
         super(addresses)
@@ -103,8 +106,18 @@ module GELF
 
       def ssl_cert_store
         OpenSSL::X509::Store.new.tap do |store|
-          # TODO: allow passing in expected server certificate and disabling system CAs
-          store.set_default_paths
+          if @tls_options.key?('no_default_ca') && @tls_options.key?('no_default_ca')
+            @tls_options['no_default_ca']
+          else
+            @tls_options['no_default_ca'] = false
+          end
+          if !@tls_options['no_default_ca']
+            store.set_default_paths
+          end
+
+          if @tls_options.key?('ca')
+            store.add_path(@tls_options['ca'])
+          end
         end
       end
     end

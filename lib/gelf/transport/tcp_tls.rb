@@ -107,10 +107,9 @@ module GELF
       def ssl_cert_store
         OpenSSL::X509::Store.new.tap do |store|
           if !@tls_options.key?('no_default_ca')
-            @tls_options['no_default_ca']
-          else
             @tls_options['no_default_ca'] = false
           end
+          
           if !@tls_options['no_default_ca']
             store.set_default_paths
           end

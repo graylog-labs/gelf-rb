@@ -53,6 +53,13 @@ module GELF
       end
 
       def write_socket(socket, message)
+        unsafe_write_socket(socket, message)
+      rescue IOError, SystemCallError
+        socket.close unless socket.closed?
+        false
+      end
+
+      def unsafe_write_socket(socket, message)
         r,w = IO.select([socket], [socket])
         # Read everything first
         while r.any? do
@@ -64,10 +71,8 @@ module GELF
         end
 
         # Now send the payload
-        return w.any? && socket.syswrite(message) > 0
-      rescue IOError, SystemCallError
-        socket.close unless socket.closed?
-        false
+        return false unless w.any?
+        return socket.syswrite(message) > 0
       end
     end
   end

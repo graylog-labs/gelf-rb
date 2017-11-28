@@ -55,8 +55,7 @@ module GELF
       def write_socket(socket, message)
         r,w = IO.select([socket], [socket])
         # Read everything first
-        loop do
-          break if !r.any?
+        while r.any? do
           # don't expect any reads, but a readable socket might
           # mean the remote end closed, so read it and throw it away.
           # we'll get an EOFError if it happens.
@@ -65,10 +64,7 @@ module GELF
         end
 
         # Now send the payload
-        if w.any? then
-          return true if socket.syswrite(message) > 0
-        end
-        false
+        return w.any? && socket.syswrite(message) > 0
       rescue IOError, SystemCallError
         socket.close unless socket.closed?
         false

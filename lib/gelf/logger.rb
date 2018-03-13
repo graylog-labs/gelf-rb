@@ -19,6 +19,7 @@ module GELF
 
       message_hash = { 'facility' => progname }
 
+      hash = {}
       if message.is_a?(Hash)
         # Stringify keys.
         message.each do |key, value|
@@ -27,12 +28,16 @@ module GELF
       else
         message_hash['short_message'] = message.to_s
       end
+      hash['facility'] = progname unless hash.has_key?('facility')
 
       if message.is_a?(Exception)
         message_hash.merge!(self.class.extract_hash_from_exception(message))
       end
 
-      notify_with_level(level, message_hash)
+      # need to strip out empty messages
+      if message_hash.has_key?('short_message') && !message_hash['short_message'].to_s.empty?
+        notify_with_level(level, message_hash)
+      end
     end
 
     # Redefines methods in +Notifier+.

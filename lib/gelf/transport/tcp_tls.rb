@@ -111,7 +111,14 @@ module GELF
           end
 
           if @tls_options.key?('ca')
-            store.add_path(@tls_options['ca'])
+            ca = @tls_options['ca']
+            if File.directory?(ca)
+              store.add_path(@tls_options['ca'])
+            elsif File.file?(ca)
+              store.add_file(ca)
+            else
+              $stderr.puts "No directory or file: #{ca}"
+            end
           end
         end
       end

@@ -59,6 +59,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<mocha>, ["~> 1.1.0"])
       s.add_development_dependency(%q<test-unit>, ["~> 3.2.0"])
       s.add_runtime_dependency(%q<json>, [">= 0"])
+      s.add_runtime_dependency(%q<multi_json>, ["~> 1.0"])
     else
       s.add_dependency(%q<shoulda>, ["~> 2.11.3"])
       s.add_dependency(%q<jeweler>, ["~> 2.1.1"])
@@ -66,6 +67,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<mocha>, ["~> 1.1.0"])
       s.add_dependency(%q<test-unit>, ["~> 3.2.0"])
       s.add_dependency(%q<json>, [">= 0"])
+      s.add_dependency(%q<multi_json>, ["~> 1.0"])
     end
   else
     s.add_dependency(%q<shoulda>, ["~> 2.11.3"])
@@ -74,6 +76,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<mocha>, ["~> 1.1.0"])
     s.add_dependency(%q<test-unit>, ["~> 3.2.0"])
     s.add_dependency(%q<json>, [">= 0"])
+    s.add_dependency(%q<multi_json>, ["~> 1.0"])
   end
 end
 

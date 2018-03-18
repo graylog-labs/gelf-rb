@@ -71,7 +71,9 @@ module GELF
     end
 
     def current_tags
-      Thread.current[:gelf_tagged_logging_tags] ||= []
+      val = Thread.current.thread_variable_get(:gelf_tagged_logging_tags)
+      return val unless val.nil?
+      Thread.current.thread_variable_set(:gelf_tagged_logging_tags, [])
     end
   end
 

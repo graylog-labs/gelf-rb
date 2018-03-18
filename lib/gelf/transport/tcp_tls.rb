@@ -87,8 +87,8 @@ module GELF
       # Ciphers have to come from the CipherString class, specifically the _TXT_ constants here - https://github.com/jruby/jruby-openssl/blob/master/src/main/java/org/jruby/ext/openssl/CipherStrings.java#L47-L178
       def restrict_ciphers(ctx)
         # This CipherString is will allow a variety of 'currently' cryptographically secure ciphers, 
-	# while also retaining a broad level of compatibility
-        ctx.ciphers = "TLSv1:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!ECDSA:!ADH:!IDEA:!3DES" 
+        # while also retaining a broad level of compatibility
+        ctx.ciphers = "TLSv1_2:TLSv1_1:TLSv1:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!DSS:!RC4:!SEED:!ECDSA:!ADH:!IDEA:!3DES"
       end
 
       def verify_mode

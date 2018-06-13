@@ -35,7 +35,6 @@ module GELF
       self.default_options['version'] = SPEC_VERSION
       self.default_options['host'] ||= Socket.gethostname
       self.default_options['level'] ||= GELF::UNKNOWN
-      self.default_options['facility'] ||= 'gelf-rb'
       self.default_options['protocol'] ||= GELF::Protocol::UDP
 
       self.level_mapping = :logger

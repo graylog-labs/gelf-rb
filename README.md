@@ -10,7 +10,7 @@ Tested with Ruby 1.9, 2.0, 2.1, 2.2, 2.3 and 2.4.
 ## Usage
 ### Gelf::Notifier
 
-This allows you to sent arbitary messages via UDP to Graylog.
+This allows you to send arbitary messages via UDP to Graylog.
 
     n = GELF::Notifier.new("localhost", 12201)
 

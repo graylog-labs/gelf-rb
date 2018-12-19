@@ -14,54 +14,44 @@ class TestLogger < Test::Unit::TestCase
     end
 
     context "#add" do
-      # logger.add(Logger::INFO, nil)
-      should 'implement add method with level, message and facility from defaults' do
-        @logger.expects(:notify_with_level!).with do |level, hash|
-          level == GELF::INFO &&
-          hash['short_message'] == 'gelf-rb' &&
-          hash['facility'] == 'gelf-rb'
-        end
-        @logger.add(GELF::INFO, nil)
-      end
-
       # logger.add(Logger::INFO, 'Message')
-      should "implement add method with level and message from parameters, facility from defaults" do
+      should "implement add method with level and message from parameters" do
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
           hash['short_message'] == 'Message' &&
-          hash['facility'] == 'gelf-rb'
+          hash['facility'].nil?
         end
         @logger.add(GELF::INFO, nil, 'Message')
       end
 
       # logger.add(Logger::INFO, RuntimeError.new('Boom!'))
-      should "implement add method with level and exception from parameters, facility from defaults" do
+      should "implement add method with level and exception from parameters" do
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
           hash['short_message'] == 'RuntimeError: Boom!' &&
           hash['full_message'] =~ /^Backtrace/ &&
-          hash['facility'] == 'gelf-rb'
+          hash['facility'].nil?
         end
         @logger.add(GELF::INFO, nil, RuntimeError.new('Boom!'))
       end
 
       # logger.add(Logger::INFO) { 'Message' }
-      should "implement add method with level from parameter, message from block, facility from defaults" do
+      should "implement add method with level from parameter, message from block" do
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
           hash['short_message'] == 'Message' &&
-          hash['facility'] == 'gelf-rb'
+          hash['facility'].nil?
         end
         @logger.add(GELF::INFO, nil, nil) { 'Message' }
       end
 
       # logger.add(Logger::INFO) { RuntimeError.new('Boom!') }
-      should "implement add method with level from parameter, exception from block, facility from defaults" do
+      should "implement add method with level from parameter, exception from block" do
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
           hash['short_message'] == 'RuntimeError: Boom!' &&
           hash['full_message'] =~ /^Backtrace/ &&
-          hash['facility'] == 'gelf-rb'
+          hash['facility'].nil?
         end
         @logger.add(GELF::INFO, nil, nil) { RuntimeError.new('Boom!') }
       end
@@ -88,11 +78,11 @@ class TestLogger < Test::Unit::TestCase
       end
 
       # logger.add(Logger::INFO, 'Message', nil)
-      should "use default facility if facility is nil" do
+      should "leave facility empty if facility is nil" do
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
           hash['short_message'] == 'Message' &&
-          hash['facility'] == 'gelf-rb'
+          hash['facility'].nil?
         end
         @logger.add(GELF::INFO, 'Message', nil)
       end
@@ -130,21 +120,21 @@ class TestLogger < Test::Unit::TestCase
       end
 
       # logger.add(Logger::INFO, { :short_message => "Some message" })
-      should "implement add method with level and message from hash, facility from defaults" do
+      should "implement add method with level and message from hash" do
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
           hash['short_message'] == 'Some message' &&
-          hash['facility'] == 'gelf-rb'
+          hash['facility'].nil?
         end
         @logger.add(GELF::INFO, { :short_message => "Some message" })
       end
 
       # logger.add(Logger::INFO, { :short_message => "Some message", :_foo => "bar", "_zomg" => "wat" })
-      should "implement add method with level and message from hash, facility from defaults and some additional fields" do
+      should "implement add method with level and message from hash and some additional fields" do
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF::INFO &&
           hash['short_message'] == 'Some message' &&
-          hash['facility'] == 'gelf-rb' &&
+          hash['facility'].nil? &&
           hash['_foo'] == 'bar' &&
           hash['_zomg'] == 'wat'
         end
@@ -190,7 +180,7 @@ class TestLogger < Test::Unit::TestCase
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF.const_get(const) &&
           hash['short_message'] == 'message' &&
-          hash['facility'] == 'gelf-rb'
+          hash['facility'].nil?
         end
         @logger.__send__(const.downcase, 'message')
       end
@@ -200,7 +190,7 @@ class TestLogger < Test::Unit::TestCase
         @logger.expects(:notify_with_level!).with do |level, hash|
           level == GELF.const_get(const) &&
           hash['short_message'] == 'message' &&
-          hash['facility'] == 'gelf-rb'
+          hash['facility'].nil?
         end
         @logger.__send__(const.downcase) { 'message' }
       end

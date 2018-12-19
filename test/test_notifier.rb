@@ -8,7 +8,7 @@ class TestNotifier < Test::Unit::TestCase
     n = GELF::Notifier.new
     assert_equal [[['localhost', 12201]], 1420], [n.addresses, n.max_chunk_size]
     assert_equal( { 'version' => '1.0', 'level' => GELF::UNKNOWN, 'protocol' => 0,
-                    'host' => 'default_hostname', 'facility' => 'gelf-rb' },
+                    'host' => 'default_hostname' },
                   n.default_options )
     n.addresses, n.max_chunk_size, n.default_options = [['graylog2.org', 7777]], :lan, {:host => 'grayhost'}
     assert_equal [['graylog2.org', 7777]], n.addresses

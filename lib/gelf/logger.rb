@@ -14,7 +14,8 @@ module GELF
         progname = default_options['facility']
       end
 
-      message_hash = { 'facility' => progname }
+      message_hash = {}
+      message_hash['facility'] = progname if progname
 
       if message.is_a?(Hash)
         message.each do |key, value|

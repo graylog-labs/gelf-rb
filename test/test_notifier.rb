@@ -7,7 +7,7 @@ class TestNotifier < Test::Unit::TestCase
     Socket.expects(:gethostname).returns('default_hostname')
     n = GELF::Notifier.new
     assert_equal [[['localhost', 12201]], 1420], [n.addresses, n.max_chunk_size]
-    assert_equal( { 'version' => '1.0', 'level' => GELF::UNKNOWN, 'protocol' => 0,
+    assert_equal( { 'version' => '1.1', 'level' => GELF::UNKNOWN, 'protocol' => 0,
                     'host' => 'default_hostname', 'facility' => 'gelf-rb' },
                   n.default_options )
     n.addresses, n.max_chunk_size, n.default_options = [['graylog2.org', 7777]], :lan, {:host => 'grayhost'}
@@ -34,16 +34,16 @@ class TestNotifier < Test::Unit::TestCase
       end
 
       should "work with hash" do
-        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
-        assert_equal '1.0', hash['version']
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.1', 'short_message' => 'message' })
+        assert_equal '1.1', hash['version']
         assert_equal 'message', hash['short_message']
       end
 
       should "work with any object which responds to #to_hash" do
         o = Object.new
-        o.expects(:to_hash).returns({ 'version' => '1.0', 'short_message' => 'message' })
+        o.expects(:to_hash).returns({ 'version' => '1.1', 'short_message' => 'message' })
         hash = @notifier.__send__(:extract_hash, o)
-        assert_equal '1.0', hash['version']
+        assert_equal '1.1', hash['version']
         assert_equal 'message', hash['short_message']
       end
 
@@ -94,9 +94,16 @@ class TestNotifier < Test::Unit::TestCase
 
       should "use default_options" do
         @notifier.default_options = {:foo => 'bar', 'short_message' => 'will be hidden by explicit argument', 'host' => 'some_host'}
-        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.1', 'short_message' => 'message' })
         assert_equal 'bar', hash['foo']
         assert_equal 'message', hash['short_message']
+      end
+
+      should "not treat protocol option as field data" do
+        @notifier.default_options = {'protocol' => 0, 'host' => 'some_host', 'version' => '1.1' }
+        hash = @notifier.__send__(:extract_hash, { 'short_message' => 'foo' })
+        assert_equal 'some_host', hash['host']
+        assert_equal nil, hash['protocol']
       end
 
       should "be compatible with HoptoadNotifier" do
@@ -107,13 +114,13 @@ class TestNotifier < Test::Unit::TestCase
 
       should "set file and line" do
         line = __LINE__
-        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.1', 'short_message' => 'message' })
         assert_match(/test_notifier.rb/, hash['file'])
         assert_equal line + 1, hash['line']
       end
 
       should "set timestamp to current time if not set" do
-        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message' })
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.1', 'short_message' => 'message' })
         assert_instance_of Float, hash['timestamp']
         now = Time.now.utc.to_f
         assert ((now - 1)..(now + 1)).include?(hash['timestamp'])
@@ -121,7 +128,7 @@ class TestNotifier < Test::Unit::TestCase
 
       should "set timestamp to specified time" do
         timestamp = 1319799449.13765
-        hash = @notifier.__send__(:extract_hash, { 'version' => '1.0', 'short_message' => 'message', 'timestamp' => timestamp })
+        hash = @notifier.__send__(:extract_hash, { 'version' => '1.1', 'short_message' => 'message', 'timestamp' => timestamp })
         assert_equal timestamp, hash['timestamp']
       end
     end
@@ -145,7 +152,7 @@ class TestNotifier < Test::Unit::TestCase
 
     context "datagrams_from_hash" do
       should "not split short data" do
-        hash = { 'version' => '1.0', 'short_message' => 'message' }
+        hash = { 'version' => '1.1', 'short_message' => 'message' }
         datagrams = @notifier.__send__(:datagrams_from_hash, hash)
         assert_equal 1, datagrams.count
         assert_instance_of String, datagrams[0]
@@ -163,7 +170,7 @@ class TestNotifier < Test::Unit::TestCase
 
       should "split long data" do
         srand(1) # for stable tests
-        hash = { 'version' => '1.0', 'short_message' => 'message' }
+        hash = { 'version' => '1.1', 'short_message' => 'message' }
         hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
         datagrams = @notifier.__send__(:datagrams_from_hash, hash)
         assert_equal 2, datagrams.count
@@ -185,7 +192,7 @@ class TestNotifier < Test::Unit::TestCase
         @notifier.instance_variable_set('@sender', @sender)
 
         srand(1) # for stable tests
-        hash = { 'version' => '1.0', 'short_message' => 'message' }
+        hash = { 'version' => '1.1', 'short_message' => 'message' }
         hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
         datagrams = @notifier.__send__(:datagrams_from_hash, hash)
         assert_equal 2, datagrams.count
@@ -201,7 +208,7 @@ class TestNotifier < Test::Unit::TestCase
 
       should "throw an error if more than MAX_CHUNKS will be created" do
         srand(1) # for stable tests
-        hash = { 'version' => '1.0', 'short_message' => 'message' }
+        hash = { 'version' => '1.1', 'short_message' => 'message' }
         hash.merge!('something' => (0..3000).map { RANDOM_DATA[rand(RANDOM_DATA.count)] }.join) # or it will be compressed too good
         @notifier.max_chunk_size = 10
         @notifier.instance_variable_set('@hash', hash)
@@ -214,7 +221,7 @@ class TestNotifier < Test::Unit::TestCase
     context "level threshold" do
       setup do
         @notifier.level = GELF::WARN
-        @hash = { 'version' => '1.0', 'short_message' => 'message' }
+        @hash = { 'version' => '1.1', 'short_message' => 'message' }
       end
 
       ['debug', 'DEBUG', :debug].each do |l|
@@ -250,7 +257,7 @@ class TestNotifier < Test::Unit::TestCase
       should "not send datagrams" do
         @sender.expects(:send_datagrams).never
         @notifier.expects(:extract_hash).never
-        @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
+        @notifier.notify!({ 'version' => '1.1', 'short_message' => 'message' })
       end
 
       context "and enabled again" do
@@ -260,7 +267,7 @@ class TestNotifier < Test::Unit::TestCase
 
         should "send datagrams" do
           @sender.expects(:send_datagrams)
-          @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
+          @notifier.notify!({ 'version' => '1.1', 'short_message' => 'message' })
         end
       end
     end
@@ -269,11 +276,11 @@ class TestNotifier < Test::Unit::TestCase
       @sender.expects(:send_datagrams).with do |datagrams|
         datagrams.is_a?(Array) && datagrams[0].is_a?(String)
       end
-      @notifier.notify!({ 'version' => '1.0', 'short_message' => 'message' })
+      @notifier.notify!({ 'version' => '1.1', 'short_message' => 'message' })
     end
 
     should "not mutate arguments" do
-      data = { 'version' => '1.0', 'short_message' => 'message', foo: { bar: "BAZ" } }
+      data = { 'version' => '1.1', 'short_message' => 'message', foo: { bar: "BAZ" } }
       original_hash = data.hash
 
       @sender.expects(:send_datagrams)
@@ -284,8 +291,8 @@ class TestNotifier < Test::Unit::TestCase
 
     GELF::Levels.constants.each do |const|
       should "call notify with level #{const} from method name" do
-        @notifier.expects(:notify_with_level).with(GELF.const_get(const), { 'version' => '1.0', 'short_message' => 'message' })
-        @notifier.__send__(const.downcase, { 'version' => '1.0', 'short_message' => 'message' })
+        @notifier.expects(:notify_with_level).with(GELF.const_get(const), { 'version' => '1.1', 'short_message' => 'message' })
+        @notifier.__send__(const.downcase, { 'version' => '1.1', 'short_message' => 'message' })
       end
     end
 

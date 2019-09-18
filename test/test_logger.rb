@@ -237,6 +237,42 @@ class TestLogger < Test::Unit::TestCase
       @logger.formatter
     end
 
+    # Supports only Ruby 2.0 or higher
+    if RUBY_VERSION[0, 1].to_i >= 2
+      context "#tagged" do
+        # logger.tagged("TAG") { logger.info "Message" }
+        should "support tagged method" do
+          @logger.expects(:notify_with_level!).with do |level, hash|
+            level == GELF::INFO &&
+              hash['short_message'] == 'Message' &&
+              hash['facility'] == 'gelf-rb'
+          end
+
+          str = "TAG"
+          str.stubs(:blank?).returns(true)
+
+          @logger.tagged(str) { @logger.info "Message" }
+        end
+
+        should "set custom gelf message with tag name and tag content" do
+          # I want the first tag with name 'test_tag'
+          @logger.log_tags = [:test_tag]
+
+          @logger.expects(:notify_with_level!).with do |level, hash|
+            level == GELF::INFO &&
+              hash['short_message'] == 'Message' &&
+              hash['facility'] == 'gelf-rb' &&
+              hash['_test_tag'] == 'TAG' # TAG should be in the hash
+          end
+
+          str = "TAG"
+          str.stubs(:blank?).returns(false)
+
+          @logger.tagged(str) { @logger.info "Message" }
+        end
+      end
+    end
+
     context "close" do
       should "close socket" do
         @sender.expects(:close).once

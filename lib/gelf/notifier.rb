@@ -3,15 +3,15 @@ require 'gelf/transport/tcp'
 require 'gelf/transport/tcp_tls'
 
 # replace JSON and #to_json with Yajl if available
-@yailavail = false
+$yajlavail = false
 begin
   require 'yajl'
-  @yailavail = true
+  $yajlavail = true
 rescue LoadError
 end
 
 def json_dump(obj)
-  if yailavail
+  if $yajlavail
     Yajl.dump(obj)
   else
     JSON.dump(obj)

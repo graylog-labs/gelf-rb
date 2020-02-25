@@ -62,7 +62,9 @@ module GELF
       end
 
       def unsafe_write_socket(socket, message)
-        r, w = IO.select([socket], [socket], [], IO_TIMEOUT) or return false
+        r, w = IO.select([socket], [socket], [], IO_TIMEOUT)
+        return false unless r
+
         # Read everything first
         while r.any? do
           # don't expect any reads, but a readable socket might

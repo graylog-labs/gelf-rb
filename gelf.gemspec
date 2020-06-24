@@ -55,14 +55,14 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<shoulda>, ["~> 2.11.3"])
       s.add_development_dependency(%q<jeweler>, ["~> 2.1.1"])
-      s.add_development_dependency(%q<rack>, ["< 2.0"])
+      s.add_development_dependency(%q<rack>, "< 3.0")
       s.add_development_dependency(%q<mocha>, ["~> 1.1.0"])
       s.add_development_dependency(%q<test-unit>, ["~> 3.2.0"])
       s.add_runtime_dependency(%q<json>, [">= 0"])
     else
       s.add_dependency(%q<shoulda>, ["~> 2.11.3"])
       s.add_dependency(%q<jeweler>, ["~> 2.1.1"])
-      s.add_dependency(%q<rack>, ["< 2.0"])
+      s.add_dependency(%q<rack>, "< 3.0")
       s.add_dependency(%q<mocha>, ["~> 1.1.0"])
       s.add_dependency(%q<test-unit>, ["~> 3.2.0"])
       s.add_dependency(%q<json>, [">= 0"])
@@ -70,7 +70,7 @@ Gem::Specification.new do |s|
   else
     s.add_dependency(%q<shoulda>, ["~> 2.11.3"])
     s.add_dependency(%q<jeweler>, ["~> 2.1.1"])
-    s.add_dependency(%q<rack>, ["< 2.0"])
+    s.add_dependency(%q<rack>, "< 3.0")
     s.add_dependency(%q<mocha>, ["~> 1.1.0"])
     s.add_dependency(%q<test-unit>, ["~> 3.2.0"])
     s.add_dependency(%q<json>, [">= 0"])

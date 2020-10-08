@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib".freeze]
   s.authors = ["Alexey Palazhchenko".freeze, "Lennart Koopmann".freeze, "Zac Sprackett".freeze, "Marcus Ilgner".freeze]
-  s.date = "2020-09-07"
+  s.date = "2020-10-08"
   s.description = "Library to send GELF messages to Graylog logging server. Supports plain-text, GELF messages and exceptions via UDP and TCP.".freeze
   s.email = "mail@marcusilgner.com".freeze
   s.extra_rdoc_files = [
@@ -58,14 +58,16 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rack>.freeze, ["~> 2.2.3"])
       s.add_development_dependency(%q<mocha>.freeze, ["~> 1.11.2"])
       s.add_development_dependency(%q<test-unit>.freeze, ["~> 3.3.6"])
-      s.add_runtime_dependency(%q<json>.freeze, [">= 0"])
+      s.add_runtime_dependency(%q<json>.freeze, ["~> 2.3.1"])
+      s.add_runtime_dependency(%q<nokogiri>.freeze, ["~> 1.10.10"])
     else
       s.add_dependency(%q<shoulda>.freeze, ["~> 3.5"])
       s.add_dependency(%q<jeweler>.freeze, ["~> 2.3.9"])
       s.add_dependency(%q<rack>.freeze, ["~> 2.2.3"])
       s.add_dependency(%q<mocha>.freeze, ["~> 1.11.2"])
       s.add_dependency(%q<test-unit>.freeze, ["~> 3.3.6"])
-      s.add_dependency(%q<json>.freeze, [">= 0"])
+      s.add_dependency(%q<json>.freeze, ["~> 2.3.1"])
+      s.add_dependency(%q<nokogiri>.freeze, ["~> 1.10.10"])
     end
   else
     s.add_dependency(%q<shoulda>.freeze, ["~> 3.5"])
@@ -73,7 +75,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rack>.freeze, ["~> 2.2.3"])
     s.add_dependency(%q<mocha>.freeze, ["~> 1.11.2"])
     s.add_dependency(%q<test-unit>.freeze, ["~> 3.3.6"])
-    s.add_dependency(%q<json>.freeze, [">= 0"])
+    s.add_dependency(%q<json>.freeze, ["~> 2.3.1"])
+    s.add_dependency(%q<nokogiri>.freeze, ["~> 1.10.10"])
   end
 end
 

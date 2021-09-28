@@ -2,7 +2,7 @@
 
 This is the new GELF gem written by Alexey Palazhchenko. It is based on the old gem by Lennart Koopmann and allows you to send GELF messages to Graylog or Logstash instances. See the [GELF specification](http://docs.graylog.org/en/stable/pages/gelf.html) for more information about GELF and [RDoc](http://rdoc.info/github/graylog-labs/gelf-rb/master/frames) for API documentation.
 
-Tested with Ruby 1.9, 2.0, 2.1, 2.2, 2.3 and 2.4.
+Tested with Ruby 1.9, 2.0, 2.1, 2.2, 2.3, 2.4 and 2.5.
 
 [![Build Status](https://travis-ci.org/graylog-labs/gelf-rb.svg?branch=master)](https://travis-ci.org/graylog-labs/gelf-rb)
 [![Code Climate](https://codeclimate.com/github/graylog-labs/gelf-rb/badges/gpa.svg)](https://codeclimate.com/github/graylog-labs/gelf-rb)

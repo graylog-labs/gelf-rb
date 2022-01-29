@@ -240,36 +240,91 @@ class TestLogger < Test::Unit::TestCase
     # Supports only Ruby 2.0 or higher
     if RUBY_VERSION[0, 1].to_i >= 2
       context "#tagged" do
-        # logger.tagged("TAG") { logger.info "Message" }
-        should "support tagged method" do
+        context 'backward compatibility' do
+          #logger.tagged("TAG") { logger.info "Message" }
+          should "support tagged method with undefined log_tags" do
+            @logger.expects(:notify_with_level!).with do |level, hash|
+              level == GELF::INFO &&
+                hash['short_message'] == 'Message' &&
+                hash['facility'] == 'gelf-rb' &&
+                hash['_tag_1'] == 'TAG_1' &&
+                hash['_tag_2'] == 'TAG_2'
+            end
+
+            @logger.tagged('TAG_1', 'TAG_2') { @logger.info "Message" }
+          end
+
+          should "support tagged method with defined log_tags" do
+            # I want the first tag with name 'test_tag'
+            @logger.log_tags = [:test_tag1]
+
+            @logger.expects(:notify_with_level!).with do |level, hash|
+              level == GELF::INFO &&
+                hash['short_message'] == 'Message' &&
+                hash['facility'] == 'gelf-rb' &&
+                hash['_test_tag1'] == 'TAG_1' &&
+                hash['_tag_2'] == 'TAG_2'
+            end
+
+            @logger.tagged('TAG_1', 'TAG_2') { @logger.info "Message" }
+          end
+        end
+
+        #logger.tagged(TAG_NAME: "TAG") { logger.info "Message" }
+        should "support tagged method with undefined log_tags" do
           @logger.expects(:notify_with_level!).with do |level, hash|
             level == GELF::INFO &&
               hash['short_message'] == 'Message' &&
-              hash['facility'] == 'gelf-rb'
+              hash['facility'] == 'gelf-rb' &&
+              hash['_test_tag1'] == 'TAG_1' &&
+              hash['_test_tag2'] == 'TAG_2'
           end
 
-          str = "TAG"
-          str.stubs(:blank?).returns(true)
-
-          @logger.tagged(str) { @logger.info "Message" }
+          @logger.tagged({test_tag1: 'TAG_1', test_tag2: 'TAG_2'}) { @logger.info "Message" }
         end
 
-        should "set custom gelf message with tag name and tag content" do
-          # I want the first tag with name 'test_tag'
-          @logger.log_tags = [:test_tag]
+        should "support tagged method with defined log_tags" do
+          @logger.log_tags = [:test_tag1]
+          @logger.expects(:notify_with_level!).with do |level, hash|
+            level == GELF::INFO &&
+              hash['short_message'] == 'Message' &&
+              hash['facility'] == 'gelf-rb' &&
+              hash['_test_tag2'] == 'TAG_2'
+          end
+
+          @logger.tagged(test_tag2: 'TAG_2') { @logger.info "Message" }
+        end
+
+        should "support push_tags method with undefined log_tags" do
+          @logger.push_tags(test_tag: 'TAG')
 
           @logger.expects(:notify_with_level!).with do |level, hash|
             level == GELF::INFO &&
               hash['short_message'] == 'Message' &&
               hash['facility'] == 'gelf-rb' &&
-              hash['_test_tag'] == 'TAG' # TAG should be in the hash
+              hash['_test_tag'] == 'TAG'
           end
 
-          str = "TAG"
-          str.stubs(:blank?).returns(false)
-
-          @logger.tagged(str) { @logger.info "Message" }
+          @logger.info('Message')
+          @logger.clear_tags!
         end
+
+        should "support push_tags method with defined log_tags" do
+          @logger.log_tags = [:test_tag1]
+          @logger.push_tags(test_tag2: 'TAG_2')
+
+          @logger.expects(:notify_with_level!).with do |level, hash|
+            level == GELF::INFO &&
+              hash['short_message'] == 'Message' &&
+              hash['facility'] == 'gelf-rb' &&
+              hash['_test_tag1'] == '' &&
+              hash['_test_tag2'] == 'TAG_2'
+          end
+
+          @logger.info('Message')
+          @logger.clear_tags!
+        end
+
       end
     end
 

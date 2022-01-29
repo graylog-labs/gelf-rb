@@ -5,4 +5,4 @@ tmp/
 
 .DS_Store
 *.gem
-
+.bundle

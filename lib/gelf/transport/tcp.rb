@@ -1,6 +1,8 @@
 module GELF
   module Transport
     class TCP
+      IO_TIMEOUT = 10 # IO timeout in seconds
+
       attr_reader :addresses
 
       # `addresses` Array of [host, port] pairs
@@ -60,14 +62,16 @@ module GELF
       end
 
       def unsafe_write_socket(socket, message)
-        r,w = IO.select([socket], [socket])
+        r, w = IO.select([socket], [socket], [], IO_TIMEOUT)
+        return false unless r
+
         # Read everything first
         while r.any? do
           # don't expect any reads, but a readable socket might
           # mean the remote end closed, so read it and throw it away.
           # we'll get an EOFError if it happens.
           socket.sysread(16384)
-          r = IO.select([socket])
+          r = IO.select([socket], [], [], IO_TIMEOUT) or break
         end
 
         # Now send the payload

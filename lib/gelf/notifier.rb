@@ -2,10 +2,15 @@ require 'gelf/transport/udp'
 require 'gelf/transport/tcp'
 require 'gelf/transport/tcp_tls'
 
-# replace JSON and #to_json with Yajl if available
 begin
-  require 'yajl/json_gem'
+  require 'yajl'
+  def json_dump(obj)
+    Yajl.dump(obj)
+  end
 rescue LoadError
+  def json_dump(obj)
+    JSON.dump(obj)
+  end
 end
 
 module GELF
@@ -163,7 +168,7 @@ module GELF
       if hash['level'] >= level
         if default_options['protocol'] == GELF::Protocol::TCP
           validate_hash(hash)
-          @sender.send(hash.to_json + "\0")
+          @sender.send(json_dump(hash) + "\0")
         else
           @sender.send_datagrams(datagrams_from_hash(hash))
         end
@@ -260,7 +265,7 @@ module GELF
     def serialize_hash(hash)
       validate_hash(hash)
 
-      Zlib::Deflate.deflate(hash.to_json).bytes
+      Zlib::Deflate.deflate(json_dump(hash)).bytes
     end
 
     def self.stringify_keys(data)

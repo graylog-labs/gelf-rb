@@ -180,8 +180,9 @@ module GELF
                        args['level'] ||= GELF::INFO
                        { 'short_message' => object.to_s }
                      end
-
-      hash = default_options.merge(self.class.stringify_keys(args.merge(primary_data)))
+      default_message_data = default_options.dup
+      default_message_data.delete('protocol')
+      hash = default_message_data.merge(self.class.stringify_keys(args.merge(primary_data)))
       convert_hoptoad_keys_to_graylog2(hash)
       set_file_and_line(hash) if @collect_file_and_line
       set_timestamp(hash)

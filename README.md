@@ -1,3 +1,11 @@
+# ⚠️ Project Deprecated – No Longer Maintained
+
+**This repository is no longer actively maintained.**
+
+We recommend using [gelf_redux](https://github.com/manet-marketing/gelf_redux) as a modern and maintained alternative.
+
+Thank you for your interest and support over the years!
+
 ## GELF Ruby library
 
 This is the new GELF gem written by Alexey Palazhchenko. It is based on the old gem by Lennart Koopmann and allows you to send GELF messages to Graylog or Logstash instances. See the [GELF specification](http://docs.graylog.org/en/stable/pages/gelf.html) for more information about GELF and [RDoc](http://rdoc.info/github/graylog-labs/gelf-rb/master/frames) for API documentation.

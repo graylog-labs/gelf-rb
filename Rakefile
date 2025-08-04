@@ -16,7 +16,8 @@ begin
     gem.email = "mail@marcusilgner.com"
     gem.homepage = "http://github.com/Graylog2/gelf-rb"
     gem.authors = ["Alexey Palazhchenko", "Lennart Koopmann", "Zac Sprackett", "Marcus Ilgner"]
-    gem.add_dependency "json"
+    gem.add_dependency "json", '~> 2.3.1'
+    gem.add_dependency "nokogiri", '1.10.10'
     gem.licenses = ["MIT"]
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end

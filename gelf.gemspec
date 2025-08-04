@@ -5,15 +5,15 @@
 # stub: gelf 3.1.0 ruby lib
 
 Gem::Specification.new do |s|
-  s.name = "gelf"
+  s.name = "gelf".freeze
   s.version = "3.1.0"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.require_paths = ["lib"]
-  s.authors = ["Alexey Palazhchenko", "Lennart Koopmann", "Zac Sprackett", "Marcus Ilgner"]
-  s.date = "2018-09-05"
-  s.description = "Library to send GELF messages to Graylog logging server. Supports plain-text, GELF messages and exceptions via UDP and TCP."
-  s.email = "mail@marcusilgner.com"
+  s.required_rubygems_version = Gem::Requirement.new(">= 0".freeze) if s.respond_to? :required_rubygems_version=
+  s.require_paths = ["lib".freeze]
+  s.authors = ["Alexey Palazhchenko".freeze, "Lennart Koopmann".freeze, "Zac Sprackett".freeze, "Marcus Ilgner".freeze]
+  s.date = "2020-10-08"
+  s.description = "Library to send GELF messages to Graylog logging server. Supports plain-text, GELF messages and exceptions via UDP and TCP.".freeze
+  s.email = "mail@marcusilgner.com".freeze
   s.extra_rdoc_files = [
     "LICENSE",
     "README.md"
@@ -44,36 +44,39 @@ Gem::Specification.new do |s|
     "test/test_ruby_sender.rb",
     "test/test_severity.rb"
   ]
-  s.homepage = "https://github.com/graylog-labs/gelf-rb"
-  s.licenses = ["MIT"]
-  s.rubygems_version = "2.5.1"
-  s.summary = "Library to send GELF messages to Graylog logging server."
+  s.homepage = "http://github.com/Graylog2/gelf-rb".freeze
+  s.licenses = ["MIT".freeze]
+  s.rubygems_version = "3.0.6".freeze
+  s.summary = "Library to send GELF messages to Graylog logging server.".freeze
 
   if s.respond_to? :specification_version then
     s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<shoulda>, ["~> 2.11.3"])
-      s.add_development_dependency(%q<jeweler>, ["~> 2.1.1"])
-      s.add_development_dependency(%q<rack>, ["< 2.0"])
-      s.add_development_dependency(%q<mocha>, ["~> 1.1.0"])
-      s.add_development_dependency(%q<test-unit>, ["~> 3.2.0"])
-      s.add_runtime_dependency(%q<json>, [">= 0"])
+      s.add_development_dependency(%q<shoulda>.freeze, ["~> 3.5"])
+      s.add_development_dependency(%q<jeweler>.freeze, ["~> 2.3.9"])
+      s.add_development_dependency(%q<rack>.freeze, ["~> 2.2.3"])
+      s.add_development_dependency(%q<mocha>.freeze, ["~> 1.11.2"])
+      s.add_development_dependency(%q<test-unit>.freeze, ["~> 3.3.6"])
+      s.add_runtime_dependency(%q<json>.freeze, ["~> 2.3.1"])
+      s.add_runtime_dependency(%q<nokogiri>.freeze, ["~> 1.10.10"])
     else
-      s.add_dependency(%q<shoulda>, ["~> 2.11.3"])
-      s.add_dependency(%q<jeweler>, ["~> 2.1.1"])
-      s.add_dependency(%q<rack>, ["< 2.0"])
-      s.add_dependency(%q<mocha>, ["~> 1.1.0"])
-      s.add_dependency(%q<test-unit>, ["~> 3.2.0"])
-      s.add_dependency(%q<json>, [">= 0"])
+      s.add_dependency(%q<shoulda>.freeze, ["~> 3.5"])
+      s.add_dependency(%q<jeweler>.freeze, ["~> 2.3.9"])
+      s.add_dependency(%q<rack>.freeze, ["~> 2.2.3"])
+      s.add_dependency(%q<mocha>.freeze, ["~> 1.11.2"])
+      s.add_dependency(%q<test-unit>.freeze, ["~> 3.3.6"])
+      s.add_dependency(%q<json>.freeze, ["~> 2.3.1"])
+      s.add_dependency(%q<nokogiri>.freeze, ["~> 1.10.10"])
     end
   else
-    s.add_dependency(%q<shoulda>, ["~> 2.11.3"])
-    s.add_dependency(%q<jeweler>, ["~> 2.1.1"])
-    s.add_dependency(%q<rack>, ["< 2.0"])
-    s.add_dependency(%q<mocha>, ["~> 1.1.0"])
-    s.add_dependency(%q<test-unit>, ["~> 3.2.0"])
-    s.add_dependency(%q<json>, [">= 0"])
+    s.add_dependency(%q<shoulda>.freeze, ["~> 3.5"])
+    s.add_dependency(%q<jeweler>.freeze, ["~> 2.3.9"])
+    s.add_dependency(%q<rack>.freeze, ["~> 2.2.3"])
+    s.add_dependency(%q<mocha>.freeze, ["~> 1.11.2"])
+    s.add_dependency(%q<test-unit>.freeze, ["~> 3.3.6"])
+    s.add_dependency(%q<json>.freeze, ["~> 2.3.1"])
+    s.add_dependency(%q<nokogiri>.freeze, ["~> 1.10.10"])
   end
 end
 
